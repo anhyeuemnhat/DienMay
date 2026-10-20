@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DienMay" default="dist" basedir=".">
+  <property name="classes" value="build/classes"/>
+  <path id="runtime"><pathelement location="${classes}"/><fileset dir="lib" includes="*.jar"/></path>
+  <target name="clean"><delete dir="build"/><delete dir="dist"/></target>
+  <target name="compile">
+    <mkdir dir="${classes}"/>
+    <javac srcdir="." destdir="${classes}" release="17" encoding="UTF-8" includeantruntime="false" includes="Code/**/*.java,GUI/**/*.java,ImplementationDB/**/*.java,Service/**/*.java"/>
+    <copy todir="${classes}/Images"><fileset dir="Images" excludes="**/*.java"/></copy>
+  </target>
+  <target name="test-compile" depends="compile">
+    <mkdir dir="build/test-classes"/>
+    <javac srcdir="tests" destdir="build/test-classes" release="17" encoding="UTF-8" includeantruntime="false"><classpath refid="runtime"/></javac>
+  </target>
+  <target name="test" depends="test-compile">
+    <java classname="tests.UnitTests" fork="true" failonerror="true"><jvmarg value="-ea"/><jvmarg value="-Djava.awt.headless=true"/><classpath><path refid="runtime"/><pathelement location="build/test-classes"/></classpath></java>
+  </target>
+  <target name="integration" depends="test-compile">
+    <java classname="tests.SqlServerIT" fork="true" failonerror="true"><jvmarg value="-ea"/><classpath><path refid="runtime"/><pathelement location="build/test-classes"/></classpath></java>
+  </target>
+  <target name="ui-smoke" depends="test-compile">
+    <java classname="tests.UiSmoke" fork="true" failonerror="true"><jvmarg value="-ea"/><classpath><path refid="runtime"/><pathelement location="build/test-classes"/></classpath></java>
+  </target>
+  <target name="jar" depends="compile">
+    <mkdir dir="dist/lib"/>
+    <jar destfile="dist/DienMay.jar" basedir="${classes}"><manifest><attribute name="Main-Class" value="GUI.App"/><attribute name="Class-Path" value="lib/mssql-jdbc-13.4.0.jre11.jar"/></manifest></jar>
+    <copy todir="dist/lib"><fileset dir="lib" includes="*.jar"/></copy>
+  </target>
+  <target name="dist" depends="test,jar"/>
+  <target name="run" depends="compile"><java classname="GUI.App" fork="true"><classpath refid="runtime"/></java></target>
+  <target name="check-db" depends="compile"><java classname="Code.DatabaseTool" fork="true" failonerror="true"><arg value="check"/><classpath refid="runtime"/></java></target>
+</project>

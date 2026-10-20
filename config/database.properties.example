@@ -1,0 +1,13 @@
+# UTF-8. Copy to database.properties. Never commit the real configuration.
+# SQL Server: enable TCP/IP, use a fixed port; Express works with a fixed port too.
+db.url=jdbc:sqlserver://localhost:1433;databaseName=DienMay;encrypt=true;trustServerCertificate=false;loginTimeout=5;socketTimeout=20000;applicationName=DienMay
+db.user=dienmay_app
+# Prefer DIENMAY_DB_PASSWORD environment variable; leave this empty in Git.
+db.password=
+store.name=Cửa hàng Điện Máy
+store.address=Điền địa chỉ cửa hàng
+store.phone=Điền số điện thoại
+# For LOCAL DEVELOPMENT ONLY with a self-signed certificate:
+# set trustServerCertificate=true in db.url. Do not do this on an untrusted network.
+# Express named-instance alternative (SQL Browser/UDP 1434 must be available):
+# jdbc:sqlserver://localhost;instanceName=SQLEXPRESS;databaseName=DienMay;encrypt=true;trustServerCertificate=true;loginTimeout=5

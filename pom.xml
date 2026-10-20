@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion><groupId>vn.dienmay</groupId><artifactId>dienmay-desktop</artifactId><version>1.0.0</version>
+  <name>DienMay — upgraded Sales and Inventory Management System</name>
+  <properties><maven.compiler.release>17</maven.compiler.release><project.build.sourceEncoding>UTF-8</project.build.sourceEncoding><exec.mainClass>GUI.App</exec.mainClass></properties>
+  <dependencies><dependency><groupId>com.microsoft.sqlserver</groupId><artifactId>mssql-jdbc</artifactId><version>13.4.0.jre11</version><scope>runtime</scope></dependency></dependencies>
+  <build>
+    <sourceDirectory>${project.basedir}</sourceDirectory><testSourceDirectory>${project.basedir}/tests</testSourceDirectory>
+    <resources><resource><directory>Images</directory><targetPath>Images</targetPath><excludes><exclude>**/*.java</exclude></excludes></resource></resources>
+    <plugins>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.13.0</version><configuration><includes><include>Code/**/*.java</include><include>GUI/**/*.java</include><include>ImplementationDB/**/*.java</include><include>Service/**/*.java</include></includes><testIncludes><testInclude>**/*.java</testInclude></testIncludes></configuration></plugin>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-jar-plugin</artifactId><version>3.4.2</version><configuration><archive><manifest><mainClass>GUI.App</mainClass><addClasspath>true</addClasspath><classpathPrefix>lib/</classpathPrefix></manifest></archive></configuration></plugin>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-dependency-plugin</artifactId><version>3.8.1</version><executions><execution><id>runtime-libraries</id><phase>package</phase><goals><goal>copy-dependencies</goal></goals><configuration><includeScope>runtime</includeScope><outputDirectory>${project.build.directory}/lib</outputDirectory></configuration></execution></executions></plugin>
+      <plugin><groupId>org.codehaus.mojo</groupId><artifactId>exec-maven-plugin</artifactId><version>3.5.0</version><executions><execution><id>offline-logic-tests</id><phase>test</phase><goals><goal>java</goal></goals><configuration><mainClass>tests.UnitTests</mainClass><classpathScope>test</classpathScope></configuration></execution></executions></plugin>
+    </plugins>
+  </build>
+</project>

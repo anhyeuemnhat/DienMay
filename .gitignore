@@ -1,0 +1,9 @@
+/build/
+/target/
+/dist/
+/config/*.properties
+/nbproject/private/
+/lib/*.jar
+*.log
+*.lck
+*.tmp
