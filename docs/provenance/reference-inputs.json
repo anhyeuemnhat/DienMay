@@ -1,0 +1,72 @@
+[
+  {
+    "file": "ptud.pdf",
+    "bytes": 56925697,
+    "sha256": "73c9b7c18d36540f97013fa031ff9a2002b6e4f83b12212d4a129e7bade9b512"
+  },
+  {
+    "file": "nm_cnpm.rar",
+    "bytes": 2741934,
+    "sha256": "7b9adbc2a9503c28f01e6b2bbd94c9013544c9322a950b38dfcde5ca4e798f8e"
+  },
+  {
+    "file": "Chuong1 (1).pdf",
+    "bytes": 428222,
+    "sha256": "78317d345268680ce1c28832a24da0907b9226151a38f6c7f2b990ada6480e7e"
+  },
+  {
+    "file": "Chuong10.pdf",
+    "bytes": 190009,
+    "sha256": "9908a628efb51b6c82acacb6a20a47050815ef9befc9b2adab8f21ae1f693ac8"
+  },
+  {
+    "file": "Chuong11.pdf",
+    "bytes": 251215,
+    "sha256": "ca9558d2929aab525338969913f1370bb351b015ec0674a24591a8a6a5b67e7b"
+  },
+  {
+    "file": "Chuong12.pdf",
+    "bytes": 114629,
+    "sha256": "7a2ed99f86e3042fbb949e18294c8efb509eaa2731a873e24c1f149b89b02b39"
+  },
+  {
+    "file": "Chuong2.pdf",
+    "bytes": 158213,
+    "sha256": "112e87e154962a3c29dbff5b2b1ede8c596fe6b3aa88c3ff0d46a23f5a6b9d77"
+  },
+  {
+    "file": "Chuong3.pdf",
+    "bytes": 146166,
+    "sha256": "a30a3aefe3b79ad32f0d59d63f9530ed0a75b5e3c0b34a02fa6aa7ea721d52da"
+  },
+  {
+    "file": "Chuong4.pdf",
+    "bytes": 173289,
+    "sha256": "042c7d8776d1e36f3bb9990d9b73037251977b0e9c0da5de9b82f08f13a45cba"
+  },
+  {
+    "file": "Chuong5.pdf",
+    "bytes": 215369,
+    "sha256": "a3c994596434e995d02601c7bccee9fa1f461d8130a88bfdc9e8471bacd2e31b"
+  },
+  {
+    "file": "Chuong6.pdf",
+    "bytes": 181777,
+    "sha256": "87700d358d370dfe60a4e366f3b7f8d0bcfa749cfa82f835e512d6080458138c"
+  },
+  {
+    "file": "Chuong7.pdf",
+    "bytes": 177329,
+    "sha256": "3e5adceca13177ccf8383308653f3732bfa0f51d7ececde67fb45171fdad432a"
+  },
+  {
+    "file": "Chuong8.pdf",
+    "bytes": 959626,
+    "sha256": "090176bdc7d7502b65310819f7b7224718b132b1a7723124766a0ac72999054f"
+  },
+  {
+    "file": "Chuong9.pdf",
+    "bytes": 268720,
+    "sha256": "931f88e6e8d6eadbd34b06efa2451d256c7fd28b459a16e54ade436c096e1a7d"
+  }
+]

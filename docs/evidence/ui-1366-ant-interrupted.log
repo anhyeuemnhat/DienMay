@@ -1,0 +1,33 @@
+Buildfile: /mnt/data/DienMay-Improved/build.xml
+
+init:
+
+compile-common:
+
+compile-backend:
+
+compile-client:
+
+compile:
+
+compile-tests:
+
+ui:
+     [java] PASS | UI / login maximized 1366x768
+     [java] PASS | UI / manager functional menu has six groups
+     [java] PASS | UI / working screen Nh?n vi?n / t?i kho?n
+     [java] PASS | UI / working screen S?n ph?m / t?n kho
+     [java] PASS | UI / working screen Kh?ch h?ng
+     [java] PASS | UI / working screen Nh? cung c?p
+     [java] PASS | UI / working screen Lo?i s?n ph?m
+     [java] PASS | UI / working screen Th??ng hi?u
+     [java] PASS | UI / working screen Nh?p h?ng
+     [java] PASS | UI / working screen Khuy?n m?i
+     [java] PASS | UI / working screen B?n h?ng
+     [java] PASS | UI / actual POS add-to-cart over HTTP
+     [java] PASS | UI / working screen Chuy?n kho / qu?y
+     [java] PASS | UI / working screen H?a ??n
+     [java] PASS | UI / working screen L?ch s? kho
+     [java] PASS | UI / working screen L?ch s? Serial / IMEI
+     [java] PASS | UI / working screen B?o h?nh
+     [java] PASS | UI / working screen Doanh thu / b?n ch?y

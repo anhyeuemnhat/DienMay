@@ -1,0 +1,28 @@
+digraph Classes {
+ graph [rankdir=LR,pad="0.3",nodesep="0.35",ranksep="0.6",fontname="DejaVu Sans",label="DienMay | Core classes and actual dependencies",labelloc=t,fontsize=22];
+ node [shape=box,style="rounded,filled",fillcolor="#edf3fa",fontname="DejaVu Sans",fontsize=12,margin="0.16,0.12",color="#35516f"];
+ edge [color="#536b84",fontname="DejaVu Sans",fontsize=10];
+ subgraph cluster_client { label="Client process";color="#c1d3e5";
+  MakeSaleUI;AppContext;SaleController;PendingStore;Cart;ApiGateway [label="ApiGateway\n<<interface>>"];
+  HttpApiClient;MakeSaleUI -> SaleController;MakeSaleUI -> Cart;MakeSaleUI -> AppContext;
+  SaleController -> PendingStore [label="owns"];SaleController -> ApiGateway;
+  AppContext -> ApiGateway;HttpApiClient -> ApiGateway [style=dashed,arrowhead=empty,label="implements"];
+ }
+ subgraph cluster_common {label="Shared contracts";color="#c1d3e5";
+  SaleRequest [label="SaleRequest\n<<immutable record>>"];ItemQuantity;Sale;InventoryRequest;
+  SaleRequest -> ItemQuantity [label="copied lines"];
+ }
+ Cart -> ItemQuantity;SaleController -> SaleRequest;SaleController -> Sale;
+ subgraph cluster_server {label="Backend process";color="#c1d3e5";
+  ApiServer;ApiHandler [label="ApiHandler\n<<interface>>"];ApplicationApi;InventorySystem;
+  AuthService;SalesService;InventoryService;SqlDatabase;ProductDao;StockDao;InvoiceDao;RequestCancellationDao;
+  ApiServer -> ApiHandler;ApplicationApi -> ApiHandler [style=dashed,arrowhead=empty,label="implements"];
+  ApplicationApi -> InventorySystem;InventorySystem -> AuthService;InventorySystem -> SalesService;
+  InventorySystem -> InventoryService;SalesService -> SqlDatabase;SalesService -> AuthService;
+  SalesService -> ProductDao;SalesService -> StockDao;SalesService -> InvoiceDao;
+  SalesService -> RequestCancellationDao;InventoryService -> RequestCancellationDao;
+  InventoryService -> StockDao;AuthService -> SqlDatabase;
+ }
+ HttpApiClient -> ApiServer [style=dashed,label="HTTPS / JSON"];
+ InventoryService -> InventoryRequest;
+}

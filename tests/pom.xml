@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+ <modelVersion>4.0.0</modelVersion>
+ <parent><groupId>vn.dienmay</groupId><artifactId>dienmay-parent</artifactId><version>2.0.0</version></parent>
+<artifactId>tests</artifactId>
+<dependencies><dependency><groupId>vn.dienmay</groupId><artifactId>common-dto</artifactId><version>${project.version}</version></dependency><dependency><groupId>vn.dienmay</groupId><artifactId>backend-server</artifactId><version>${project.version}</version></dependency><dependency><groupId>vn.dienmay</groupId><artifactId>client-swing</artifactId><version>${project.version}</version></dependency><dependency><groupId>vn.dienmay</groupId><artifactId>tools</artifactId><version>${project.version}</version></dependency></dependencies>
+<build><finalName>tests</finalName><plugins><plugin><groupId>org.codehaus.mojo</groupId><artifactId>exec-maven-plugin</artifactId><executions><execution><id>style</id><phase>verify</phase><goals><goal>exec</goal></goals><configuration>
+          <executable>java</executable><workingDirectory>${maven.multiModuleProjectDirectory}</workingDirectory>
+          <arguments><argument>-Djava.awt.headless=true</argument><argument>-Dfile.encoding=UTF-8</argument>
+          <argument>-Dstdout.encoding=UTF-8</argument><argument>-Dstderr.encoding=UTF-8</argument>
+          <argument>-classpath</argument><classpath/><argument>vn.dienmay.tools.SourceStyle</argument>
+          <argument>check</argument><argument>${maven.multiModuleProjectDirectory}</argument></arguments>
+          </configuration></execution><execution><id>style-self</id><phase>verify</phase><goals><goal>exec</goal></goals><configuration>
+          <executable>java</executable><workingDirectory>${maven.multiModuleProjectDirectory}</workingDirectory>
+          <arguments><argument>-Djava.awt.headless=true</argument><argument>-Dfile.encoding=UTF-8</argument>
+          <argument>-Dstdout.encoding=UTF-8</argument><argument>-Dstderr.encoding=UTF-8</argument>
+          <argument>-classpath</argument><classpath/><argument>vn.dienmay.tools.SourceStyle</argument>
+          <argument>self-test</argument></arguments>
+          </configuration></execution><execution><id>unit</id><phase>verify</phase><goals><goal>exec</goal></goals><configuration>
+          <executable>java</executable><workingDirectory>${maven.multiModuleProjectDirectory}</workingDirectory>
+          <arguments><argument>-Djava.awt.headless=true</argument><argument>-Dfile.encoding=UTF-8</argument>
+          <argument>-Dstdout.encoding=UTF-8</argument><argument>-Dstderr.encoding=UTF-8</argument>
+          <argument>-classpath</argument><classpath/><argument>vn.dienmay.tests.UnitTests</argument>
+          </arguments>
+          </configuration></execution><execution><id>api</id><phase>verify</phase><goals><goal>exec</goal></goals><configuration>
+          <executable>java</executable><workingDirectory>${maven.multiModuleProjectDirectory}</workingDirectory>
+          <arguments><argument>-Djava.awt.headless=true</argument><argument>-Dfile.encoding=UTF-8</argument>
+          <argument>-Dstdout.encoding=UTF-8</argument><argument>-Dstderr.encoding=UTF-8</argument>
+          <argument>-classpath</argument><classpath/><argument>vn.dienmay.tests.ApiTests</argument>
+          </arguments>
+          </configuration></execution><execution><id>security</id><phase>verify</phase><goals><goal>exec</goal></goals><configuration>
+          <executable>java</executable><workingDirectory>${maven.multiModuleProjectDirectory}</workingDirectory>
+          <arguments><argument>-Djava.awt.headless=true</argument><argument>-Dfile.encoding=UTF-8</argument>
+          <argument>-Dstdout.encoding=UTF-8</argument><argument>-Dstderr.encoding=UTF-8</argument>
+          <argument>-classpath</argument><classpath/><argument>vn.dienmay.tests.SecurityTests</argument>
+          </arguments>
+          </configuration></execution></executions></plugin></plugins></build>
+</project>

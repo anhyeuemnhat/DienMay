@@ -1,0 +1,16 @@
+Buildfile: /mnt/data/DienMay-Improved/build.xml
+
+init:
+
+compile-common:
+
+compile-backend:
+
+compile-client:
+
+compile:
+
+compile-tests:
+
+BUILD SUCCESSFUL
+Total time: 0 seconds

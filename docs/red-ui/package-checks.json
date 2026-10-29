@@ -1,0 +1,13 @@
+{
+  "automated_passes": 284,
+  "automated_failures": 0,
+  "standalone_jar_startup_runs": 2,
+  "real_swing_screenshots": 74,
+  "protected_source_files_unchanged": 54,
+  "background_resource_and_jar_entry_sha256": "c2cd0191ada4ab64539169ad67fac0774f56a18225b682158faa54ee3be656ad",
+  "maven_verified": false,
+  "live_sql_server_verified": false,
+  "windows_native_dpi_verified": false,
+  "jar_contains_test_classes": false,
+  "no_font_files_in_delivery": true
+}

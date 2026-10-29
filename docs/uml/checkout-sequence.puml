@@ -1,0 +1,35 @@
+@startuml
+actor Cashier
+participant MakeSaleUI as UI
+participant SaleController as C
+participant PendingStore as P
+participant HttpApiClient as H
+participant ApplicationApi as A
+participant SalesService as S
+database "SQL Server" as DB
+Cashier -> UI : confirm current quote
+UI -> C : submit(stable request UUID)
+C -> P : save + force + atomic replace
+C -> H : POST sales/checkout
+H -> A : request + bearer token
+A -> S : authenticated server Session + request
+S -> DB : begin transaction, require role/auth version
+S -> DB : request application lock, existing hash/owner
+alt already committed
+ S -> DB : reload persisted invoice
+else new active request
+ S -> DB : check cancellation; lock products; validate price/serial
+ S -> DB : invoice + details + stock + units + warranty + ledger
+end
+S -> DB : commit
+S --> A : Sale
+A --> H : 200 data: Sale
+alt confirmed valid response
+ H --> C : Sale
+ C -> P : clear pending
+ C --> UI : display persisted receipt
+else lost/invalid reply
+ H --> C : transport failure
+ C --> UI : keep exact UUID; resolve or retry
+end
+@enduml

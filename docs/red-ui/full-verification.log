@@ -1,0 +1,2 @@
+PASS: offline regression, both UI resolutions, JAR resources and standalone JAR startup.
+Scope: synthetic HTTP fixtures, not live SQL Server acceptance.

@@ -1,0 +1,389 @@
+[
+  {
+    "operation": "LOGIN",
+    "path": "/api/v1/auth/login",
+    "method": "POST",
+    "roles": [],
+    "body": "username, password"
+  },
+  {
+    "operation": "LOGOUT",
+    "path": "/api/v1/auth/logout",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER",
+      "WAREHOUSE"
+    ],
+    "body": "{}"
+  },
+  {
+    "operation": "PASSWORD",
+    "path": "/api/v1/auth/password",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER",
+      "WAREHOUSE"
+    ],
+    "body": "oldPassword, newPassword"
+  },
+  {
+    "operation": "SETTINGS",
+    "path": "/api/v1/settings",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER",
+      "WAREHOUSE"
+    ],
+    "body": "{}"
+  },
+  {
+    "operation": "PRODUCT_SEARCH",
+    "path": "/api/v1/products/search",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER",
+      "WAREHOUSE"
+    ],
+    "body": "text"
+  },
+  {
+    "operation": "PRODUCT_FIND",
+    "path": "/api/v1/products/find",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER",
+      "WAREHOUSE"
+    ],
+    "body": "code"
+  },
+  {
+    "operation": "PRODUCT_GET",
+    "path": "/api/v1/products/get",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER",
+      "WAREHOUSE"
+    ],
+    "body": "id"
+  },
+  {
+    "operation": "PRODUCT_SAVE",
+    "path": "/api/v1/products/save",
+    "method": "POST",
+    "roles": [
+      "MANAGER"
+    ],
+    "body": "item: Item"
+  },
+  {
+    "operation": "SERIALS",
+    "path": "/api/v1/products/serials",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER",
+      "WAREHOUSE"
+    ],
+    "body": "id, location (KHO|QUAY)"
+  },
+  {
+    "operation": "LOOKUPS",
+    "path": "/api/v1/lookups/list",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER",
+      "WAREHOUSE"
+    ],
+    "body": "type (category|brand|vendor)"
+  },
+  {
+    "operation": "LOOKUP_SAVE",
+    "path": "/api/v1/lookups/save",
+    "method": "POST",
+    "roles": [
+      "MANAGER"
+    ],
+    "body": "type, id?, name"
+  },
+  {
+    "operation": "CUSTOMERS",
+    "path": "/api/v1/customers/search",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "text"
+  },
+  {
+    "operation": "CUSTOMER",
+    "path": "/api/v1/customers/get",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "id"
+  },
+  {
+    "operation": "CUSTOMER_SAVE",
+    "path": "/api/v1/customers/save",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "id?, name, phone, address"
+  },
+  {
+    "operation": "VENDORS",
+    "path": "/api/v1/vendors/list",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "WAREHOUSE"
+    ],
+    "body": "{}"
+  },
+  {
+    "operation": "VENDOR_SAVE",
+    "path": "/api/v1/vendors/save",
+    "method": "POST",
+    "roles": [
+      "MANAGER"
+    ],
+    "body": "id?, name, phone, address, enabled"
+  },
+  {
+    "operation": "EMPLOYEES",
+    "path": "/api/v1/employees/list",
+    "method": "POST",
+    "roles": [
+      "MANAGER"
+    ],
+    "body": "{}"
+  },
+  {
+    "operation": "EMPLOYEE_SAVE",
+    "path": "/api/v1/employees/save",
+    "method": "POST",
+    "roles": [
+      "MANAGER"
+    ],
+    "body": "id?, username, name, phone, role, enabled, password (empty retains password)"
+  },
+  {
+    "operation": "PROMOTIONS",
+    "path": "/api/v1/promotions/list",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "{}"
+  },
+  {
+    "operation": "PROMOTION_SAVE",
+    "path": "/api/v1/promotions/save",
+    "method": "POST",
+    "roles": [
+      "MANAGER"
+    ],
+    "body": "id?, code, name, from, to, percent, enabled"
+  },
+  {
+    "operation": "QUOTE",
+    "path": "/api/v1/sales/quote",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "lines: ItemQuantity[], code, manual"
+  },
+  {
+    "operation": "CHECKOUT",
+    "path": "/api/v1/sales/checkout",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "request: SaleRequest"
+  },
+  {
+    "operation": "SALE_CANCEL",
+    "path": "/api/v1/sales/cancel",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "request: SaleRequest"
+  },
+  {
+    "operation": "SALE_RESOLVE",
+    "path": "/api/v1/sales/resolve",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "request: SaleRequest"
+  },
+  {
+    "operation": "INVOICE",
+    "path": "/api/v1/sales/get",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "id"
+  },
+  {
+    "operation": "INVOICES",
+    "path": "/api/v1/sales/search",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "text, from, to"
+  },
+  {
+    "operation": "RECEIVE",
+    "path": "/api/v1/inventory/receive",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "WAREHOUSE"
+    ],
+    "body": "request: InventoryRequest"
+  },
+  {
+    "operation": "TRANSFER",
+    "path": "/api/v1/inventory/transfer",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "WAREHOUSE"
+    ],
+    "body": "request: InventoryRequest"
+  },
+  {
+    "operation": "STOCK_CANCEL",
+    "path": "/api/v1/inventory/cancel",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "WAREHOUSE"
+    ],
+    "body": "request: InventoryRequest"
+  },
+  {
+    "operation": "STOCK_RESOLVE",
+    "path": "/api/v1/inventory/resolve",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "WAREHOUSE"
+    ],
+    "body": "request: InventoryRequest"
+  },
+  {
+    "operation": "STOCK_HISTORY",
+    "path": "/api/v1/inventory/history",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "WAREHOUSE"
+    ],
+    "body": "sku"
+  },
+  {
+    "operation": "SERIAL_HISTORY",
+    "path": "/api/v1/inventory/serial-history",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "WAREHOUSE"
+    ],
+    "body": "serial"
+  },
+  {
+    "operation": "WARRANTIES",
+    "path": "/api/v1/warranties/search",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "text"
+  },
+  {
+    "operation": "CLAIM_RECEIVE",
+    "path": "/api/v1/warranties/receive",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "warranty, fault"
+  },
+  {
+    "operation": "CLAIMS",
+    "path": "/api/v1/warranties/claims",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "warranty?"
+  },
+  {
+    "operation": "CLAIM_TRANSITION",
+    "path": "/api/v1/warranties/transition",
+    "method": "POST",
+    "roles": [
+      "MANAGER"
+    ],
+    "body": "claim, expected, next, notes"
+  },
+  {
+    "operation": "CLAIM_HISTORY",
+    "path": "/api/v1/warranties/history",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "CASHIER"
+    ],
+    "body": "claim"
+  },
+  {
+    "operation": "REPORT",
+    "path": "/api/v1/reports/query",
+    "method": "POST",
+    "roles": [
+      "MANAGER"
+    ],
+    "body": "type (summary|employee|best), from, to"
+  },
+  {
+    "operation": "LOW_STOCK",
+    "path": "/api/v1/reports/low-stock",
+    "method": "POST",
+    "roles": [
+      "MANAGER",
+      "WAREHOUSE"
+    ],
+    "body": "{}"
+  }
+]

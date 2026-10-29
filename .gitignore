@@ -1,9 +1,10 @@
 /build/
-/target/
 /dist/
-/config/*.properties
-/nbproject/private/
-/lib/*.jar
-*.log
+**/target/
+/backend-server/lib/*.jar
+/config/database.properties
+*.p12
+*.jks
+.env
 *.lck
 *.tmp

@@ -1,0 +1,59 @@
+Buildfile: /mnt/data/DienMay-Improved/build.xml
+
+clean:
+   [delete] Deleting directory /mnt/data/DienMay-Improved/build
+   [delete] Deleting directory /mnt/data/DienMay-Improved/dist
+
+init:
+    [mkdir] Created dir: /mnt/data/DienMay-Improved/build/common
+    [mkdir] Created dir: /mnt/data/DienMay-Improved/build/backend
+    [mkdir] Created dir: /mnt/data/DienMay-Improved/build/client
+    [mkdir] Created dir: /mnt/data/DienMay-Improved/build/tests
+    [mkdir] Created dir: /mnt/data/DienMay-Improved/build/tools
+    [mkdir] Created dir: /mnt/data/DienMay-Improved/dist
+
+tools:
+    [javac] Compiling 1 source file to /mnt/data/DienMay-Improved/build/tools
+
+style:
+     [echo] Project convention checks passed; see docs/evidence/style-check.log.
+
+compile-common:
+    [javac] Compiling 16 source files to /mnt/data/DienMay-Improved/build/common
+
+compile-backend:
+    [javac] Compiling 22 source files to /mnt/data/DienMay-Improved/build/backend
+
+compile-client:
+    [javac] Compiling 29 source files to /mnt/data/DienMay-Improved/build/client
+    [javac] /mnt/data/DienMay-Improved/client-swing/src/main/java/vn/dienmay/client/ui/WorkFrame.java:24: warning: [this-escape] possible 'this' escape before subclass is fully initialized
+    [javac]     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    [javac]                             ^
+    [javac] /mnt/data/DienMay-Improved/client-swing/src/main/java/vn/dienmay/client/ui/DashboardFrame.java:43: warning: [this-escape] possible 'this' escape before subclass is fully initialized
+    [javac]     message("API: " + app.gateway().profile() + "  |  Phiên hết hạn: " + app.session().expiresAt());
+    [javac]            ^
+    [javac] /mnt/data/DienMay-Improved/client-swing/src/main/java/vn/dienmay/client/ui/StockFrame.java:60: warning: [this-escape] possible 'this' escape before subclass is fully initialized
+    [javac]       super.dispose();
+    [javac]                    ^
+    [javac] 3 warnings
+
+compile:
+
+compile-tests:
+    [javac] Compiling 9 source files to /mnt/data/DienMay-Improved/build/tests
+
+test:
+     [echo] UnitTests: passed (failures make this target fail). See docs/evidence/unit-tests.log.
+     [echo] ApiTests: passed (failures make this target fail). See docs/evidence/api-tests.log.
+     [echo] SecurityTests: passed (failures make this target fail). See docs/evidence/security-tests.log.
+
+package:
+      [jar] Building jar: /mnt/data/DienMay-Improved/dist/common-dto.jar
+      [jar] Building jar: /mnt/data/DienMay-Improved/dist/client-swing.jar
+      [jar] Building jar: /mnt/data/DienMay-Improved/dist/backend-server.jar
+     [echo] Independent runtime artifacts are in dist/. Backend SQL JDBC driver is NOT bundled.
+
+verify:
+
+BUILD SUCCESSFUL
+Total time: 20 seconds
