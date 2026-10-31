@@ -53,7 +53,7 @@ public final class MainUI extends WorkFrame {
     g.fill = GridBagConstraints.NONE;
     g.insets = new Insets(20, 16, 20, 36);
     body.add(login, g);
-    getRootPane().setDefaultButton(submit);
+    defaultAction(submit);
     username.setName("username");
     password.setName("password");
     message("Sẵn sàng đăng nhập • Vui lòng nhập tên đăng nhập và mật khẩu.");

@@ -1,54 +1,31 @@
-# Acquisition and parity limitations
+# Nguồn mã và phạm vi đối chiếu
 
-GitHub Connector verified `main` at 83bec84a21714275296552a2f201962cc19089ba.
-Commit timestamp: 2026-10-20T06:25:15Z. Root tree:
-06e16223ad1d5f651fbb7b80431c2055e2ead386.
-Every file read was pinned to that commit; the prior reference SHA was not simply
-assumed current. The CSV records 36 reviewed files and upstream blob IDs.
-These are upstream Git SHA-1 blob identifiers, NOT hashes of modified output files.
+Base chỉnh sửa: **DienMay-Do-UI.rar do người dùng đính kèm**.
+Bản giải nén gốc được giữ riêng; thay đổi thực hiện trên bản sao.
+Mã gốc được đọc trước khi sửa. Build và ba bộ test nền ban đầu chạy được;
+bằng chứng đó không thay thế các log kiểm thử bản cuối trong `docs/evidence/`.
 
-The container could not resolve external hosts for git/archive/dependency downloads.
-Individual text reads through the connector worked. No complete clone or archive
-was acquired; source was adapted locally from those reviewed texts. The delivered
-folder is a standalone project with all of ITS active Java sources, not a complete
-copy of every upstream asset or a reproducible upstream checkout.
+GitHub connector đã kiểm tra read-only repository `anhyeuemnhat/DienMay`, nhánh `main`:
+- Commit quan sát: `233b11bf84705781b7f074847a3d8210a191a059`.
+- Commit timestamp: `2026-10-29T21:56:21Z`.
+- Đã đọc metadata repository/branch và root listing.
+- **Không clone đầy đủ, không so khớp từng byte RAR với main, không push/ghi GitHub.**
 
-## Not acquired/reviewed completely
+SHA256 và kích thước hai tệp đầu vào nằm trong `inputs.json`.
+`changes.json` so sánh mã/thành phần triển khai của RAR với bản bàn giao, không phải Git diff với main.
+Root `SHA256SUMS.txt` ghi hash các tệp cuối cùng, không phải chữ ký số hay chứng nhận bảo mật.
 
-- Most original GUI classes and every NetBeans `.form` file.
-- Original `Images/` binary resources.
-- `Project.docx`, `usecasedescriptions.docx` and original UML diagram files.
-- Original README/build.xml contents and complete test files byte-for-byte.
-- Legacy migrations 003_stage_legacy, 004_apply_reviewed_legacy,
-  005_reconciliation and 006_permissions; names/tree metadata were seen only.
+## Thành phần giữ lại / loại bỏ
 
-No missing file was fabricated and labeled as original. The new UI is handwritten
-and self-contained, with new SQL/runbooks/UML clearly marked as delivery material.
-Not acquiring original `.form` means Designer preservation and full original UI
-function parity cannot be accepted. This is a material deviation from the user's
-whole-repository preservation requirement, not just an environmental test skip.
+Giữ kiến trúc Java Swing / common DTO / HTTP backend / SQL Server, các phân hệ,
+tài nguyên giao diện và JDBC JAR có trong RAR. Nâng cấp điều hướng, lifecycle,
+quality, migration, seed, tests và tài liệu theo changelog.
 
-## Source-to-delivery mapping
+Không gói cấu hình DB cụ thể của người dùng, IDE caches, build trung gian,
+Git metadata, hash/báo cáo cũ, các ảnh/diagram chỉ mô tả kiến trúc cũ.
+Bằng chứng UI mới được sinh từ bản chạy hiện tại với dữ liệu mô phỏng.
+Tài liệu gốc nói về giáo trình/commit cũ không được dùng làm bằng chứng của đợt này.
 
-| Original | Delivered change |
-|---|---|
-| Code model records/utilities | common-dto/.../model; package/style, immutable contracts, retained rules |
-| Service.InventoryService.Request | common model InventoryRequest, independent of backend |
-| ImplementationDB.SQL | server/db/SqlDatabase; backend-only credentials/connection lifecycle |
-| Other ImplementationDB DAOs | server/db; parameter guard and movement defect correction |
-| Business/auth services | server/service; API sessions, role validation, request cancellation |
-| Service.PendingStore | client/state; no service dependency, durable recovery retained |
-| Code.InventorySystem | server composition root with private final fields |
-| Code.SingletonPattern | removed; client AppContext and explicit server instances |
-| Code.Store / Warehouse | redundant construction wrappers removed, services composed directly |
-| GUI.App / Ui | concepts reviewed, new API-backed application/view utilities implemented |
-| Other GUI screens | new handwritten working views, not verified NetBeans-compatible adaptations |
-| Original unit/SQL tests | reviewed scenarios adapted; new explicit test runners, not every old file retained |
-| database/001_schema.sql | existing dm schema structure retained; additive version 2 supplied |
-| database/002_demo.sql | catalog/stock demonstration; public default credentials removed |
-
-No GitHub write action was used. No live user database was accessed, modified,
-migrated or deleted. A complete original baseline build was not possible and is
-not represented as having passed. Upstream licensing was not fully inspected;
-retain attribution and obtain repository-owner approval before redistribution
-outside this requested project handover.
+Không truy cập hay thay đổi database vận hành. SQL Server không có trong môi trường;
+DDL/seed/migration/integration vẫn chờ kiểm thử. Giấy phép tài nguyên gốc chưa được
+kiểm toán độc lập; xem `../../THIRD_PARTY_NOTICES.md`.

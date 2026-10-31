@@ -99,6 +99,7 @@ public final class SalesService {
       // Stable lock order reduces deadlocks between overlapping multi-line carts.
       for (ItemQuantity line : lines) {
         Item item = products.get(c, line.productId(), true);
+        QualityService.requireTradable(c, item);
         if (!item.enabled()) {
           throw new IllegalArgumentException("San pham da ngung kinh doanh: " + item.sku());
         }
@@ -120,7 +121,7 @@ public final class SalesService {
       String phone = "";
       if (request.customerId() != null) {
         try (PreparedStatement q = statement(c,
-            "SELECT FullName,Phone FROM dm.Customers WITH (HOLDLOCK) WHERE Id=?", request.customerId());
+            "SELECT FullName,Phone FROM dm.Customers WITH (HOLDLOCK) WHERE Id=? AND Enabled=1", request.customerId());
             ResultSet r = q.executeQuery()) {
           if (!r.next()) {
             throw new IllegalArgumentException("Khong tim thay khach hang.");

@@ -5,8 +5,10 @@ import vn.dienmay.server.db.SqlDatabase;
 import vn.dienmay.server.service.AuthService;
 import vn.dienmay.server.service.CatalogService;
 import vn.dienmay.server.service.InventoryService;
+import vn.dienmay.server.service.LifecycleService;
 import vn.dienmay.server.service.PeopleService;
 import vn.dienmay.server.service.PromotionService;
+import vn.dienmay.server.service.QualityService;
 import vn.dienmay.server.service.ReportService;
 import vn.dienmay.server.service.SalesService;
 import vn.dienmay.server.service.WarrantyService;
@@ -14,6 +16,8 @@ import vn.dienmay.server.service.WarrantyService;
 /** Backend composition root. No singleton, mutable global session or public dependency fields. */
 public final class InventorySystem {
   private final SqlDatabase database;
+  private final QualityService quality;
+  private final LifecycleService lifecycle;
   private final AuthService auth;
   private final CatalogService catalog;
   private final SalesService sales;
@@ -27,6 +31,8 @@ public final class InventorySystem {
     this.database = Objects.requireNonNull(database, "database");
     auth = new AuthService(database);
     catalog = new CatalogService(database, auth);
+    quality = new QualityService(database, auth);
+    lifecycle = new LifecycleService(database, auth);
     sales = new SalesService(database, auth);
     inventory = new InventoryService(database, auth);
     people = new PeopleService(database, auth);
@@ -34,6 +40,9 @@ public final class InventorySystem {
     warranties = new WarrantyService(database, auth);
     reports = new ReportService(database, auth);
   }
+
+  public QualityService quality() { return quality; }
+  public LifecycleService lifecycle() { return lifecycle; }
 
   public SqlDatabase database() {
     return database;

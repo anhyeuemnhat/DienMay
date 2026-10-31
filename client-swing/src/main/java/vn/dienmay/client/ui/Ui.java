@@ -235,6 +235,7 @@ public final class Ui {
       g.gridx = 1;
       g.weightx = 1;
       g.fill = GridBagConstraints.HORIZONTAL;
+      GuidedInput.apply(String.valueOf(values[i]), (Component) values[i + 1]);
       panel.add((Component) values[i + 1], g);
     }
     return panel;

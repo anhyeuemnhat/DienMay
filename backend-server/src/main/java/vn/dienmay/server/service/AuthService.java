@@ -207,7 +207,7 @@ public final class AuthService {
           throw new SecurityException("Mat khau hien tai khong dung.");
         }
       }
-      update(c, "UPDATE dm.Employees SET PasswordHash=?,MustChange=0,AuthVersion=AuthVersion+1 "
+      update(c, "UPDATE dm.Employees SET PasswordHash=?,MustChange=0,AuthVersion=AuthVersion+1,Revision=Revision+1 "
           + "WHERE Id=?", hash, session.employeeId);
       return new Session(session.employeeId, session.name, session.role, session.version + 1,
           false, clock.instant().plus(lifetime));

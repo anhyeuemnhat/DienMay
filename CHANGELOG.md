@@ -1,45 +1,37 @@
-# Changes from the reviewed pinned source
+# Thay đổi bản 3.0.0 - 31/10/2026
 
-Delivery date: 2026-10-29. Upstream baseline: 83bec84a21714275296552a2f201962cc19089ba.
-This is a local deliverable; no upstream push or branch mutation was performed.
+Base chỉnh sửa: RAR đính kèm, không phải bản clone main đã xác minh từng byte.
+Danh sách file/hash thay đổi trong `docs/provenance/changes.json`.
 
-## Implemented
+## Giao diện
 
-- Fixed the ten-column/eleven-placeholder StockDao movement defect and added a
-  real-method JDBC-double regression plus generic parameter-count guard.
-- Moved SQL/config/driver/services into an independently launched backend; added
-  explicit HTTP APIs and a JDBC-free desktop transport boundary.
-- Replaced static desktop singleton access by instance composition, immutable
-  contracts, injected transport/connection boundaries and focused controllers.
-- Retained reviewed monetary, inventory, serial, promotion, invoice, warranty,
-  role/auth-version and transactional idempotency rules.
-- Added expiring opaque API sessions, endpoint permissions, bounded JSON/HTTP,
-  loopback-only cleartext, TLS support and safe transport errors.
-- Added server-fenced cancellation for uncertain sale/stock requests, client
-  persistence-before-send, same-UUID retry and full response-body timeouts.
-- Delivered handwritten Swing working screens with six functional menu groups,
-  role shortcuts, asynchronous calls, readonly sortable/filterable tables,
-  CSV export, printing, adaptive forms and maximized work windows.
-- Added additive schema v2, random-password SQL IT fixtures, no public demo account
-  passwords, dedicated-test-database safeguards and separate evidence scopes.
-- Added executable project convention tooling, offline Ant build, optional Maven
-  reactor, UML/navigation/API/runbook documentation and actual GUI screenshots.
+Thêm AppShell; chuyển WorkFrame/EditDialog sang JPanel; Back/Forward/Home/drafts,
+cache màn hình, cảnh báo dirty/busy, giữ state, mode banner.
+Nối lifecycle/quality editor qua API; không giả vờ nút đã ghi SQL khi chưa có response.
+RowsPanel chuẩn hóa header/kiểu sắp xếp/enum/ngày, empty schema và mode xuất/in.
+GuidedInput và combo typeahead; field typed barcode/IMEI/evidence.
+Sửa cold start X11 bằng usable display bounds, validate/repaint; không bắt maximize trước map.
 
-## Fixes found during verification
+## Backend/API/common
 
-- Headless offline test originally attempted an unavailable display; explicitly
-  enabled headless mode for nonvisual suites rather than deleting the test.
-- Forced-maximize/undecorated user WM config invalidated GUI geometry assertions;
-  reran under the standard Openbox config, which does NOT maximize windows for us.
-- Manager home initially scrolled/clipped shortcuts at 1366x768; reduced card
-  density/padding, reset scroll position, then allocated spare area to action cards.
-- Network response streaming now has a complete deadline and size bound, not only
-  an initial connection/header timeout. Oversized requests are rejected before
-  pending state is committed locally.
+CatalogRules, QualityService, LifecycleService, RecordGuard; thêm 5 Operation quản trị.
+Kiểm tra active/verified/mode trước giao dịch, reset duyệt khi đổi danh tính/mã,
+reference tuple 6 field, không chấp nhận forged approval qua save.
+Revision/row lock cho master writes; lifecycle tách khỏi enabled form;
+phone, self/last-manager protection, audit; AuthVersion khi thay đổi tài khoản/mật khẩu.
+InventoryRequest thêm identifierType; đọc pending SERIAL cũ giữ fingerprint.
+Không thay hủy pending request thành nghiệp vụ đảo hóa đơn.
 
-## Deliberately not represented as complete
+## Database và vận hành
 
-No full original archive, no baseline build of the entire original repository,
-no original NetBeans form/resources/DOCX/legacy migration parity proof, no actual
-SQL Server execution, no Windows DPI/peripheral acceptance, no Maven run,
-no full Google Java Style certification. See ACCEPTANCE_REPORT.md.
+Migration 010/011, ReferenceProducts/DeploymentInfo/AuditLog, GTIN/IMEI CHECK,
+installer mục tiêu chính xác và chốt DEMO/Test, không auto seed/DDL khi backend start.
+Danh mục Sony/LG có nguồn, demo linked flow, barcode trống, serial DEMO tường minh,
+readonly reconciliation/audit. Driver Ant/Maven khớp 13.6.0.jre11; kèm giấy phép MIT.
+
+## Kiểm thử/tài liệu
+
+Thêm QualityTests, cập nhật SecurityTests/SqlServerIT/UiSmoke/PackagedAppSmoke,
+chuẩn hóa fixture minh bạch, evidence hiện tại, ma trận 182 field và 44 API,
+hướng dẫn cài đặt và báo cáo chưa nghiệm thu SQL.
+Không đính kèm config thật, log cũ, các file build/IDE thừa hoặc token GitHub.

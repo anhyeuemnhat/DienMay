@@ -18,6 +18,8 @@ public final class ReportsUI extends RowsFrame {
 
   public ReportsUI(AppContext app) {
     super(app, "Báo cáo bán hàng", "Chọn khoảng ngày • Số liệu được tính tại backend");
+    rows.columns("InvoiceCount", "Subtotal", "Discount", "NetRevenue");
+    GuidedInput.install(from, "dd/MM/yyyy"); GuidedInput.install(to, "dd/MM/yyyy");
     actions.add(type);
     actions.add(new JLabel("Từ (dd/MM/yyyy):"));
     actions.add(from);
@@ -33,6 +35,12 @@ public final class ReportsUI extends RowsFrame {
       case 2 -> "best";
       default -> "summary";
     };
+    rows.setData(java.util.List.of());
+    switch (report) {
+      case "employee" -> rows.columns("UserName", "FullName", "InvoiceCount", "NetRevenue");
+      case "best" -> rows.columns("SKU", "ProductName", "Quantity", "GrossSales");
+      default -> rows.columns("InvoiceCount", "Subtotal", "Discount", "NetRevenue");
+    }
     load(Operation.REPORT, Data.map("type", report, "from", Ui.date(from), "to", Ui.date(to)));
   }
 }

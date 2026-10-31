@@ -21,8 +21,13 @@ public final class DatabaseTool {
       throw new IllegalArgumentException("Use: check | bootstrap <username> | hash");
     }
     SqlDatabase database = new SqlDatabase();
+    if (java.util.Set.of("init-demo", "init-test", "migrate", "seed-demo", "classify-production").contains(args[0])) {
+      DatabaseInstaller.run(database, args);
+      return;
+    }
     if (args[0].equals("check")) {
       System.out.println("SQL Server: " + database.checkConnection());
+      System.out.println("Mode: " + database.read(vn.dienmay.server.service.QualityService::mode));
       return;
     }
     if (!(args[0].equals("hash") && args.length == 1)
@@ -44,6 +49,7 @@ public final class DatabaseTool {
         System.out.println(hash);
         return;
       }
+      database.checkConnection();
       String username = Validation.required(args[1], 64, "Ten tai khoan");
       long id = database.transaction(c -> {
         lock(c, "dm:employee-admin");

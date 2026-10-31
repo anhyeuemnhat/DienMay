@@ -14,6 +14,7 @@ public class RowsFrame extends WorkFrame {
 
   protected RowsFrame(AppContext app, String title, String description) {
     super(app, title, description);
+    rows.dataContext(app::environmentMode);
     body.add(actions, BorderLayout.NORTH);
     body.add(rows, BorderLayout.CENTER);
   }

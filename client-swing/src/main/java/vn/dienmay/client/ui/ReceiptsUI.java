@@ -21,6 +21,9 @@ public final class ReceiptsUI extends RowsFrame {
 
   public ReceiptsUI(AppContext app) {
     super(app, "Tra cứu hóa đơn", "Tìm theo số hóa đơn, khách hàng, điện thoại hoặc nhân viên");
+    rows.columns("Id", "Code", "SoldAt", "CustomerName", "CustomerPhone", "EmployeeName", "Total", "PaymentMethod");
+    GuidedInput.install(search, "Mã hóa đơn / tên / điện thoại");
+    GuidedInput.install(from, "dd/MM/yyyy"); GuidedInput.install(to, "dd/MM/yyyy");
     actions.add(search);
     actions.add(new JLabel("Từ ngày:"));
     actions.add(from);
@@ -46,7 +49,9 @@ public final class ReceiptsUI extends RowsFrame {
       java.util.Map<String, Object> store = Json.object(settings);
       WorkFrame receipt = new WorkFrame(app, "Hóa đơn " + sale.code(),
           "Bản ghi đã lưu • Chứng từ nội bộ") {};
-      JTextArea text = new JTextArea(sale.generateReceipt(Data.text(store, "name"),
+      String prefix = "DEMO".equals(Data.text(store, "mode"))
+          ? "DEMO / MO PHONG - KHONG PHAI CHUNG TU KINH DOANH THAT\n\n" : "";
+      JTextArea text = new JTextArea(prefix + sale.generateReceipt(Data.text(store, "name"),
           Data.text(store, "address"), Data.text(store, "phone")));
       text.setEditable(false);
       text.setLineWrap(true);
@@ -61,7 +66,7 @@ public final class ReceiptsUI extends RowsFrame {
           Ui.error(receipt, ex);
         }
       })), BorderLayout.SOUTH);
-      receipt.setVisible(true);
+      receipt.open();
     });
   }
 }

@@ -1,0 +1,66 @@
+Buildfile: /mnt/data/DienMayDo/build.xml
+
+clean:
+   [delete] Deleting directory /mnt/data/DienMayDo/build
+   [delete] Deleting directory /mnt/data/DienMayDo/dist
+
+init:
+    [mkdir] Created dir: /mnt/data/DienMayDo/build/common
+    [mkdir] Created dir: /mnt/data/DienMayDo/build/backend
+    [mkdir] Created dir: /mnt/data/DienMayDo/build/client
+    [mkdir] Created dir: /mnt/data/DienMayDo/build/tests
+    [mkdir] Created dir: /mnt/data/DienMayDo/build/tools
+    [mkdir] Created dir: /mnt/data/DienMayDo/dist
+
+tools:
+    [javac] Compiling 1 source file to /mnt/data/DienMayDo/build/tools
+
+style:
+     [echo] Project convention checks passed; see docs/evidence/style-check.log.
+
+compile-common:
+    [javac] Compiling 17 source files to /mnt/data/DienMayDo/build/common
+
+compile-backend:
+    [javac] Compiling 26 source files to /mnt/data/DienMayDo/build/backend
+
+compile-client:
+    [javac] Compiling 39 source files to /mnt/data/DienMayDo/build/client
+    [javac] /mnt/data/DienMayDo/client-swing/src/main/java/vn/dienmay/client/ui/WorkFrame.java:28: warning: [this-escape] possible 'this' escape before subclass is fully initialized
+    [javac]     setName(title);
+    [javac]            ^
+    [javac] /mnt/data/DienMayDo/client-swing/src/main/java/vn/dienmay/client/ui/SurfacePanel.java:20: warning: [this-escape] possible 'this' escape before subclass is fully initialized
+    [javac]     setOpaque(false);
+    [javac]              ^
+    [javac] /mnt/data/DienMayDo/client-swing/src/main/java/vn/dienmay/client/ui/DashboardFrame.java:17: warning: [this-escape] possible 'this' escape before subclass is fully initialized
+    [javac]     workspaceMode("home");
+    [javac]                  ^
+    [javac] /mnt/data/DienMayDo/client-swing/src/main/java/vn/dienmay/client/ui/StockFrame.java:57: warning: [this-escape] possible 'this' escape before subclass is fully initialized
+    [javac]     workspaceMode("dense");
+    [javac]                  ^
+    [javac] 4 warnings
+     [copy] Copying 1 file to /mnt/data/DienMayDo/build/client
+
+compile:
+
+compile-tests:
+    [javac] Compiling 11 source files to /mnt/data/DienMayDo/build/tests
+
+test:
+     [echo] UnitTests: passed (failures make this target fail). See docs/evidence/unit-tests.log.
+     [echo] ApiTests: passed (failures make this target fail). See docs/evidence/api-tests.log.
+     [echo] SecurityTests: passed (failures make this target fail). See docs/evidence/security-tests.log.
+     [echo] QualityTests: passed (failures make this target fail). See docs/evidence/quality-tests.log.
+
+package:
+      [jar] Building jar: /mnt/data/DienMayDo/dist/common-dto.jar
+      [jar] Building jar: /mnt/data/DienMayDo/dist/client-swing.jar
+      [jar] Building jar: /mnt/data/DienMayDo/dist/backend-server.jar
+     [echo] Independent runtime artifacts are in dist/. SQL JDBC driver is in backend-server/lib; client has no database driver.
+
+verify:
+
+BUILD SUCCESSFUL
+Total time: 11 seconds
+
+EXIT_CODE=0

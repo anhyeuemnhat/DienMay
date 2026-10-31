@@ -125,10 +125,10 @@ public final class SqlDatabase {
   public String checkConnection() throws SQLException {
     return read(c -> {
       try (PreparedStatement s = Jdbc.statement(c,
-          "SELECT DB_NAME(), Version FROM dm.SchemaVersion WHERE Version=2");
+          "SELECT DB_NAME(), Version FROM dm.SchemaVersion WHERE Version=4");
           ResultSet r = s.executeQuery()) {
         if (!r.next()) {
-          throw new SQLException("Thieu schema dm phien ban 2.");
+          throw new SQLException("Thieu schema dm phien ban 4.");
         }
         return r.getString(1) + " / schema " + r.getInt(2);
       }

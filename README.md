@@ -1,68 +1,64 @@
-# DienMay Improved
+# Điện Máy Đỏ - bản nâng cấp 3.0.0
 
-**Bản cải tiến có mã nguồn thật, build và kiểm thử thật. Chưa nghiệm thu đầy đủ cả 5 tiêu chí.**
+**Trạng thái: bản bàn giao mã nguồn để tiếp tục nghiệm thu, CHƯA đạt nghiệm thu toàn bộ.**
 
-Nguồn tham chiếu: `anhyeuemnhat/DienMay`, nhánh `main`, HEAD đã kiểm tra qua GitHub Connector:
-`83bec84a21714275296552a2f201962cc19089ba`.
-
-## Phạm vi bàn giao
-
-Project này có đủ mã nguồn cho các module đang được build: Swing client,
-backend Java độc lập, DTO/model chung, công cụ convention và kiểm thử.
-Các model, service và DAO được cải biên từ mã đã đọc tại commit trên;
-không thay nghiệp vụ SQL Server bằng cơ sở dữ liệu giả.
-
-**Giới hạn quan trọng:** không lấy được toàn bộ archive/clone của repository.
-Chỉ các file ghi trong `docs/provenance/upstream-files.csv` đã được đọc trực tiếp.
-Phần lớn GUI gốc, `.form`, ảnh, tài liệu DOCX và migration legacy chưa được lấy đầy đủ.
-Giao diện bàn giao là Swing viết tay, không cần ảnh ngoài; **không phải bản clone đầy đủ
-hay bằng chứng giữ nguyên khả năng chỉnh sửa form NetBeans**.
+Dự án thật gồm Java Swing, backend REST Java, DTO dùng chung, bộ SQL Server,
+kiểm thử, tài nguyên và hướng dẫn trong cùng thư mục này.
+Không có mật khẩu mặc định, tài khoản thật hoặc database sản xuất kèm theo.
 
 ## Bắt đầu
 
+1. Đọc **[README_RUN.md](README_RUN.md)** để build, cấu hình và chạy.
+2. Khởi tạo SQL Server theo **[database/README.md](database/README.md)**.
+   Có schema, migration, danh mục tham chiếu và dataset DEMO riêng; không chỉ có schema rỗng.
+3. Xem **[ACCEPTANCE_REPORT.md](ACCEPTANCE_REPORT.md)** trước khi dùng dữ liệu thật.
+
 ```sh
 ant clean verify
+# Sau khi đã cấu hình và khởi tạo SQL Server:
+sh scripts/database-tool.sh check
+sh scripts/run-backend.sh
+# Terminal khác:
+sh scripts/run-client.sh
 ```
 
-Build chính đã chạy thành công bằng JDK 21, `--release 17`; chưa chạy native JDK 17.
-Ant build không cần tải dependency để compile/kiểm thử offline.
-Driver Microsoft JDBC chỉ cần khi backend kết nối SQL Server và **chưa được kèm trong ZIP**.
-Maven POM cũng được cung cấp cho IDE/build trực tuyến, nhưng Maven chưa chạy trong môi trường bàn giao.
+Windows dùng các tệp `.bat` cùng tên. JDK 17+ và Apache Ant cần được cài trên máy.
+`dist/` có các JAR đã build; vẫn giữ đầy đủ mã nguồn để build lại.
 
-Đọc **[README_RUN.md](README_RUN.md)** để tạo schema, bootstrap quản lý, cấu hình TLS và chạy hai tiến trình.
-Không có tài khoản/mật khẩu mặc định. Không tự chạy migration trên dữ liệu thật.
+## Các thay đổi chính
 
-## Kết quả kiểm chứng
+- Một cửa sổ chính `AppShell`; các màn hình và biểu mẫu là panel.
+  Quay lại, Tiến, Trang chủ, Nháp chưa lưu; cảnh báo trước khi rời màn hình có thay đổi.
+- Ngừng sử dụng / khôi phục danh mục và tài khoản có lý do, phiên bản bản ghi,
+  kiểm tra quyền và nhật ký. Không xóa lịch sử chứng từ.
+- Quy trình quản lý xác minh thương hiệu / loại / sản phẩm / mã vạch,
+  lưu nguồn, ghi chú, người duyệt, thời điểm. API không tự tin trạng thái duyệt gửi từ form sản phẩm.
+- GTIN/EAN/UPC và IMEI có kiểm tra cấu trúc; đúng cấu trúc **không** đồng nghĩa đúng sản phẩm/thiết bị.
+- Bảng dữ liệu phân biệt mã chuỗi, ngày, tiền, trạng thái; gợi ý nhập liệu không bị lưu như giá trị thật.
+- SQL Server schema v4: 24 bảng / 182 cột, migration bổ sung, công cụ khởi tạo có chốt chặn DEMO,
+  hai sản phẩm tham chiếu có nguồn hãng, giao dịch mô phỏng liên kết xuyên suốt.
 
-| Bộ kiểm tra | Kết quả | Phạm vi |
-|---|---:|---|
-| Domain, recovery, JDBC boundary | 66/66 | JDBC test double, không phải SQL Server |
-| JSON, HTTP, idempotency controller | 47/47 | HTTP thật, handler giả lập rõ ràng |
-| Xác thực/phân quyền | 17/17 | Service/API thật, JDBC test double |
-| Swing 1366×768 | 23/23 | Linux Xvfb/Openbox, dữ liệu API minh họa |
-| Swing 1920×1080 | 23/23 | Linux Xvfb/Openbox, dữ liệu API minh họa |
-| SourceStyle | 77 file, 0 lỗi | Quy tắc con của dự án; không tuyên bố full Google Style |
-| SQL Server integration | NOT RUN | Cần SQL Server và driver |
-| Windows scaling, NetBeans Designer | NOT RUN | Cần nghiệm thu bổ sung |
+## Đã kiểm chứng / chưa kiểm chứng
 
-Tổng cộng **176 lượt test** đạt: 130 non-visual + 46 lượt GUI.
-46 lượt GUI là cùng 23 test chạy hai lần, không phải 46 kịch bản khác nhau.
-Bộ convention có self-test riêng, không cộng vào 176.
-Còn ba cảnh báo `this-escape` của javac 21 trong constructor Swing; log giữ nguyên.
+191 kiểm thử không cần SQL Server đã đạt. Kiểm thử Swing dùng HTTP mô phỏng,
+không dùng database thật; kết quả và ảnh ở `docs/evidence/`.
+**Môi trường thực hiện không có SQL Server**: tạo DB, chạy migration/seed,
+giao dịch SQL, khóa đồng thời và kết nối backend với DB chưa được chạy thực tế.
+Bộ SQL integration test đã biên dịch nhưng kết quả hiện tại là `SKIP`, không phải `PASS`.
 
-## Cấu trúc
+**Chưa có nghiệp vụ hủy / hoàn / điều chỉnh chứng từ đã ghi sổ.**
+Nút hủy yêu cầu chỉ chặn giao dịch chưa hoàn tất; không được coi là hoàn tiền hay đảo doanh thu.
+Xem [các vấn đề còn mở](docs/KNOWN_LIMITATIONS.md). Không chạy migration trực tiếp lên dữ liệu thật khi chưa sao lưu và nghiệm thu.
 
-```text
-common-dto/       model/DTO, JSON, operation policy; khong JDBC
-backend-server/   API, auth, services, transaction, SQL Server DAO
-client-swing/     Swing, HTTP client, controllers, pending-file recovery
-database/         schema v1, additive migration v2, synthetic demo, permissions
-tests/            130 offline tests, UI tests, opt-in SQL Server integration
-tools/            JDK-only convention checker/formatter
-scripts/          build/run/test cho Windows va Linux
-dist/             common-dto.jar, client-swing.jar, backend-server.jar
-docs/             audit, UML, architecture, GUI, logs va 40 screenshot
-```
+## Tài liệu trong dự án
 
-Tham khảo **[ACCEPTANCE_REPORT.md](ACCEPTANCE_REPORT.md)** trước khi chấm đạt hoặc triển khai.
-Repository GitHub gốc không bị push, tạo branch hay thay đổi dữ liệu.
+| Nội dung | Vị trí |
+|---|---|
+| Cài đặt / build / chạy | `README_RUN.md`, `database/README.md` |
+| Hiện trạng, thay đổi, nghiệm thu | `docs/AUDIT.md`, `CHANGELOG.md`, `ACCEPTANCE_REPORT.md` |
+| Ma trận tất cả cột, nguồn sự thật, quy tắc | `docs/data/FIELD_MATRIX.md`, `docs/data/schema-inventory.json` |
+| Gợi ý nhập liệu và điều hướng | `docs/data/GUIDED_INPUT.md`, `docs/gui-design/SCREENS.md` |
+| Kiến trúc, 44 API, triển khai | `docs/architecture/` |
+| Bằng chứng kiểm thử | `docs/testing/`, `docs/evidence/` |
+| Nguồn danh mục / nguồn mã | `docs/REFERENCES.md`, `docs/provenance/` |
+| Toàn vẹn tệp / thư viện | `SHA256SUMS.txt`, `THIRD_PARTY_NOTICES.md` |

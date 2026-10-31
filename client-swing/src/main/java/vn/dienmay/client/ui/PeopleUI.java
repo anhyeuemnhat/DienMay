@@ -13,6 +13,7 @@ import vn.dienmay.client.AppContext;
 import vn.dienmay.common.api.Data;
 import vn.dienmay.common.api.Json;
 import vn.dienmay.common.api.Operation;
+import vn.dienmay.common.model.CatalogRules;
 import vn.dienmay.common.model.Money;
 import vn.dienmay.common.model.Role;
 
@@ -54,7 +55,31 @@ public final class PeopleUI extends RowsFrame {
       actions.add(Ui.button("Thêm mới", () -> edit(Map.of())));
       actions.add(Ui.button("Sửa dòng chọn", () -> edit(rows.selected())));
     }
+    if (Operation.LIFECYCLE.allows(app.session().role())) {
+      actions.add(Ui.button("Ngừng sử dụng", () -> lifecycle(false)));
+      actions.add(Ui.button("Khôi phục", () -> lifecycle(true)));
+    }
+    if (kind == Kind.CATEGORIES || kind == Kind.BRANDS) {
+      actions.add(Ui.button("Kiểm chứng", () -> app.open("quality", () -> new QualityUI(app))));
+    }
+    switch (kind) {
+      case CUSTOMERS -> rows.columns("Id", "FullName", "Phone", "Address", "Enabled", "Revision");
+      case VENDORS -> rows.columns("Id", "Name", "Phone", "Address", "Enabled", "Revision");
+      case EMPLOYEES -> rows.columns("Id", "UserName", "FullName", "Phone", "Role", "Enabled", "MustChange",
+          "Revision");
+      case PROMOTIONS -> rows.columns("Id", "Code", "Name", "StartDate", "EndDate", "PercentOff", "Enabled",
+          "Revision");
+      default -> rows.columns("Id", "Name", "Enabled", "Revision", "VerificationStatus", "VerificationSource");
+    }
     reload();
+  }
+
+  private void lifecycle(boolean enabled) {
+    String type = switch (kind) {
+      case CUSTOMERS -> "customer"; case VENDORS -> "vendor"; case EMPLOYEES -> "employee";
+      case PROMOTIONS -> "promotion"; case CATEGORIES -> "category"; case BRANDS -> "brand";
+    };
+    LifecycleActions.edit(app, this, type, rows.selected(), enabled, this::reload);
   }
 
   private String lookupType() {
@@ -64,14 +89,9 @@ public final class PeopleUI extends RowsFrame {
   private void reload() {
     Map<String, Object> input = kind == Kind.CUSTOMERS ? Data.map("text", search.getText())
         : kind == Kind.CATEGORIES || kind == Kind.BRANDS ? Data.map("type", lookupType()) : Data.map();
-    app.request(this, kind.query, input, result -> {
-      if (kind == Kind.CATEGORIES || kind == Kind.BRANDS) {
-        List<Map<String, Object>> data = Json.list(result, Ui.Choice.class).stream()
-            .map(choice -> Data.map("Id", choice.id(), "Name", choice.name())).toList();
-        rows.setData(data);
-      } else {
-        rows.setRows(result);
-      }
+    Operation query = kind == Kind.CATEGORIES || kind == Kind.BRANDS ? Operation.QUALITY_LIST : kind.query;
+    app.request(this, query, input, result -> {
+      rows.setRows(result);
       message("Đã tải dữ liệu. Mọi thay đổi được backend kiểm tra quyền.");
     });
   }
@@ -83,15 +103,19 @@ public final class PeopleUI extends RowsFrame {
 
   private void edit(Map<String, Object> row) {
     Long id = row.isEmpty() ? null : Json.number(row.get("Id")).longValueExact();
+    int revision = id == null ? 0 : Json.number(row.get("Revision")).intValueExact();
     String title = (id == null ? "Thêm: " : "Sửa: ") + kind.title;
     if (kind == Kind.CATEGORIES || kind == Kind.BRANDS) {
       JTextField name = Ui.text(text(row, "Name"));
       new EditDialog(app, this, title, Ui.fields("Tên *", name), kind.save,
-          () -> Data.map("id", id, "type", lookupType(), "name", name.getText()), result -> reload()).setVisible(true);
+          () -> Data.map("id", id, "revision", revision, "type", lookupType(), "name", name.getText()), result ->
+              reload()).open();
       return;
     }
     JTextField name = Ui.text(text(row, kind == Kind.CUSTOMERS || kind == Kind.EMPLOYEES ? "FullName" : "Name"));
     JCheckBox enabled = new JCheckBox("Đang hoạt động", id == null || Boolean.TRUE.equals(row.get("Enabled")));
+    enabled.setEnabled(id == null);
+    enabled.setToolTipText("Bản ghi cũ: dùng Ngừng sử dụng / Khôi phục để ghi lý do.");
     if (kind == Kind.PROMOTIONS) {
       JTextField code = Ui.text(text(row, "Code"));
       JTextField from = Ui.text(Ui.DATE.format(id == null ? LocalDate.now() : LocalDate.parse(text(row, "StartDate"))));
@@ -101,9 +125,10 @@ public final class PeopleUI extends RowsFrame {
       new EditDialog(app, this, title, Ui.fields("Mã khuyến mãi *", code, "Tên *", name,
           "Từ ngày (dd/MM/yyyy)", from, "Đến ngày", to, "Giảm (0-100%)", percent,
           "Trạng thái", enabled), kind.save,
-          () -> Data.map("id", id, "code", code.getText(), "name", name.getText(), "from", Ui.date(from),
+          () -> Data.map("id", id, "revision", revision, "code", code.getText(), "name", name.getText(), "from",
+              Ui.date(from),
               "to", Ui.date(to), "percent", Money.of(percent.getText()), "enabled", enabled.isSelected()),
-          result -> reload()).setVisible(true);
+          result -> reload()).open();
       return;
     }
     JTextField phone = Ui.text(text(row, "Phone"));
@@ -122,21 +147,22 @@ public final class PeopleUI extends RowsFrame {
               if ((id == null || secret.length > 0) && (secret.length < 12 || secret.length > 256)) {
                 throw new IllegalArgumentException("Mật khẩu phải có 12-256 ký tự.");
               }
-              return Data.map("id", id, "username", username.getText(), "name", name.getText(),
-                  "phone", phone.getText(), "role", ((Role) role.getSelectedItem()).name(),
+              return Data.map("id", id, "revision", revision, "username", username.getText(), "name", name.getText(),
+                  "phone", CatalogRules.phone(phone.getText()), "role", ((Role) role.getSelectedItem()).name(),
                   "enabled", enabled.isSelected(), "password", new String(secret));
             } finally {
               Arrays.fill(secret, '\0');
             }
-          }, result -> reload()).setVisible(true);
+          }, result -> reload()).open();
       return;
     }
     JTextField address = Ui.text(text(row, "Address"));
     javax.swing.JPanel fields = kind == Kind.VENDORS
         ? Ui.fields("Tên *", name, "Điện thoại", phone, "Địa chỉ", address, "Trạng thái", enabled)
         : Ui.fields("Họ tên *", name, "Điện thoại", phone, "Địa chỉ", address);
-    new EditDialog(app, this, title, fields, kind.save, () -> Data.map("id", id, "name", name.getText(),
-        "phone", phone.getText(), "address", address.getText(), "enabled", enabled.isSelected()),
-        result -> reload()).setVisible(true);
+    new EditDialog(app, this, title, fields, kind.save, () -> Data.map("id", id, "revision", revision, "name",
+        name.getText(),
+        "phone", CatalogRules.phone(phone.getText()), "address", address.getText(), "enabled", enabled.isSelected()),
+        result -> reload()).open();
   }
 }

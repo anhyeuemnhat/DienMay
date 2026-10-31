@@ -32,13 +32,18 @@ public final class PromotionService {
   public List<LinkedHashMap<String, Object>> list(AuthService.Session session) throws SQLException {
     return db.read(c -> {
       auth.require(c, session, Role.MANAGER, Role.CASHIER);
-      return rows(c, "SELECT Id,Code,Name,StartDate,EndDate,PercentOff,Enabled "
+      return rows(c, "SELECT Id,Code,Name,StartDate,EndDate,PercentOff,Enabled,Revision "
           + "FROM dm.Promotions ORDER BY Id DESC");
     });
   }
 
   public long save(AuthService.Session session, Long id, String code, String name,
       LocalDate from, LocalDate to, BigDecimal percent, boolean enabled) throws SQLException {
+    return save(session, id, code, name, from, to, percent, enabled, id == null ? 0 : -1);
+  }
+
+  public long save(AuthService.Session session, Long id, String code, String name,
+      LocalDate from, LocalDate to, BigDecimal percent, boolean enabled, int revision) throws SQLException {
     String normalized = Validation.required(code, 50, "Ma khuyen mai").toUpperCase(Locale.ROOT);
     String validName = Validation.required(name, 150, "Ten khuyen mai");
     Validation.dates(from, to);
@@ -51,10 +56,13 @@ public final class PromotionService {
             + "OUTPUT INSERTED.Id VALUES(?,?,?,?,?,?)",
             normalized, validName, from, to, percent, enabled);
       }
+      RecordGuard.expect(c, "dm.Promotions", id, revision, enabled);
       if (update(c, "UPDATE dm.Promotions SET Code=?,Name=?,StartDate=?,EndDate=?,PercentOff=?,"
-          + "Enabled=? WHERE Id=?", normalized, validName, from, to, percent, enabled, id) != 1) {
+          + "Enabled=?,Revision=Revision+1 WHERE Id=?", normalized, validName, from, to, percent, enabled, id) != 1) {
         throw new IllegalArgumentException("Khong tim thay khuyen mai.");
       }
+      QualityService.audit(c, "promotion", id, "UPDATE", Integer.toString(revision),
+          Integer.toString(revision + 1), "Promotion form update", session.employeeId());
       return id;
     });
   }

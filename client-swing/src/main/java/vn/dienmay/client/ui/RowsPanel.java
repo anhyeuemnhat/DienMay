@@ -46,6 +46,8 @@ public final class RowsPanel extends JPanel {
   private final TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
   private List<Map<String, Object>> rows = List.of();
   private List<String> keys = List.of();
+  private java.util.function.Supplier<String> context = () -> "UNKNOWN";
+  public void dataContext(java.util.function.Supplier<String> source) { context = source; }
 
   public RowsPanel() {
     super(new BorderLayout(6, 6));
@@ -60,8 +62,16 @@ public final class RowsPanel extends JPanel {
     TableStyling.install(table, (column, value) -> display(keys.isEmpty() ? "" : keys.get(column), value));
     filter.getDocument().addDocumentListener(new DocumentListener() {
       private void update() {
-        sorter.setRowFilter(filter.getText().isBlank() ? null
-            : RowFilter.regexFilter("(?iu)" + Pattern.quote(filter.getText())));
+        String query = filter.getText().toLowerCase(Locale.ROOT);
+        sorter.setRowFilter(query.isBlank() ? null : new RowFilter<DefaultTableModel, Integer>() {
+          @Override public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
+            for (int column = 0; column < entry.getValueCount(); column++) {
+              if (String.valueOf(display(keys.get(column), entry.getValue(column)))
+                  .toLowerCase(Locale.ROOT).contains(query)) { return true; }
+            }
+            return false;
+          }
+        });
         updateCount();
       }
 
@@ -85,6 +95,15 @@ public final class RowsPanel extends JPanel {
     add(Ui.scroll(table), BorderLayout.CENTER);
   }
 
+  /** Initial headers remain useful when an API query returns no rows. */
+  public void columns(String... columns) {
+    if (rows.isEmpty()) {
+      keys = List.of(columns);
+      model.setColumnIdentifiers(keys.stream().map(RowsPanel::label).toArray());
+      TableStyling.fitColumns(table);
+    }
+  }
+
   public JTable table() {
     return table;
   }
@@ -97,12 +116,19 @@ public final class RowsPanel extends JPanel {
   }
 
   public void setData(List<Map<String, Object>> result) {
+    Object selectedId = table.getSelectedRow() < 0 ? null : selected().get("Id");
+    List<? extends javax.swing.RowSorter.SortKey> order = List.copyOf(sorter.getSortKeys());
+    List<String> previousKeys = keys;
+    int[] widths = java.util.stream.IntStream.range(0, table.getColumnCount())
+        .map(i -> table.getColumnModel().getColumn(i).getWidth()).toArray();
+    java.awt.Point scroll = table.getParent() instanceof javax.swing.JViewport viewport ? viewport.getViewPosition() :
+        null;
     List<Map<String, Object>> snapshot = new ArrayList<>();
     for (Map<String, Object> row : result) {
       snapshot.add(java.util.Collections.unmodifiableMap(new java.util.LinkedHashMap<>(row)));
     }
     rows = List.copyOf(snapshot);
-    keys = rows.isEmpty() ? List.of() : List.copyOf(rows.get(0).keySet());
+    keys = rows.isEmpty() ? keys : List.copyOf(rows.get(0).keySet());
     Object[] headers = keys.stream().map(RowsPanel::label).toArray();
     Object[][] values = new Object[rows.size()][keys.size()];
     for (int row = 0; row < rows.size(); row++) {
@@ -112,6 +138,32 @@ public final class RowsPanel extends JPanel {
     }
     model.setDataVector(values, headers);
     TableStyling.fitColumns(table);
+    for (int column = 0; column < keys.size(); column++) {
+      sorter.setComparator(column, (left, right) -> {
+        if (left instanceof Number a && right instanceof Number b) {
+          return new BigDecimal(a.toString()).compareTo(new BigDecimal(b.toString()));
+        }
+        return String.valueOf(left).compareToIgnoreCase(String.valueOf(right));
+      });
+    }
+    if (keys.equals(previousKeys)) {
+      sorter.setSortKeys(order);
+      for (int i = 0; i < widths.length; i++) { table.getColumnModel().getColumn(i).setPreferredWidth(widths[i]); }
+    }
+    if (selectedId != null) {
+      for (int i = 0; i < rows.size(); i++) {
+        if (java.util.Objects.equals(selectedId, rows.get(i).get("Id"))) {
+          int view = table.convertRowIndexToView(i);
+          if (view >= 0) { table.setRowSelectionInterval(view, view); }
+          break;
+        }
+      }
+    }
+    if (scroll != null) {
+      javax.swing.SwingUtilities.invokeLater(() -> {
+        if (table.getParent() instanceof javax.swing.JViewport viewport) { viewport.setViewPosition(scroll); }
+      });
+    }
     updateCount();
   }
 
@@ -137,24 +189,41 @@ public final class RowsPanel extends JPanel {
     if (value instanceof BigDecimal number) {
       String lower = key.toLowerCase(Locale.ROOT);
       if (lower.contains("price") || lower.contains("total") || lower.contains("revenue")
-          || lower.equals("discount") || lower.equals("gross")) {
+          || lower.equals("discount") || lower.equals("gross") || lower.equals("grosssales") ||
+              lower.equals("unitcost")) {
         return Money.format(number);
       }
       return number.stripTrailingZeros().toPlainString();
     }
+    if (value instanceof LocalDate date) { return Ui.DATE.format(date); }
+    if (value instanceof Instant instant) {
+      return DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss").withZone(Validation.ZONE).format(instant);
+    }
     if (value instanceof String text) {
+      boolean dateField = java.util.Set.of("StartDate", "EndDate", "SoldAt", "CreatedAt", "ChangedAt", "ReceivedAt",
+          "CompletedAt", "VerifiedAt", "CheckedOn").contains(key);
       try {
-        if (text.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}T.*Z")) {
+        if (dateField && text.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}T.*Z")) {
           return DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss").withZone(Validation.ZONE)
               .format(Instant.parse(text));
         }
-        if (text.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}")) {
+        if (dateField && text.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}")) {
           return Ui.DATE.format(LocalDate.parse(text));
         }
       } catch (java.time.DateTimeException ignored) {
         // Non-date text is displayed verbatim, never silently reinterpreted.
       }
+      if (!java.util.Set.of("Role", "PaymentMethod", "Kind", "Location", "Status", "NewStatus", "OldStatus",
+          "Validity", "VerificationStatus", "BarcodeStatus", "BarcodeType").contains(key)) { return text; }
       return switch (text) {
+        case "PENDING" -> "Chờ xác minh";
+        case "VERIFIED" -> "Đã đối chiếu";
+        case "INVALID" -> "Không hợp lệ";
+        case "DEMO" -> "Mô phỏng";
+        case "NONE" -> "Không có mã";
+        case "OTHER" -> "Loại mã khác";
+        case "KHO" -> "Kho";
+        case "QUAY" -> "Quầy";
         case "MANAGER" -> "Quản lý";
         case "CASHIER" -> "Thu ngân";
         case "WAREHOUSE" -> "Nhân viên kho";
@@ -175,6 +244,32 @@ public final class RowsPanel extends JPanel {
 
   public static String label(String key) {
     return switch (key) {
+      case "Category", "CategoryName" -> "Loại sản phẩm";
+      case "Brand", "BrandName" -> "Thương hiệu";
+      case "Barcode" -> "Mã vạch";
+      case "IdentifierType" -> "Loại mã thiết bị";
+      case "IdentifierSource" -> "Chứng từ nguồn";
+      case "BarcodeType" -> "Loại mã vạch";
+      case "BarcodeStatus" -> "Đối chiếu mã vạch";
+      case "BarcodeSource" -> "Nguồn mã vạch";
+      case "BarcodeNote" -> "Căn cứ mã vạch";
+      case "Model" -> "Model chính hãng";
+      case "Description", "Specifications" -> "Mô tả / thông số";
+      case "TrackSerial" -> "Theo dõi Serial";
+      case "Serial" -> "Serial / IMEI";
+      case "VerificationStatus" -> "Đối chiếu danh tính";
+      case "VerificationSource", "SourceUrl" -> "Nguồn đối chiếu";
+      case "VerificationNote" -> "Căn cứ đối chiếu";
+      case "VerifiedAt", "CheckedOn" -> "Ngày đối chiếu";
+      case "IsDemo" -> "Dữ liệu DEMO";
+      case "Revision" -> "Phiên bản";
+      case "GrossSales" -> "Tiền hàng trước giảm";
+      case "EntityType" -> "Nhóm dữ liệu";
+      case "EntityId" -> "Mã bản ghi";
+      case "Action" -> "Thao tác";
+      case "OldValue" -> "Trước thay đổi";
+      case "NewValue" -> "Sau thay đổi";
+      case "Reason" -> "Lý do";
       case "Id", "id" -> "Mã";
       case "Name", "name", "ProductName" -> "Tên";
       case "FullName", "CustomerName" -> "Họ tên";
@@ -231,7 +326,7 @@ public final class RowsPanel extends JPanel {
 
   private void export() {
     JFileChooser chooser = new JFileChooser();
-    chooser.setSelectedFile(new java.io.File("dienmay-export.csv"));
+    chooser.setSelectedFile(new java.io.File("dienmay-" + context.get().toLowerCase(Locale.ROOT) + "-export.csv"));
     if (Ui.saveFile(this, chooser) != JFileChooser.APPROVE_OPTION) {
       return;
     }
@@ -240,10 +335,12 @@ public final class RowsPanel extends JPanel {
       return;
     }
     StringBuilder csv = new StringBuilder("﻿");
+    csv.append(csvCell("Nguồn dữ liệu")).append(",");
     csv.append(String.join(",", keys.stream().map(RowsPanel::label).map(RowsPanel::csvCell).toList()))
         .append("\r\n");
     for (int view = 0; view < table.getRowCount(); view++) {
       Map<String, Object> row = rows.get(table.convertRowIndexToModel(view));
+      csv.append(csvCell(context.get())).append(",");
       csv.append(String.join(",", keys.stream().map(row::get).map(RowsPanel::csvCell).toList()))
           .append("\r\n");
     }
@@ -257,7 +354,8 @@ public final class RowsPanel extends JPanel {
 
   private void print() {
     try {
-      table.print(JTable.PrintMode.FIT_WIDTH, new MessageFormat("Điện Máy Đỏ"), new MessageFormat("Trang {0}"));
+      table.print(JTable.PrintMode.FIT_WIDTH, new MessageFormat("Điện Máy Đỏ / " + context.get()), new
+          MessageFormat("Trang {0}"));
     } catch (java.awt.print.PrinterException ex) {
       Ui.error(this, ex);
     }

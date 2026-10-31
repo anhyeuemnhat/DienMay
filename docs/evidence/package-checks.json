@@ -1,0 +1,157 @@
+{
+  "checked_at_utc": "2026-10-30T23:25:42.366975+00:00",
+  "scope": "Static package integrity and recorded local test results only. No SQL Server execution, production UAT, Windows, or independent security certification.",
+  "overall_acceptance": "NOT_FULLY_ACCEPTED; see ACCEPTANCE_REPORT.md and docs/KNOWN_LIMITATIONS.md",
+  "checks": [
+    {
+      "check": "No symlinks",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "94 Java source files",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "No font files distributed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "No local database credentials/configuration",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "No private key or database backup files",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "No VCS/cache/build metadata",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Required source/runtime/database/evidence documents present",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "24 schema tables and 182 field entries",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "44 API operation contracts",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Single declared Swing JFrame",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "No business class extends JDialog",
+      "passed": true,
+      "detail": "Short confirmations and CSV export still use modal dialogs; not a claim that no dialogs exist."
+    },
+    {
+      "check": "unit test log",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "api test log",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "security test log",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "quality test log",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Final clean Ant build succeeded",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Four compiler warnings explicitly retained",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "UI 1366x768",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Packaged startup 1366x768",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "UI 1920x1080",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Packaged startup 1920x1080",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "SQL test honestly reported SKIP",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Blank password in configuration template",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "No known token/private-key pattern in shipped text",
+      "passed": true,
+      "detail": "Pattern scan only. Synthetic passwords/check digits in explicit tests are not production credentials."
+    },
+    {
+      "check": "No hard-coded sandbox runtime paths",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "JAR CRC dist/common-dto.jar",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "JAR CRC dist/backend-server.jar",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "JAR CRC dist/client-swing.jar",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "JAR CRC backend-server/lib/mssql-jdbc-13.6.0.jre11.jar",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Client JAR excludes backend and JDBC classes",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

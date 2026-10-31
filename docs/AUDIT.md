@@ -1,29 +1,25 @@
-# Evidence-based audit and closure
+# Hiện trạng và phát hiện từ mã nguồn
 
-The prior five ratings are supplied by the user, not independently certified
-historical results. The concrete source observations below came from the pinned
-reviewed files, not unseen GUI/diagram files.
+Base: tệp `DienMay-Do-UI.rar` do người dùng cung cấp.
+Mã thật đã có ba module common/backend/client, API, JDBC, scripts, tests và UI đỏ;
+không xây dựng lại một demo giao diện rời thay cho project.
+Không có database vận hành thật được kết nối trong đợt này.
 
-| Observation before changes | Actual change | Verification | Remaining gap |
-|---|---|---|---|
-| StockDao.movement: 10 columns / 11 question marks / 10 arguments | Corrected SQL and statement-shape guard | UnitTests invokes actual DAO with JDBC double | Must execute real INSERT/rollback on SQL Server |
-| GUI.App obtains SingletonPattern.system and reads system.db settings | Independent ApiGateway/HttpApiClient, backend-only SqlDatabase | Separate module compilation + architecture test + jdeps report | Real three-host deployment not run |
-| InventorySystem exposes public final SQL/service fields | Private composition root and explicit getters | Source and class diagram | No exhaustive whole-repository design audit |
-| One work menu plus account menu in reviewed GUI.App | Six functional groups; shared permission registry | GUI menu/role tests; screenshots | Missing legacy screen/form parity |
-| No maximize policy in reviewed GUI.App.menu | WorkFrame maximum state and responsive layouts | Both 1366x768 and 1920x1080 actual windows | Windows scaling and multi-monitor behavior |
-| Dense one-line source and wildcard imports | Explicit imports, readable statements, project naming/formatter | 77-file checker and full compile | Full Google Style / generated-code tooling unverified |
-| Existing UUID/hash locks and conditional stock updates | Preserved service rules; added cancel fence | Controller/JDBC/API tests | SQL concurrency locks/constraints not exercised |
-| Existing durable pending-file recovery | Kept file lock/fingerprint, changed profile to API URL | Persistence/tamper/retry tests | Legacy pending-file cutover requires reconciliation |
+| Vấn đề có căn cứ trong bản gốc | Xử lý trong bản bàn giao |
+|---|---|
+| WorkFrame là JFrame; form sửa là dialog lớn | WorkFrame/EditDialog chuyển JPanel; AppShell duy nhất |
+| Thiếu quy trình archive/restore thống nhất | LifecycleService + form + API + revision/audit + migration |
+| Seed có DemoTech/mã vạch tự tạo | Thay seed đó trong bản sao project bằng reference hãng và DEMO tách biệt; không sửa DB thật |
+| Không phân biệt đủ PENDING/VERIFIED/INVALID/DEMO | QualityService, field evidence, cổng chặn giao dịch, mode DB |
+| Table formatting có thể dịch nhầm chuỗi/tên | Format theo column semantics; tests chuỗi SALE/ngày/SKU0 |
+| Gợi ý nhập liệu không đồng bộ | GuidedInput, combo prefix, input type/evidence hints |
+| Schema cũ thiếu field xác minh và audit | Migration additive v3/v4; không xóa bản ghi cũ |
+| Báo cáo cũ không phải bằng chứng lần này | Thay tài liệu/trạng thái, loại log/ảnh/diagram cũ, chỉ giữ evidence mới |
+| Cold packaged startup trắng trong lần test mới | Sửa native sizing/paint; chạy lại actual JAR đạt |
 
-## Priority and risk decisions
+Phạm vi màn hình: nhân viên, sản phẩm/tồn, khách, vendor, category, brand, nhập,
+khuyến mãi, bán, chuyển, hóa đơn, lịch sử kho, serial, bảo hành, báo cáo, cảnh báo tồn,
+xác minh dữ liệu và màn hình con. Duyệt source/test không thay thế đọc mọi cell DB thật.
 
-The plan in IMPLEMENTATION_PLAN.md predates implementation. Critical correctness
-(placeholder, atomicity, uncertain outcome, auth boundaries) preceded UI polish.
-No SQLite/H2 replacement was introduced to obtain artificial integration PASS.
-No original test was deleted and then used to claim a full original-suite PASS;
-the report states exactly which newly delivered/adapted suites executed.
-
-Remaining blockers: complete source/form/resource acquisition; real SQL Server
-regression and transaction races; Windows DPI/printer/scanner; native JDK17;
-Maven dependency resolution; TLS deployment/load testing; operational/DBA sign-off.
-These are tracked in ACCEPTANCE_REPORT.md and testing runbooks.
+Rủi ro chưa giải quyết: SQL runtime chưa chạy, nghiệp vụ đảo chứng từ chưa có,
+phân trang/tải/production UAT chưa đầy đủ. Xem KNOWN_LIMITATIONS.

@@ -1,0 +1,960 @@
+{
+  "SchemaVersion": {
+    "Version": {
+      "definition": "Version int NOT NULL PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "AppliedAt": {
+      "definition": "AppliedAt datetime2(3) NOT NULL DEFAULT SYSUTCDATETIME()",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    }
+  },
+  "Employees": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "UserName": {
+      "definition": "UserName nvarchar(64) COLLATE Latin1_General_100_CI_AS NOT NULL UNIQUE",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "FullName": {
+      "definition": "FullName nvarchar(120) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Phone": {
+      "definition": "Phone nvarchar(30) NOT NULL DEFAULT N''",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "PasswordHash": {
+      "definition": "PasswordHash varchar(256) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Role": {
+      "definition": "Role varchar(16) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Enabled": {
+      "definition": "Enabled bit NOT NULL DEFAULT 1",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "MustChange": {
+      "definition": "MustChange bit NOT NULL DEFAULT 1",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "AuthVersion": {
+      "definition": "AuthVersion int NOT NULL DEFAULT 1",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "FailedAttempts": {
+      "definition": "FailedAttempts int NOT NULL DEFAULT 0",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "LockUntil": {
+      "definition": "LockUntil datetime2(3) NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Revision": {
+      "definition": "Revision int NOT NULL CONSTRAINT DF_Employee_Revision DEFAULT 1",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    }
+  },
+  "Customers": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "FullName": {
+      "definition": "FullName nvarchar(120) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Phone": {
+      "definition": "Phone nvarchar(30) NOT NULL DEFAULT N''",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Address": {
+      "definition": "Address nvarchar(300) NOT NULL DEFAULT N''",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Enabled": {
+      "definition": "Enabled bit NOT NULL CONSTRAINT DF_Customer_Enabled DEFAULT 1",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "Revision": {
+      "definition": "Revision int NOT NULL CONSTRAINT DF_Customer_Revision DEFAULT 1",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    }
+  },
+  "Categories": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Name": {
+      "definition": "Name nvarchar(100) NOT NULL UNIQUE",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Enabled": {
+      "definition": "Enabled bit NOT NULL CONSTRAINT DF_Category_Enabled DEFAULT 1",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "Revision": {
+      "definition": "Revision int NOT NULL CONSTRAINT DF_Category_Revision DEFAULT 1",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerificationStatus": {
+      "definition": "VerificationStatus varchar(16) NOT NULL CONSTRAINT DF_Category_Verification DEFAULT 'PENDING'",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerificationSource": {
+      "definition": "VerificationSource nvarchar(1000) NOT NULL CONSTRAINT DF_Category_Source DEFAULT N''",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerificationNote": {
+      "definition": "VerificationNote nvarchar(1000) NOT NULL CONSTRAINT DF_Category_Note DEFAULT N''",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerifiedBy": {
+      "definition": "VerifiedBy bigint NULL REFERENCES dm.Employees(Id)",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerifiedAt": {
+      "definition": "VerifiedAt datetime2(3) NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    }
+  },
+  "Brands": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Name": {
+      "definition": "Name nvarchar(100) NOT NULL UNIQUE",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Enabled": {
+      "definition": "Enabled bit NOT NULL CONSTRAINT DF_Brand_Enabled DEFAULT 1",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "Revision": {
+      "definition": "Revision int NOT NULL CONSTRAINT DF_Brand_Revision DEFAULT 1",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerificationStatus": {
+      "definition": "VerificationStatus varchar(16) NOT NULL CONSTRAINT DF_Brand_Verification DEFAULT 'PENDING'",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerificationSource": {
+      "definition": "VerificationSource nvarchar(1000) NOT NULL CONSTRAINT DF_Brand_Source DEFAULT N''",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerificationNote": {
+      "definition": "VerificationNote nvarchar(1000) NOT NULL CONSTRAINT DF_Brand_Note DEFAULT N''",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerifiedBy": {
+      "definition": "VerifiedBy bigint NULL REFERENCES dm.Employees(Id)",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerifiedAt": {
+      "definition": "VerifiedAt datetime2(3) NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    }
+  },
+  "Vendors": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Name": {
+      "definition": "Name nvarchar(150) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Phone": {
+      "definition": "Phone nvarchar(30) NOT NULL DEFAULT N''",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Address": {
+      "definition": "Address nvarchar(300) NOT NULL DEFAULT N''",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Enabled": {
+      "definition": "Enabled bit NOT NULL DEFAULT 1",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Revision": {
+      "definition": "Revision int NOT NULL CONSTRAINT DF_Vendor_Revision DEFAULT 1",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    }
+  },
+  "Products": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "SKU": {
+      "definition": "SKU nvarchar(64) COLLATE Latin1_General_100_CI_AS NOT NULL UNIQUE",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Barcode": {
+      "definition": "Barcode nvarchar(128) COLLATE Latin1_General_100_CI_AS NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Name": {
+      "definition": "Name nvarchar(180) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "CategoryId": {
+      "definition": "CategoryId bigint NOT NULL REFERENCES dm.Categories(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "BrandId": {
+      "definition": "BrandId bigint NOT NULL REFERENCES dm.Brands(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Model": {
+      "definition": "Model nvarchar(100) NOT NULL DEFAULT N''",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Description": {
+      "definition": "Description nvarchar(1000) NOT NULL DEFAULT N''",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "CostPrice": {
+      "definition": "CostPrice decimal(19,2) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "SellingPrice": {
+      "definition": "SellingPrice decimal(19,2) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "WarrantyMonths": {
+      "definition": "WarrantyMonths int NOT NULL DEFAULT 0",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "TrackSerial": {
+      "definition": "TrackSerial bit NOT NULL DEFAULT 0",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Enabled": {
+      "definition": "Enabled bit NOT NULL DEFAULT 1",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "ReorderLevel": {
+      "definition": "ReorderLevel int NOT NULL DEFAULT 5",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Revision": {
+      "definition": "Revision int NOT NULL DEFAULT 1",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "VerificationStatus": {
+      "definition": "VerificationStatus varchar(16) NOT NULL CONSTRAINT DF_Product_Verification DEFAULT 'PENDING'",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerificationSource": {
+      "definition": "VerificationSource nvarchar(1000) NOT NULL CONSTRAINT DF_Product_Source DEFAULT N''",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerificationNote": {
+      "definition": "VerificationNote nvarchar(1000) NOT NULL CONSTRAINT DF_Product_Note DEFAULT N''",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerifiedBy": {
+      "definition": "VerifiedBy bigint NULL REFERENCES dm.Employees(Id)",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "VerifiedAt": {
+      "definition": "VerifiedAt datetime2(3) NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "BarcodeType": {
+      "definition": "BarcodeType varchar(16) NOT NULL CONSTRAINT DF_Product_BarcodeType DEFAULT 'NONE'",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "BarcodeStatus": {
+      "definition": "BarcodeStatus varchar(16) NOT NULL CONSTRAINT DF_Product_BarcodeStatus DEFAULT 'PENDING'",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "BarcodeSource": {
+      "definition": "BarcodeSource nvarchar(1000) NOT NULL CONSTRAINT DF_Product_BarcodeSource DEFAULT N''",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "BarcodeNote": {
+      "definition": "BarcodeNote nvarchar(1000) NOT NULL CONSTRAINT DF_Product_BarcodeNote DEFAULT N''",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "BarcodeVerifiedBy": {
+      "definition": "BarcodeVerifiedBy bigint NULL REFERENCES dm.Employees(Id)",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "BarcodeVerifiedAt": {
+      "definition": "BarcodeVerifiedAt datetime2(3) NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "IsDemo": {
+      "definition": "IsDemo bit NOT NULL CONSTRAINT DF_Product_IsDemo DEFAULT 0",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    }
+  },
+  "ProductCodes": {
+    "Code": {
+      "definition": "Code nvarchar(128) COLLATE Latin1_General_100_CI_AS NOT NULL PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "ProductId": {
+      "definition": "ProductId bigint NOT NULL REFERENCES dm.Products(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    }
+  },
+  "Stock": {
+    "ProductId": {
+      "definition": "ProductId bigint NOT NULL REFERENCES dm.Products(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Location": {
+      "definition": "Location varchar(8) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Quantity": {
+      "definition": "Quantity int NOT NULL DEFAULT 0",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    }
+  },
+  "ProductUnits": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "ProductId": {
+      "definition": "ProductId bigint NOT NULL REFERENCES dm.Products(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Serial": {
+      "definition": "Serial nvarchar(128) COLLATE Latin1_General_100_CI_AS NOT NULL UNIQUE",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Location": {
+      "definition": "Location varchar(8) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Status": {
+      "definition": "Status varchar(16) NOT NULL DEFAULT 'IN_STOCK'",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "IdentifierType": {
+      "definition": "IdentifierType varchar(8) NOT NULL CONSTRAINT DF_Unit_IdentifierType DEFAULT 'SERIAL'",
+      "source": "database/migration/011_identifiers.sql",
+      "computed": false
+    },
+    "IdentifierSource": {
+      "definition": "IdentifierSource nvarchar(200) NOT NULL CONSTRAINT DF_Unit_IdentifierSource DEFAULT N''",
+      "source": "database/migration/011_identifiers.sql",
+      "computed": false
+    }
+  },
+  "Promotions": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Code": {
+      "definition": "Code nvarchar(50) COLLATE Latin1_General_100_CI_AS NOT NULL UNIQUE",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Name": {
+      "definition": "Name nvarchar(150) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "StartDate": {
+      "definition": "StartDate date NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "EndDate": {
+      "definition": "EndDate date NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "PercentOff": {
+      "definition": "PercentOff decimal(5,2) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Enabled": {
+      "definition": "Enabled bit NOT NULL DEFAULT 1",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Revision": {
+      "definition": "Revision int NOT NULL CONSTRAINT DF_Promotion_Revision DEFAULT 1",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    }
+  },
+  "Invoices": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Code": {
+      "definition": "Code AS (N'HD-'+CONVERT(nvarchar(20),Id)) PERSISTED",
+      "source": "database/schema/001_schema.sql",
+      "computed": true
+    },
+    "RequestId": {
+      "definition": "RequestId uniqueidentifier NOT NULL UNIQUE",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "RequestHash": {
+      "definition": "RequestHash char(64) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "SoldAt": {
+      "definition": "SoldAt datetime2(3) NOT NULL DEFAULT SYSUTCDATETIME()",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "EmployeeId": {
+      "definition": "EmployeeId bigint NOT NULL REFERENCES dm.Employees(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "CustomerId": {
+      "definition": "CustomerId bigint NULL REFERENCES dm.Customers(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "CustomerName": {
+      "definition": "CustomerName nvarchar(120) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "CustomerPhone": {
+      "definition": "CustomerPhone nvarchar(30) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Subtotal": {
+      "definition": "Subtotal decimal(19,2) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Discount": {
+      "definition": "Discount decimal(19,2) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Total": {
+      "definition": "Total decimal(19,2) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "PaymentMethod": {
+      "definition": "PaymentMethod varchar(12) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "PromotionCode": {
+      "definition": "PromotionCode nvarchar(50) COLLATE Latin1_General_100_CI_AS NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    }
+  },
+  "InvoiceDetails": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "InvoiceId": {
+      "definition": "InvoiceId bigint NOT NULL REFERENCES dm.Invoices(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "ProductId": {
+      "definition": "ProductId bigint NOT NULL REFERENCES dm.Products(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "SKU": {
+      "definition": "SKU nvarchar(64) COLLATE Latin1_General_100_CI_AS NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "ProductName": {
+      "definition": "ProductName nvarchar(180) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "UnitPrice": {
+      "definition": "UnitPrice decimal(19,2) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Quantity": {
+      "definition": "Quantity int NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "WarrantyMonths": {
+      "definition": "WarrantyMonths int NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    }
+  },
+  "InvoiceUnits": {
+    "DetailId": {
+      "definition": "DetailId bigint NOT NULL REFERENCES dm.InvoiceDetails(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "UnitId": {
+      "definition": "UnitId bigint NOT NULL UNIQUE REFERENCES dm.ProductUnits(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    }
+  },
+  "StockMovements": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "RequestId": {
+      "definition": "RequestId uniqueidentifier NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "ProductId": {
+      "definition": "ProductId bigint NOT NULL REFERENCES dm.Products(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Location": {
+      "definition": "Location varchar(8) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Delta": {
+      "definition": "Delta int NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Kind": {
+      "definition": "Kind varchar(16) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Reference": {
+      "definition": "Reference nvarchar(200) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "EmployeeId": {
+      "definition": "EmployeeId bigint NOT NULL REFERENCES dm.Employees(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "InvoiceId": {
+      "definition": "InvoiceId bigint NULL REFERENCES dm.Invoices(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "VendorId": {
+      "definition": "VendorId bigint NULL REFERENCES dm.Vendors(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "UnitCost": {
+      "definition": "UnitCost decimal(19,2) NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "CreatedAt": {
+      "definition": "CreatedAt datetime2(3) NOT NULL DEFAULT SYSUTCDATETIME()",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    }
+  },
+  "StockMovementUnits": {
+    "MovementId": {
+      "definition": "MovementId bigint NOT NULL REFERENCES dm.StockMovements(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "UnitId": {
+      "definition": "UnitId bigint NOT NULL REFERENCES dm.ProductUnits(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    }
+  },
+  "InventoryRequests": {
+    "RequestId": {
+      "definition": "RequestId uniqueidentifier PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "RequestHash": {
+      "definition": "RequestHash char(64) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "EmployeeId": {
+      "definition": "EmployeeId bigint NOT NULL REFERENCES dm.Employees(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "CreatedAt": {
+      "definition": "CreatedAt datetime2(3) NOT NULL DEFAULT SYSUTCDATETIME()",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    }
+  },
+  "Warranties": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Code": {
+      "definition": "Code AS (N'BH-'+CONVERT(nvarchar(20),Id)) PERSISTED",
+      "source": "database/schema/001_schema.sql",
+      "computed": true
+    },
+    "DetailId": {
+      "definition": "DetailId bigint NOT NULL REFERENCES dm.InvoiceDetails(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "UnitId": {
+      "definition": "UnitId bigint NULL REFERENCES dm.ProductUnits(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "StartDate": {
+      "definition": "StartDate date NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "EndDate": {
+      "definition": "EndDate date NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "WarrantyMonths": {
+      "definition": "WarrantyMonths int NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "CoveredQuantity": {
+      "definition": "CoveredQuantity int NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    }
+  },
+  "WarrantyClaims": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "WarrantyId": {
+      "definition": "WarrantyId bigint NOT NULL REFERENCES dm.Warranties(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "ReceivedAt": {
+      "definition": "ReceivedAt datetime2(3) NOT NULL DEFAULT SYSUTCDATETIME()",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "ReceivedBy": {
+      "definition": "ReceivedBy bigint NOT NULL REFERENCES dm.Employees(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Fault": {
+      "definition": "Fault nvarchar(1000) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Status": {
+      "definition": "Status varchar(16) NOT NULL DEFAULT 'RECEIVED'",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Notes": {
+      "definition": "Notes nvarchar(1000) NOT NULL DEFAULT N''",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "CompletedAt": {
+      "definition": "CompletedAt datetime2(3) NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    }
+  },
+  "ClaimHistory": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "ClaimId": {
+      "definition": "ClaimId bigint NOT NULL REFERENCES dm.WarrantyClaims(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "ChangedAt": {
+      "definition": "ChangedAt datetime2(3) NOT NULL DEFAULT SYSUTCDATETIME()",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "ChangedBy": {
+      "definition": "ChangedBy bigint NOT NULL REFERENCES dm.Employees(Id)",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "OldStatus": {
+      "definition": "OldStatus varchar(16) NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "NewStatus": {
+      "definition": "NewStatus varchar(16) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    },
+    "Notes": {
+      "definition": "Notes nvarchar(1000) NOT NULL",
+      "source": "database/schema/001_schema.sql",
+      "computed": false
+    }
+  },
+  "RequestCancellations": {
+    "Kind": {
+      "definition": "Kind varchar(8) NOT NULL",
+      "source": "database/migration/007_api_transition.sql",
+      "computed": false
+    },
+    "RequestId": {
+      "definition": "RequestId uniqueidentifier NOT NULL",
+      "source": "database/migration/007_api_transition.sql",
+      "computed": false
+    },
+    "RequestHash": {
+      "definition": "RequestHash char(64) NOT NULL",
+      "source": "database/migration/007_api_transition.sql",
+      "computed": false
+    },
+    "EmployeeId": {
+      "definition": "EmployeeId bigint NOT NULL REFERENCES dm.Employees(Id)",
+      "source": "database/migration/007_api_transition.sql",
+      "computed": false
+    },
+    "CancelledAt": {
+      "definition": "CancelledAt datetime2(3) NOT NULL DEFAULT SYSUTCDATETIME()",
+      "source": "database/migration/007_api_transition.sql",
+      "computed": false
+    }
+  },
+  "DeploymentInfo": {
+    "Id": {
+      "definition": "Id int NOT NULL PRIMARY KEY CONSTRAINT CK_Deployment_Id CHECK(Id=1)",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "Mode": {
+      "definition": "Mode varchar(16) NOT NULL CONSTRAINT CK_Deployment_Mode CHECK(Mode IN ('UNCLASSIFIED','DEMO','PRODUCTION'))",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "DatasetVersion": {
+      "definition": "DatasetVersion nvarchar(80) NOT NULL DEFAULT N''",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "CreatedAt": {
+      "definition": "CreatedAt datetime2(3) NOT NULL DEFAULT SYSUTCDATETIME()",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    }
+  },
+  "AuditLog": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "EntityType": {
+      "definition": "EntityType varchar(24) NOT NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "EntityId": {
+      "definition": "EntityId bigint NOT NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "Action": {
+      "definition": "Action varchar(40) NOT NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "OldValue": {
+      "definition": "OldValue nvarchar(1000) NOT NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "NewValue": {
+      "definition": "NewValue nvarchar(1000) NOT NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "Reason": {
+      "definition": "Reason nvarchar(1000) NOT NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "EmployeeId": {
+      "definition": "EmployeeId bigint NOT NULL REFERENCES dm.Employees(Id)",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "CreatedAt": {
+      "definition": "CreatedAt datetime2(3) NOT NULL DEFAULT SYSUTCDATETIME()",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    }
+  },
+  "ReferenceProducts": {
+    "Id": {
+      "definition": "Id bigint IDENTITY PRIMARY KEY",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "BrandName": {
+      "definition": "BrandName nvarchar(100) NOT NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "CategoryName": {
+      "definition": "CategoryName nvarchar(100) NOT NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "ProductName": {
+      "definition": "ProductName nvarchar(180) NOT NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "Model": {
+      "definition": "Model nvarchar(100) NOT NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "Specifications": {
+      "definition": "Specifications nvarchar(1000) NOT NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "SourceUrl": {
+      "definition": "SourceUrl nvarchar(1000) NOT NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    },
+    "CheckedOn": {
+      "definition": "CheckedOn date NOT NULL",
+      "source": "database/migration/010_quality_lifecycle.sql",
+      "computed": false
+    }
+  }
+}

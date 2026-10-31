@@ -3,33 +3,31 @@ package vn.dienmay.client.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.Insets;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import javax.swing.BorderFactory;
-import javax.swing.JFrame;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import vn.dienmay.client.AppContext;
 
-/** All work windows share one image/brand shell; business components remain on readable surfaces. */
-@SuppressWarnings("serial") // View state is never Java-serialized.
-public abstract class WorkFrame extends JFrame {
+/** A business screen, NOT a native window. The legacy class name is retained for source compatibility. */
+@SuppressWarnings("serial")
+public abstract class WorkFrame extends JPanel {
   protected final AppContext app;
   protected final JPanel body = new WorkArea();
-  protected final JLabel status = new JLabel("Sẵn sàng");
+  protected final JLabel status = new JLabel("S\u1eb5n s\u00e0ng");
   private final Workspace workspace = new Workspace();
   private final String screenTitle;
+  private JButton defaultAction;
+  private boolean disposed;
 
   protected WorkFrame(AppContext app, String title, String subtitle) {
-    super(Ui.windowTitle());
+    super(new BorderLayout());
     this.app = app;
-    this.screenTitle = title;
+    screenTitle = title;
     setName(title);
-    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
     BackgroundPanel background = new BackgroundPanel(new BorderLayout());
-    setContentPane(background);
+    add(background, BorderLayout.CENTER);
     background.add(Ui.heading(title, subtitle), BorderLayout.NORTH);
     body.setOpaque(false);
     body.setBorder(null);
@@ -42,50 +40,34 @@ public abstract class WorkFrame extends JFrame {
     SurfacePanel footer = new SurfacePanel(new BorderLayout(), new Color(65, 5, 15, 238), 0);
     status.setForeground(Color.WHITE);
     status.setBorder(BorderFactory.createEmptyBorder(8, 22, 8, 22));
-    javax.swing.JScrollPane statusScroll = Ui.backgroundScroll(status);
-    footer.add(statusScroll, BorderLayout.CENTER);
+    footer.add(Ui.backgroundScroll(status), BorderLayout.CENTER);
     background.add(footer, BorderLayout.SOUTH);
-    if (app.session() != null) {
-      setJMenuBar(Navigation.menu(app, this));
-    }
-    setMinimumSize(new Dimension(760, 520));
-    setSize(1180, 760);
-    setLocationRelativeTo(null);
-    setExtendedState(getExtendedState() | Frame.MAXIMIZED_BOTH);
-    addWindowListener(new WindowAdapter() {
-      @Override
-      public void windowClosing(WindowEvent event) {
-        if (app.jobs() > 0) {
-          Ui.message(WorkFrame.this, "Đang xử lý. Hoàn tất hoặc đối soát trước khi đóng.");
-          return;
-        }
-        closeRequested();
-      }
-    });
   }
 
-  /** Login/home preserve a wider mascot area; dense POS/stock forms prioritize usable work space. */
   protected final void workspaceMode(String mode) {
     workspace.mode = mode;
     workspace.revalidate();
   }
 
-  public final String screenTitle() {
-    return screenTitle;
-  }
+  public final String screenTitle() { return screenTitle; }
+  public final boolean isDisposed() { return disposed; }
+  public final JButton defaultAction() { return defaultAction; }
+  protected final void defaultAction(JButton button) { defaultAction = button; }
+  public final void open() { app.show(this); }
 
-  protected void closeRequested() {
-    dispose();
-  }
+  /** Navigation retains this instance, including row selection, filters, drafts and scroll positions. */
+  public boolean canLeave() { return true; }
+  public boolean hasUnsavedChanges() { return false; }
+  public void onClosed() { }
+  protected void closeRequested() { dispose(); }
 
-  @Override
-  public void setVisible(boolean visible) {
-    if (visible) {
-      app.register(this);
-      Ui.fonts(this);
-      setExtendedState(getExtendedState() | Frame.MAXIMIZED_BOTH);
+  public void dispose() { app.close(this); }
+
+  public final void release() {
+    if (!disposed) {
+      disposed = true;
+      onClosed();
     }
-    super.setVisible(visible);
   }
 
   public final void message(String message) {

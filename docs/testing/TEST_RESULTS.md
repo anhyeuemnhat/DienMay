@@ -1,70 +1,46 @@
-# Test result ledger
+# Kết quả kiểm thử thực tế
 
-Run environment: Linux; OpenJDK 21.0.12.1, javac --release 17; Ant;
-Xvfb/Openbox standard system configuration for GUI. SQL Server, JDBC binary,
-Windows and Maven were not available. No external DB was substituted.
+Đợt bàn giao 31/10/2026 (Asia/Ho_Chi_Minh; log hệ thống có thể ghi 30/10 UTC).
+JDK/Ant thực tế trong `../evidence/environment.log`.
 
-| Suite | Cases executed | Passed | Failed | Main evidence |
-|---|---:|---:|---:|---|
-| UnitTests | 66 | 66 | 0 | unit-tests.log |
-| ApiTests | 47 | 47 | 0 | api-tests.log |
-| SecurityTests | 17 | 17 | 0 | security-tests.log |
-| UiSmoke 1366x768 | 23 | 23 | 0 | ui-1366x768.log + ui/1366x768/*.png |
-| UiSmoke 1920x1080 | 23 | 23 | 0 | ui-1920x1080.log + ui/1920x1080/*.png |
-| SQL Server integration | 0 | n/a | n/a | sql-server-tests.log: SKIP/NOT RUN |
+| Phạm vi | Kết quả | Bằng chứng |
+|---|---|---|
+| UnitTests | 66 đạt, 0 lỗi | `unit-tests.log` |
+| ApiTests | 47 đạt, 0 lỗi | `api-tests.log` |
+| SecurityTests | 22 đạt, 0 lỗi | `security-tests.log` |
+| QualityTests | 56 đạt, 0 lỗi | `quality-tests.log` |
+| Tổng offline | **191 đạt** | `ant-clean-verify.log` |
+| Swing 1366x768, 3 role | 105 đạt, 0 lỗi, process exit 0 | `ui-1366x768.log`, `ui/1366x768/` |
+| Swing 1920x1080, 3 role | 105 đạt, 0 lỗi, process exit 0 | `ui-1920x1080.log`, `ui/1920x1080/` |
+| Cold JAR startup từ working directory khác | Đạt ở cả hai độ phân giải; exit 0 | `packaged-*.log`, `packaged/` |
+| Quy ước mã nguồn | 94 tệp; 0 vi phạm; self-test đạt | `style-check.log`, `style-self-test.log` |
+| SQL Server integration | **SKIP / CHƯA CHẠY** | `sql-server-integration.log` |
+| Maven / Windows / máy in / máy quét / TLS thật | **Chưa chạy** | Checklist, không có log đạt |
 
-176 test executions = 130 offline/nonvisual + the same 23 GUI tests at two
-resolutions. There are 153 distinct delivered scenarios in those executed suites,
-not 176 independent scenarios. SourceStyle checks 77 Java files and has a separate
-self-test; neither is included in the 176. Offline tests include actual local HTTP
-but use explicit fixture handlers or JDBC doubles. They cannot prove SQL Server
-constraints/locks/transaction races, SQL syntax, or client-to-real-database flow.
+Tất cả tên log trên nằm trong `docs/evidence/`.
 
-## Important coverage
+## Đúng phạm vi bằng chứng
 
-Money precision/range/rounding; cart immutability and no mutation on invalid add;
-serial normalization/duplication; request payload hashing; dates/warranty transitions;
-PBKDF2 malformed hashes/salts; role matrix/opaque tokens/TTL/AuthVersion/MustChange;
-transaction commit/rollback/resource-close control flow; movement ten-parameter
-regression; pending restart/corruption/tampering/OS lock; stable retry/negative
-resolve/cancel semantics; JSON malformed input/depth/duplicates/number precision;
-real HTTP routes/content type/body size/authorization/error redaction/rate limiting;
-complete response timeout and oversized streaming response; client dependency boundary.
+Unit/API/security/quality gồm các hàm thật, local HTTP, file pending thật,
+UI component và JDBC doubles theo từng bộ; **không bộ nào trong 191 test kết nối SQL Server**.
+QualityTests kiểm tra check digit/IMEI, phân loại/nguồn, lifecycle/revision,
+từ chối duyệt giả trong CRUD, so tuple tham chiếu, semantics cell và guided input.
 
-## Retained failures and their fixes
+UiSmoke mở Swing thật, gọi local HTTP với `UiFixture` mô phỏng.
+Nó kiểm tra một JFrame, 17/6/7 đích theo role, Back/Forward, dirty prompt,
+form/filter/selection state và viewport. **Không thay thế E2E DB hoặc UAT nhân viên thật.**
 
-`unit-tests-initial-display-failure.log`: one offline Swing date-input test lacked a
-display. Headless mode was explicitly set and the same suite rerun: 66/66.
+Cold startup gọi đúng `java -jar` và entrypoint ứng dụng từ thư mục tạm,
+kiểm tra process sống, ảnh nền được tải và không lỗi startup.
+Không kiểm tra đăng nhập production, giấy phép tài nguyên hay mọi cell trong ảnh.
 
-`ui-1366-forced-wm-failure.log` and `ui-1366-initial.log`: the user Openbox config
-forced every application undecorated/maximized, interfering with Java WM geometry.
-The final runner explicitly uses /etc/xdg/openbox/rc.xml, not forced maximization.
+## Lỗi đã phát hiện trong đợt kiểm tra
 
-`ui-1366-dashboard-failure.log`: manager dashboard clipped/scrolled top actions.
-The layout was changed, screenshots inspected, and both resolutions rerun. This
-was a real detected UI issue, not a test removed to create PASS.
+Cold startup ban đầu trả cửa sổ trắng trên X11 khi maximize trước/sát thời điểm native peer
+được map. Chuyển sang đặt usable display bounds, validate/repaint sau show/resize;
+kiểm thử JAR lại cả hai kích thước đạt. UiSmoke được sửa để installTheme trước khi tạo view,
+không dùng mixed Look-and-Feel khác ứng dụng. Cleanup test dispose cả window owner ẩn để process thoát.
+Một lệnh gộp chạy cả hai UI vượt timeout của công cụ; đã chạy lại từng độ phân giải và ghi exit 0.
+Không dùng dòng RESULT đơn lẻ để che process timeout.
 
-## Unexecuted gates
-
-SqlServerIT is compiled and deliberately opt-in. It checks exact DB name ending
-_Test before writes and uses random ephemeral fixture passwords. It covers real
-SQL transactions, concurrent duplicate checkout, overselling, serial collisions,
-rollback injection, stale prices/promotions, warranty history, authorization changes,
-request cancellation/races, invoice reports, ledger reconciliation, and a real
-HTTP client -> ApplicationApi -> SQL Server scenario. Running without prerequisites
-prints SKIP, never PASS. See SQL_SERVER_ACCEPTANCE.md.
-
-Windows scaling 100/125/150%, JDK17 runtime, TLS deployment, long-duration load,
-NetBeans original form round-trip, physical scanner/printer and every legacy
-function/document have no acceptance evidence in this delivery.
-
-## Final runner interruption
-
-A final Ant-wrapped GUI run stopped producing output before completion and was
-terminated by the command deadline. Its incomplete log is retained as
-ui-1366-ant-interrupted.log and is NOT counted as a passing run. A direct Java
-run completed all 23 cases. The Linux runner now executes Java directly with a
-120-second outer timeout; both resolution logs must have a final RESULT line.
-The precise cause of that one runner stall was not established. This timeout is
-a test-runner safeguard, not a claim that an intermittent production defect was
-identified and fixed. Final complete bounded runs are the acceptance evidence.
+Còn 4 javac this-escape warnings trong constructor Swing. Không ẩn warnings và không tuyên bố code không còn lỗi.

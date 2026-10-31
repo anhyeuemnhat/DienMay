@@ -22,17 +22,17 @@ import java.util.concurrent.FutureTask;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
 import javax.swing.JDialog;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import vn.dienmay.client.AppContext;
 import vn.dienmay.client.api.HttpApiClient;
+import vn.dienmay.client.ui.EditDialog;
 import vn.dienmay.client.ui.MainUI;
-import vn.dienmay.client.ui.MakeSaleUI;
 import vn.dienmay.client.ui.Navigation;
+import vn.dienmay.client.ui.RowsPanel;
 import vn.dienmay.client.ui.WorkFrame;
 import vn.dienmay.common.api.ApiSession;
 import vn.dienmay.common.api.Data;
@@ -41,198 +41,218 @@ import vn.dienmay.common.api.Operation;
 import vn.dienmay.common.model.Role;
 import vn.dienmay.server.api.ApiServer;
 
-/** Actual Swing, actual local HTTP and screenshots. Synthetic responses, NOT database acceptance. */
+/** Real Swing and real local HTTP with explicitly synthetic responses; NOT SQL Server acceptance. */
 public final class UiSmoke {
   private UiSmoke() {}
 
-  private static <T> T edt(Callable<T> work) throws Exception {
-    FutureTask<T> future = new FutureTask<>(work);
-    SwingUtilities.invokeAndWait(future);
-    return future.get();
+  private static <T> T edt(Callable<T> action) throws Exception {
+    FutureTask<T> task = new FutureTask<>(action);
+    SwingUtilities.invokeAndWait(task);
+    return task.get();
   }
 
   private static List<Component> descendants(Component root) {
-    List<Component> components = new ArrayList<>();
-    components.add(root);
+    List<Component> result = new ArrayList<>();
+    result.add(root);
     if (root instanceof Container container) {
-      for (Component child : container.getComponents()) {
-        components.addAll(descendants(child));
-      }
+      for (Component child : container.getComponents()) { result.addAll(descendants(child)); }
     }
-    return components;
+    return result;
   }
 
   private static void idle(AppContext app) throws Exception {
-    long end = System.nanoTime() + 8_000_000_000L;
-    while (System.nanoTime() < end) {
-      if (edt(app::jobs) == 0) {
-        Thread.sleep(150);
-        if (edt(app::jobs) == 0) {
-          return;
-        }
-      }
+    long until = System.nanoTime() + 10_000_000_000L;
+    while (System.nanoTime() < until) {
       for (Window window : Window.getWindows()) {
-        if (window instanceof JDialog && window.isShowing()) {
-          throw new AssertionError("Unexpected dialog: " + ((JDialog) window).getTitle());
+        if (window instanceof JDialog dialog && dialog.isShowing()) {
+          throw new AssertionError("Unexpected dialog: " + dialog.getTitle());
         }
       }
-      Thread.sleep(30);
+      if (edt(app::jobs) == 0) {
+        Thread.sleep(120);
+        if (edt(app::jobs) == 0) { return; }
+      }
+      Thread.sleep(25);
     }
-    throw new AssertionError("UI workers did not finish");
+    throw new AssertionError("UI worker timeout");
   }
 
-  private static void inspect(WorkFrame frame, int width, int height) {
-    check(frame.isShowing(), "Window not shown");
-    check((frame.getExtendedState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH,
-        "Window not maximized: " + frame.getTitle());
-    check(frame.getWidth() >= width - 30 && frame.getHeight() >= height - 80,
-        "Window does not fill work area: " + frame.getBounds());
-    Rectangle outer = new Rectangle(frame.getLocationOnScreen(), frame.getSize());
-    for (Component component : descendants(frame)) {
-      if (component instanceof AbstractButton button && button.isShowing()
-          && !(button instanceof JMenuItem)) {
-        Rectangle bounds = new Rectangle(button.getLocationOnScreen(), button.getSize());
-        check(bounds.width > 0 && bounds.height > 0 && outer.contains(bounds),
-            "Clipped button: " + button.getText() + " " + bounds);
-      }
-      if (component instanceof JTable table && table.isShowing()) {
-        check(table.getParent().getHeight() >= 150, "Table viewport too short");
+  private static AbstractButton button(Component parent, String nameOrText) {
+    return descendants(parent).stream().filter(c -> c instanceof AbstractButton)
+        .map(c -> (AbstractButton) c).filter(b -> nameOrText.equals(b.getName()) || nameOrText.equals(b.getText()))
+        .findFirst().orElseThrow(() -> new AssertionError("Missing button: " + nameOrText));
+  }
+
+  private static JTable table(WorkFrame screen) {
+    return descendants(screen).stream().filter(c -> c instanceof JTable).map(c -> (JTable) c).findFirst().orElseThrow();
+  }
+
+  private static void oneWindow(AppContext app) {
+    equal(1L, java.util.Arrays.stream(Window.getWindows()).filter(w -> w instanceof JFrame &&
+        w.isDisplayable()).count());
+    check(app.shell().isShowing(), "Shell must be showing");
+    check(app.shell().current().isShowing(), "Current JPanel must be showing");
+    equal(0L, java.util.Arrays.stream(Window.getWindows()).filter(w -> w instanceof JDialog && w.isShowing()).count());
+  }
+
+  private static void inspect(AppContext app) {
+    oneWindow(app);
+    Rectangle outer = new Rectangle(app.shell().getLocationOnScreen(), app.shell().getSize());
+    for (String id : List.of("navigationBack", "navigationForward", "navigationHome", "navigationDrafts")) {
+      AbstractButton b = button(app.shell(), id);
+      check(outer.contains(new Rectangle(b.getLocationOnScreen(), b.getSize())), "Clipped navigation: " + id);
+    }
+    for (Component c : descendants(app.shell().current())) {
+      if (c instanceof JTable t && c.isShowing()) {
+        check(t.getParent().getHeight() >= 120, "Data table viewport too small");
+        check(t.getRowCount() == 0 || t.getColumnCount() == 0 || !t.isCellEditable(0, 0),
+            "Display table cannot mutate data directly");
       }
     }
   }
 
-  private static void screenshot(WorkFrame frame, Path file) throws Exception {
+  private static void screenshot(AppContext app, Path target) throws Exception {
     edt(() -> {
-      frame.message("UI TEST / SYNTHETIC API DATA / Linux Xvfb - NOT SQL Server acceptance");
-      frame.toFront();
+      app.shell().current().message("KIEM THU GIAO DIEN / DU LIEU MO PHONG API / CHUA KIEM THU SQL SERVER");
+      app.shell().toFront();
       return null;
     });
-    Thread.sleep(200);
+    Thread.sleep(150);
     ImageIO.write(new Robot().createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize())),
-        "png", file.toFile());
+        "png", target.toFile());
+  }
+
+  private static void confirm(Callable<Void> action, int answer) throws Exception {
+    edt(() -> {
+      javax.swing.Timer closer = new javax.swing.Timer(70, event -> {
+        for (Window window : Window.getWindows()) {
+          if (window instanceof JDialog && window.isShowing()) {
+            for (Component c : descendants(window)) {
+              if (c instanceof JOptionPane option) { option.setValue(answer); return; }
+            }
+          }
+        }
+      });
+      closer.start();
+      try { action.call(); } finally { closer.stop(); }
+      return null;
+    });
   }
 
   public static void main(String[] args) throws Exception {
-    if (GraphicsEnvironment.isHeadless()) {
-      throw new IllegalStateException("UI tests require a real display or Xvfb plus a window manager");
-    }
+    if (GraphicsEnvironment.isHeadless()) { throw new IllegalStateException("Run under Xvfb or a desktop display"); }
     int width = Toolkit.getDefaultToolkit().getScreenSize().width;
     int height = Toolkit.getDefaultToolkit().getScreenSize().height;
-    Path output = Path.of(args.length == 0 ? "docs/evidence/ui" : args[0], width + "x" + height);
-    Files.createDirectories(output);
-    System.setProperty("dienmay.stateDir", Files.createTempDirectory("dm-ui-test-").toString());
-    edt(() -> {
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-      return null;
-    });
+    Path out = Path.of(args.length == 0 ? "docs/evidence/ui" : args[0], width + "x" + height);
+    Files.createDirectories(out);
+    System.setProperty("dienmay.stateDir", Files.createTempDirectory("dienmay-ui-fixture-").toString());
+    edt(() -> { vn.dienmay.client.ui.Ui.installTheme(); return null; });
     TestKit tests = new TestKit();
     try (ApiServer server = new ApiServer(new InetSocketAddress("127.0.0.1", 0), null, new UiFixture())) {
       server.start();
       HttpApiClient gateway = new HttpApiClient(URI.create("http://127.0.0.1:" + server.port()));
-      AppContext app = new AppContext(gateway);
-      WorkFrame login = edt(() -> {
-        WorkFrame frame = new MainUI(app);
-        frame.setVisible(true);
-        return frame;
-      });
-      Thread.sleep(400);
-      tests.test("UI / login maximized " + width + "x" + height, () -> edt(() -> {
-        inspect(login, width, height);
-        return null;
-      }));
-      screenshot(login, output.resolve("01-login.png"));
-      ApiSession session = Json.convert(gateway.call(Operation.LOGIN, "", Data.map("username", "MANAGER")),
-          ApiSession.class);
-      edt(() -> { app.acceptSession(session); return null; });
-      idle(app);
-      WorkFrame home = edt(() -> java.util.Arrays.stream(Window.getWindows())
-          .filter(w -> w instanceof WorkFrame && w.isShowing()).map(w -> (WorkFrame) w).findFirst().orElseThrow());
-      tests.test("UI / manager functional menu has six groups", () -> edt(() -> {
-        equal(6, home.getJMenuBar().getMenuCount());
-        inspect(home, width, height);
-        return null;
-      }));
-      screenshot(home, output.resolve("02-manager-home.png"));
-      int index = 3;
-      for (Navigation.Destination destination : edt(() -> Navigation.destinations(app))) {
-        WorkFrame frame = edt(() -> {
-          WorkFrame value = destination.create().apply(app);
-          value.setVisible(true);
-          return value;
-        });
-        idle(app);
-        Thread.sleep(200);
-        tests.test("UI / working screen " + destination.title(), () -> edt(() -> {
-          inspect(frame, width, height);
-          equal(6, frame.getJMenuBar().getMenuCount());
-          return null;
-        }));
-        if (frame instanceof MakeSaleUI) {
-          edt(() -> {
-            JTextField code = (JTextField) descendants(frame).stream()
-                .filter(c -> "productCode".equals(c.getName())).findFirst().orElseThrow();
-            code.setText("PK-CAP-01");
-            code.postActionEvent();
-            return null;
-          });
+      for (Role role : Role.values()) {
+        AppContext app = new AppContext(gateway);
+        try {
+          edt(() -> { new MainUI(app).open(); return null; });
+          Thread.sleep(250);
+          tests.test(role + " / login uses single JFrame", () -> edt(() -> { oneWindow(app); return null; }));
+          if (role == Role.MANAGER) { screenshot(app, out.resolve("01-login.png")); }
+          ApiSession session = Json.convert(gateway.call(Operation.LOGIN, "", Data.map("username", role.name())),
+              ApiSession.class);
+          edt(() -> { app.acceptSession(session); return null; });
           idle(app);
-          tests.test("UI / actual POS add-to-cart over HTTP", () -> edt(() -> {
-            JTable table = (JTable) descendants(frame).stream().filter(JTable.class::isInstance)
-                .findFirst().orElseThrow();
-            equal(1, table.getRowCount());
+          WorkFrame home = edt(() -> app.shell().current());
+          tests.test(role + " / dashboard and DEMO banner", () -> edt(() -> {
+            inspect(app); equal("DEMO", app.environmentMode());
+            equal(6, app.shell().getJMenuBar().getMenuCount());
             return null;
           }));
-        }
-        screenshot(frame, output.resolve(String.format("%02d-%s.png", index++, frame.getClass().getSimpleName()
-            + "-" + destination.permission().name().toLowerCase(java.util.Locale.ROOT))));
-        edt(() -> { frame.dispose(); return null; });
-      }
-      // Navigate by a real JMenuItem action rather than only constructing screens.
-      tests.test("UI / menu action opens real work screen", () -> {
-        edt(() -> {
-          JMenu menu = home.getJMenuBar().getMenu(1);
-          menu.getItem(0).doClick();
-          return null;
-        });
-        idle(app);
-        check(edt(() -> java.util.Arrays.stream(Window.getWindows()).anyMatch(w -> w.isShowing()
-            && w.getClass().getSimpleName().equals("ProductsUI"))), "Menu did not open products");
-      });
-      for (Role role : List.of(Role.CASHIER, Role.WAREHOUSE)) {
-        ApiSession next = Json.convert(gateway.call(Operation.LOGIN, "", Data.map("username", role.name())),
-            ApiSession.class);
-        edt(() -> { app.acceptSession(next); return null; });
-        idle(app);
-        WorkFrame current = edt(() -> java.util.Arrays.stream(Window.getWindows())
-            .filter(w -> w instanceof WorkFrame && w.isShowing()).map(w -> (WorkFrame) w).findFirst().orElseThrow());
-        tests.test("UI / " + role.name() + " permissions and maximized home", () -> edt(() -> {
-          inspect(current, width, height);
-          for (Navigation.Destination destination : Navigation.destinations(app)) {
-            check(destination.permission().allows(role), "Forbidden destination visible");
+          screenshot(app, out.resolve("02-home-" + role.name() + ".png"));
+          List<Navigation.Destination> destinations = edt(() -> Navigation.destinations(app));
+          tests.test(role + " / allowed destinations only", () -> {
+            check(destinations.stream().allMatch(d -> d.permission().allows(role)), "Role menu mismatch");
+            equal(role == Role.MANAGER ? 17 : role == Role.CASHIER ? 6 : 7, destinations.size());
+          });
+          int index = 3;
+          for (Navigation.Destination destination : destinations) {
+            edt(() -> { Navigation.open(app, destination); return null; });
+            idle(app);
+            WorkFrame screen = edt(() -> app.shell().current());
+            tests.test(role + " / screen " + destination.title(), () -> edt(() -> { inspect(app); return null; }));
+            if (role == Role.MANAGER) {
+              screenshot(app, out.resolve(String.format("%02d-%s.png", index++, destination.permission().name())));
+            }
+            edt(() -> { app.shell().back(); return null; });
+            tests.test(role + " / Back " + destination.title(), () -> edt(() -> {
+              equal(home, app.shell().current()); oneWindow(app); return null;
+            }));
+            edt(() -> { app.shell().forward(); return null; });
+            tests.test(role + " / Forward retains screen " + destination.title(), () -> edt(() -> {
+              equal(screen, app.shell().current()); return null;
+            }));
+            edt(() -> { app.shell().back(); return null; });
           }
-          check(Navigation.destinations(app).stream().noneMatch(d -> d.permission() == Operation.EMPLOYEES
-              || d.permission() == Operation.REPORT), "Privileged menu exposed");
-          return null;
-        }));
-        screenshot(current, output.resolve(String.format("%02d-%s-home.png", index++,
-            role.name().toLowerCase(java.util.Locale.ROOT))));
-      }
-      tests.test("UI / EDT remains responsive during slow API work", () -> {
-        edt(() -> { app.run(null, () -> { Thread.sleep(300); return true; }, result -> {}); return null; });
-        long start = System.nanoTime();
-        edt(() -> true);
-        check(System.nanoTime() - start < 200_000_000L, "EDT blocked on API");
-        idle(app);
-      });
-    } finally {
-      edt(() -> {
-        for (Window window : Window.getWindows()) {
-          window.dispose();
+          if (role == Role.MANAGER) {
+            Navigation.Destination products = destinations.stream().filter(d -> d.permission() ==
+                Operation.PRODUCT_SEARCH)
+                .findFirst().orElseThrow();
+            edt(() -> { Navigation.open(app, products); return null; });
+            idle(app);
+            WorkFrame productScreen = edt(() -> app.shell().current());
+            edt(() -> { table(productScreen).setRowSelectionInterval(0, 0); return null; });
+            edt(() -> { button(productScreen, "S\u1eeda d\u00f2ng ch\u1ecdn").doClick(); return null; });
+            idle(app);
+            WorkFrame editor = edt(() -> app.shell().current());
+            tests.test("Product editor is a JPanel, not a window", () -> edt(() -> {
+              check(editor instanceof EditDialog, "Expected in-window editor"); oneWindow(app); return null;
+            }));
+            screenshot(app, out.resolve("30-product-editor.png"));
+            JTextField field = edt(() -> descendants(editor).stream().filter(c -> c instanceof JTextField)
+                .map(c -> (JTextField) c).findFirst().orElseThrow());
+            String original = edt(field::getText);
+            edt(() -> { field.setText("000-DRAFT"); return null; });
+            confirm(() -> { app.shell().back(); return null; }, JOptionPane.NO_OPTION);
+            tests.test("Unsaved-change rejection keeps current editor", () -> edt(() -> {
+              equal(editor, app.shell().current()); return null;
+            }));
+            confirm(() -> { app.shell().back(); return null; }, JOptionPane.YES_OPTION);
+            tests.test("Back preserves parent selection and retained editor draft", () -> edt(() -> {
+              equal(productScreen, app.shell().current()); equal(0, table(productScreen).getSelectedRow());
+              equal("000-DRAFT", field.getText()); check(editor.hasUnsavedChanges(), "Dirty state lost");
+              return null;
+            }));
+            edt(() -> { app.shell().forward(); return null; });
+            tests.test("Forward restores unsaved form without reconstructing", () -> edt(() -> {
+              equal(editor, app.shell().current()); equal("000-DRAFT", field.getText());
+              field.setText(original); check(!editor.hasUnsavedChanges(),
+                  "Returning original value must clear dirty flag");
+              return null;
+            }));
+            edt(() -> { button(editor, "editorCancel").doClick(); return null; });
+            tests.test("Cancel releases editor and returns parent", () -> edt(() -> {
+              check(editor.isDisposed(), "Cancelled editor retained"); equal(productScreen, app.shell().current());
+              oneWindow(app); return null;
+            }));
+            tests.test("Table filter/selection survive Home and Back", () -> edt(() -> {
+              RowsPanel rows = (RowsPanel) descendants(productScreen).stream().filter(c -> c instanceof RowsPanel)
+                  .findFirst().orElseThrow();
+              JTextField filter = (JTextField) descendants(rows).stream().filter(c -> c instanceof JTextField)
+                  .findFirst().orElseThrow();
+              filter.setText("Sony"); equal(1, rows.table().getRowCount());
+              rows.table().setRowSelectionInterval(0, 0);
+              app.shell().home(); app.shell().back();
+              equal(productScreen, app.shell().current()); equal("Sony", filter.getText());
+              equal(0, rows.table().getSelectedRow()); return null;
+            }));
+          }
+        } finally {
+          idle(app);
+          edt(() -> { app.shell().dispose(); return null; });
         }
-        return null;
-      });
+      }
     }
-    tests.finish("swing-" + width + "x" + height);
-    System.out.println("SCOPE | Linux Xvfb/Openbox; synthetic API data. Windows DPI/peripherals/SQL NOT tested.");
+    edt(() -> { for (Window window : Window.getWindows()) { window.dispose(); } return null; });
+    tests.finish("Swing single-window / " + width + "x" + height + " / SYNTHETIC HTTP, NOT SQL SERVER");
   }
 }

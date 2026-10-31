@@ -1,33 +1,43 @@
-# SQL Server acceptance (NOT RUN here)
+# Nghiệm thu SQL Server - CHƯA CHẠY
 
-Use a disposable dedicated database; never point this runner at a shop database.
-A DBA creates e.g. DienMay_Test, applies schema/001_schema.sql and
-migration/007_api_transition.sql and grants test-fixture access. The test principal needs the runtime grants plus
-UPDATE on dm.Warranties solely to simulate historical expiry; do NOT add that
-fixture privilege to the production runtime role. Do not
-install demo. Install the Microsoft JDBC jar in backend-server/lib.
+`docs/evidence/sql-server-integration.log` ghi `SKIP`: môi trường bàn giao không có SQL Server.
+`BUILD SUCCESSFUL` khi target SQL bỏ qua **không phải nghiệm thu SQL đạt**.
 
-Set DIENMAY_DB_URL/USER/PASSWORD to that database, DIENMAY_IT_ALLOW_WRITES=YES and
-DIENMAY_IT_DATABASE=DienMay_Test. `ant sql-it` refuses an actual DB_NAME different
-from the exact allowed name or a name not ending _Test. The runner creates random
-prefixed fixtures and random test passwords, retaining audit rows. It never
-cleans production records. The DBA can drop the whole disposable database after
-review; the application does not do so automatically.
+## Chuẩn bị an toàn
 
-Collect stdout, SQL Server/JDBC versions, schema history, runtime role permissions,
-server collation/isolation settings and a copy of read-only reconciliation output.
-Require all SqlServerIT cases to pass, including three injected rollback phases,
-concurrent duplicate and overselling cases, serial collision rollback, cancellation
-before late execution and concurrent cancel-versus-checkout, and HTTP checkout.
+DBA tạo database trống tên `DienMayDo_Test`, cấp tài khoản cài đặt, cấu hình
+DIENMAY_DB_URL/USER/PASSWORD tới đúng DB này. Không dùng database khách hàng/production.
 
-Then run manual end-to-end employee workflows on separate client/backend hosts
-with TLS: bootstrap/login/password rotation; product/customer/vendor/promotions;
-receive + transfer + sell with and without serials; lookup/reprint; warranty intake
-and transitions; report totals. Simulate response loss/restart, keep pending UUIDs,
-re-authenticate and reconcile. Inspect ledger totals and rollback after failures.
+```sh
+ant clean verify
+sh scripts/database-tool.sh init-test DienMayDo_Test --confirm-test
+# Sau khi cấp runtime role và xác nhận chỉ để kiểm thử:
+export DIENMAY_IT_ALLOW_WRITES=YES
+export DIENMAY_IT_DATABASE=DienMayDo_Test
+ant sql-it
+```
 
-Test constraint rejection with duplicate SKU/barcode/serial; disabled products and
-vendors; insufficient stock; identical source/destination; permission changes mid-
-session; expired promotions; stale product revision; malformed serial count; date
-ranges; no accidental double document on retry. Do not mark this gate complete
-using an H2/SQLite replacement, a JDBC proxy, or fixture HTTP responses.
+PowerShell dùng `$env:DIENMAY_IT_ALLOW_WRITES='YES'`, `$env:DIENMAY_IT_DATABASE='DienMayDo_Test'`.
+Test tạo tài khoản và fixture riêng với mật khẩu ngẫu nhiên trong bộ nhớ, không cần seed demo và không cần bootstrap trước.
+Giữ lại hồ sơ test để đối soát, không DELETE/DROP để dọn lịch sử.
+Sau khi chạy, bỏ các biến opt-in khỏi terminal. Không sao chép fixture sang DB thật.
+
+## Checklist phải có bằng chứng
+
+| Nhóm | Cách kiểm tra / điều kiện đạt | Hiện tại |
+|---|---|---|
+| Khởi tạo trống | 001+007+010+011+012 chạy; SchemaVersion=1..4, mode đúng | Chưa chạy |
+| Seed DEMO | bootstrap, seed, chạy lại không trùng; từ chối tên/mode/dữ liệu không hợp lệ | Chưa chạy |
+| Migration cũ | backup/restore bản sao; giữ dữ liệu/lịch sử, chờ duyệt; lặp lại an toàn | Chưa chạy |
+| JDBC / TLS / role | check + backend khởi động bằng user runtime, không db_owner | Chưa chạy |
+| CRUD / lifecycle | ba role; có/không liên kết; khôi phục, audit, stale revision, self/last-manager | Có mã test, chưa chạy SQL |
+| Duyệt / định danh | pending, tuple sai, barcode/IMEI sai, trùng, DEMO/PROD lẫn | Có mã test/một phần offline; chưa chạy SQL |
+| Giao dịch | nhập -> chuyển -> bán -> bảo hành -> báo cáo | Chưa chạy SQL |
+| Đồng thời / khôi phục | bán trùng serial, tồn cuối, request/hash trùng, rollback, mất kết nối trước/sau commit | Chưa chạy SQL |
+| Đối soát | 009 không trả vi phạm; 013 được phân loại, không xóa giá trị chờ xác minh | Chưa chạy |
+| Backup / restore | restore thật trên máy khác và chạy lại luồng | Chưa chạy |
+| Hủy/hoàn đã ghi sổ | Cần thiết kế/chính sách và test riêng | Chưa triển khai |
+
+Khi bổ sung bằng chứng: ghi phiên bản SQL Server/JDBC/JDK, OS, database test, user role,
+commit/hash mã, lệnh, exit code, log đã che bí mật và kết quả reconciliation.
+Không đổi chữ CHƯA CHẠY thành ĐẠT chỉ vì code đã biên dịch.

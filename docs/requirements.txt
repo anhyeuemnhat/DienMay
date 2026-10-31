@@ -1,0 +1,500 @@
+NHIỆM VỤ: RÀ SOÁT, NÂNG CẤP VÀ HOÀN THIỆN TOÀN DIỆN PHẦN MỀM QUẢN LÝ KINH DOANH CỬA HÀNG ĐIỆN MÁY ĐỎ
+
+Repository GitHub: anhyeuemnhat/DienMay
+Nhánh tham chiếu: main
+Công nghệ hiện tại: Java Swing, Java Backend, REST API, Microsoft SQL Server.
+Phạm vi: Toàn bộ phần mềm, tất cả phân hệ, chức năng, giao diện, trường dữ liệu, bảng dữ liệu và vai trò người dùng.
+
+ĐẦU RA CUỐI CÙNG DUY NHẤT: MỘT THƯ MỤC DỰ ÁN PHẦN MỀM ĐÃ HOÀN THIỆN, ĐẦY ĐỦ MÃ NGUỒN VÀ CÁC THÀNH PHẦN CẦN THIẾT ĐỂ BUILD, CÀI ĐẶT, CHẠY VÀ KIỂM THỬ. MỌI TÀI LIỆU, KẾT QUẢ KIỂM THỬ, MIGRATION VÀ BÁO CÁO CẦN THIẾT PHẢI NẰM BÊN TRONG CHÍNH THƯ MỤC NÀY. KHÔNG ĐƯỢC THAY THẾ THƯ MỤC DỰ ÁN BẰNG LỜI GIẢI THÍCH, KẾ HOẠCH, BÁO CÁO HAY CÁC FILE RỜI.
+
+I. VAI TRÒ VÀ NGUYÊN TẮC LÀM VIỆC
+
+Hãy đảm nhận đồng thời vai trò:
+- Kỹ sư phần mềm cấp cao (Senior Software Engineer).
+- Kiến trúc sư phần mềm (Software Architect).
+- Chuyên gia Java Swing, Java Backend và SQL Server.
+- Chuyên gia phân tích nghiệp vụ hệ thống bán lẻ điện máy.
+- Chuyên gia chất lượng, quản trị và xác thực dữ liệu (Data Quality & Data Validation).
+- Chuyên gia thiết kế trải nghiệm người dùng (UI/UX).
+- Chuyên gia kiểm thử và bảo đảm chất lượng phần mềm (QA Engineer).
+
+Nhiệm vụ là nghiên cứu mã nguồn thực tế, phát hiện thiếu sót, thiết kế giải pháp và triển khai những cải tiến cần thiết để phần mềm hoạt động đầy đủ, chính xác, thống nhất, thân thiện và sát với môi trường kinh doanh điện máy thực tế.
+
+Các nguyên tắc bắt buộc:
+1. Đọc và phân tích mã nguồn thực tế trước khi đưa ra kết luận hoặc chỉnh sửa.
+2. Không suy đoán cấu trúc, chức năng hay trạng thái hiện tại của phần mềm khi chưa kiểm tra.
+3. Không chỉ đưa ra đề xuất lý thuyết nếu có đủ công cụ và quyền để trực tiếp triển khai, kiểm thử.
+4. Không giả lập kết quả kiểm thử hoặc tuyên bố hoàn thành khi chưa có bằng chứng.
+5. Không phá vỡ chức năng đang hoạt động, thay đổi dữ liệu sản xuất hoặc thực hiện thao tác không thể khôi phục nếu chưa được cho phép.
+6. Bảo đảm tất cả thay đổi phù hợp với kiến trúc, cơ sở dữ liệu và nghiệp vụ của dự án.
+7. Mọi nội dung phải chính xác, có căn cứ, đầy đủ và tuân thủ nghiêm ngặt yêu cầu.
+
+II. NGUYÊN TẮC GIAO TIẾP: KHÔNG HIỂU RÕ PHẢI HỎI LẠI
+
+ĐÂY LÀ YÊU CẦU ĐẶC BIỆT QUAN TRỌNG.
+
+Tôi không phải người có chuyên môn sâu về lập trình, kiến trúc phần mềm hay thuật ngữ kỹ thuật. Tôi có thể mô tả yêu cầu bằng ngôn ngữ đời thường, ví dụ thực tế, hình ảnh chụp màn hình hoặc cách diễn đạt chưa đầy đủ.
+
+Vì vậy:
+- Phải chủ động phân tích và diễn giải yêu cầu của tôi theo ngữ cảnh.
+- Không được mặc định rằng cách tôi mô tả đã đầy đủ hoặc chính xác về mặt kỹ thuật.
+- Nếu chưa hiểu ý định, có nhiều cách hiểu khác nhau, thiếu điều kiện quan trọng hoặc tồn tại mâu thuẫn, phải hỏi lại.
+- Câu hỏi phải ngắn gọn, cụ thể, dễ hiểu và tập trung vào điểm còn mơ hồ.
+- Ưu tiên sử dụng ví dụ hoặc các phương án thực tế để tôi dễ lựa chọn.
+- Không đặt những câu hỏi không cần thiết nếu câu trả lời đã có trong cuộc trò chuyện, mã nguồn hoặc tài liệu dự án.
+- Nếu một quyết định kỹ thuật có thể ảnh hưởng lớn đến dữ liệu, nghiệp vụ, kiến trúc hoặc trải nghiệm sử dụng, phải làm rõ trước khi triển khai.
+- Không tự ý diễn giải sai hoặc thu hẹp phạm vi yêu cầu chỉ vì cách diễn đạt của tôi chưa chuyên nghiệp.
+
+Quy tắc cốt lõi: Nếu hiểu rõ và có đủ căn cứ thì thực hiện. Nếu chưa rõ và việc suy đoán có thể dẫn đến kết quả sai, phải hỏi lại trước khi quyết định. Không sử dụng việc hỏi lại làm lý do trì hoãn những phần công việc đã đủ rõ ràng và có thể thực hiện an toàn.
+
+III. RÀ SOÁT TOÀN BỘ PHẦN MỀM
+
+Kiểm tra toàn bộ chức năng hiện có theo ba vai trò:
+- Quản lý cửa hàng.
+- Nhân viên kho.
+- Thu ngân.
+
+Phạm vi bao gồm tối thiểu:
+1. Nhân viên / tài khoản.
+2. Sản phẩm / tồn kho.
+3. Khách hàng.
+4. Nhà cung cấp.
+5. Loại sản phẩm.
+6. Thương hiệu.
+7. Nhập hàng.
+8. Khuyến mãi.
+9. Bán hàng.
+10. Chuyển kho / quầy.
+11. Hóa đơn.
+12. Lịch sử kho.
+13. Lịch sử Serial / IMEI.
+14. Bảo hành.
+15. Doanh thu / bán chạy.
+16. Cảnh báo tồn kho.
+
+Đồng thời kiểm tra các màn hình con, biểu mẫu, hộp thoại, nghiệp vụ, API và chức năng khác thực sự tồn tại trong repository. Không giới hạn phạm vi chỉ ở những màn hình nhìn thấy trong ảnh chụp.
+
+Mỗi chức năng phải được đánh giá về:
+- Mức độ đầy đủ của các thao tác nghiệp vụ.
+- Tính chính xác của dữ liệu.
+- Tính hợp lý của giao diện.
+- Phân quyền người dùng.
+- Khả năng điều hướng.
+- Ràng buộc và xác thực dữ liệu đầu vào.
+- Tính toàn vẹn dữ liệu.
+- Khả năng xử lý lỗi.
+- Tính nhất quán với các chức năng liên quan.
+
+IV. HOÀN THIỆN CÁC CHỨC NĂNG CRUD
+
+Kiểm tra toàn bộ các thao tác:
+- Create — Thêm.
+- Read — Xem / tra cứu.
+- Update — Sửa / cập nhật.
+- Delete — Xóa.
+
+Đặc biệt, phiên bản đã quan sát có nhiều chức năng chỉ hỗ trợ Thêm và Sửa nhưng chưa có Xóa. Yêu cầu rà soát và hoàn thiện theo đúng bản chất nghiệp vụ.
+
+1. Chức năng Xóa
+- Bổ sung thao tác Xóa tại những phân hệ phù hợp, có kiểm soát và xác nhận rõ ràng.
+- Xóa vĩnh viễn: Chỉ áp dụng khi an toàn, không vi phạm các ràng buộc dữ liệu và nghiệp vụ.
+- Xóa mềm: Giữ bản ghi nhưng đánh dấu không còn sử dụng.
+- Ngừng hoạt động: Áp dụng cho sản phẩm, thương hiệu, tài khoản hoặc đối tượng phù hợp.
+- Hủy / điều chỉnh nghiệp vụ: Áp dụng cho giao dịch, hóa đơn, nhập hàng và các chứng từ cần lưu giữ lịch sử.
+- Không mặc định rằng mọi dữ liệu đều phải được phép xóa vĩnh viễn.
+
+2. Phân quyền
+- Quản lý được thực hiện các thao tác quản trị theo chính sách quyền.
+- Nhân viên kho và Thu ngân chỉ được thao tác trong phạm vi nghiệp vụ được cấp.
+- Không cho phép vượt quyền thông qua API hoặc đường truy cập gián tiếp.
+- Những thao tác nguy hiểm phải có xác nhận, thông báo hậu quả và kiểm tra ràng buộc.
+
+3. Bảo vệ lịch sử
+- Không làm mất lịch sử bán hàng, bảo hành, nhập kho, chuyển kho, hóa đơn hoặc dữ liệu phục vụ đối soát.
+- Các thao tác hủy và điều chỉnh phải duy trì tính nhất quán về tồn kho, doanh thu và chứng từ.
+
+V. THIẾT KẾ LẠI ĐIỀU HƯỚNG: MỘT CỬA SỔ CHÍNH DUY NHẤT
+
+YÊU CẦU BẮT BUỘC: SINGLE-WINDOW APPLICATION.
+
+Hiện tượng cần khắc phục: Khi người dùng bấm vào một chức năng như "Sản phẩm / tồn kho", phần mềm lại mở thêm một cửa sổ riêng, khiến người dùng phải bấm dấu X để đóng và trở về giao diện trước.
+
+1. Điều hướng trong cùng cửa sổ
+- Sau khi đăng nhập, phần mềm phải duy trì một cửa sổ chính.
+- Khi truy cập bất kỳ chức năng nào, nội dung phải hiển thị trực tiếp trong cửa sổ đó, không mở thêm JFrame độc lập.
+- Ví dụ: Trang chủ → Sản phẩm / tồn kho → Chi tiết sản phẩm → Sửa sản phẩm.
+- Tất cả các màn hình trên phải thuộc cùng một cửa sổ ứng dụng.
+
+2. Nút Quay lại
+- Mọi màn hình cần điều hướng ngược phải có nút Quay lại rõ ràng.
+- Khi bấm Quay lại, phải trở về đúng màn hình trước đó.
+- Không yêu cầu người dùng bấm dấu X để quay về.
+- Bổ sung nút Trang chủ khi phù hợp.
+- Phân biệt rõ Quay lại, Hủy thao tác và Thoát ứng dụng.
+
+3. Bảo toàn trạng thái
+Khi chuyển màn hình hoặc quay lại, phải xử lý hợp lý:
+- Từ khóa tìm kiếm.
+- Bộ lọc.
+- Dòng đang chọn.
+- Vị trí cuộn.
+- Dữ liệu đang nhập.
+- Thay đổi chưa lưu.
+- Trạng thái giao dịch.
+- Phiên đăng nhập và quyền truy cập.
+
+Nếu có nội dung chưa lưu, phải cảnh báo trước khi rời màn hình. Không làm gián đoạn hoặc ghi nhận sai những giao dịch đang xử lý.
+
+4. Yêu cầu kiến trúc
+Ưu tiên sử dụng:
+- Một JFrame chính.
+- Các JPanel đại diện cho từng màn hình.
+- CardLayout hoặc bộ quản lý điều hướng tương đương.
+- Cơ chế quản lý lịch sử màn hình.
+- Các thành phần giao diện tái sử dụng.
+
+Chỉ sử dụng hộp thoại phụ đối với những thao tác ngắn thực sự cần thiết, chẳng hạn xác nhận xóa, cảnh báo hoặc lựa chọn nhanh. Không sử dụng cửa sổ phụ thay thế cho toàn bộ giao diện nghiệp vụ chính. Áp dụng thống nhất cho cả ba vai trò người dùng.
+
+VI. CHUẨN HÓA TOÀN BỘ BẢNG DỮ LIỆU VÀ BIỂU MẪU
+
+Kiểm tra tất cả bảng JTable và biểu mẫu nhập liệu.
+
+1. Tiêu đề cột
+Chuẩn hóa các Column Headers về:
+- Tên gọi.
+- Ngôn ngữ.
+- Ý nghĩa nghiệp vụ.
+- Định dạng.
+- Căn lề.
+- Kích thước.
+- Khả năng hiển thị.
+- Tính thống nhất giữa các màn hình.
+
+Ưu tiên tiếng Việt rõ ràng, dễ hiểu đối với người sử dụng. Ví dụ, cân nhắc chuẩn hóa những tiêu đề như Category, Brand, SellingPrice thành tên tiếng Việt phù hợp.
+
+2. Nội dung từng ô dữ liệu
+- Không chỉ kiểm tra tiêu đề cột.
+- Phải kiểm tra cả dữ liệu hiển thị bên dưới từng cột, bảo đảm mỗi cell chứa đúng loại thông tin, đúng ý nghĩa và đúng nghiệp vụ.
+- Mỗi bảng phải thống nhất với nguồn dữ liệu và các biểu mẫu liên quan.
+
+3. Trải nghiệm hiển thị
+- Không cắt nội dung quan trọng.
+- Định dạng tiền tệ, ngày tháng, số lượng dễ đọc.
+- Giữ nguyên số 0 đầu đối với mã được lưu dưới dạng chuỗi.
+- Không hiển thị dữ liệu kỹ thuật khó hiểu khi có thể sử dụng tên nghiệp vụ.
+- Bảng và biểu mẫu hoạt động ổn định ở các kích thước cửa sổ phù hợp.
+
+VII. KIỂM SOÁT TÍNH XÁC THỰC CỦA TỪNG FIELD VÀ TỪNG CELL
+
+ĐÂY LÀ MỘT TRONG NHỮNG YÊU CẦU QUAN TRỌNG NHẤT CỦA TOÀN BỘ DỰ ÁN.
+
+Không chỉ yêu cầu dữ liệu đúng định dạng hoặc trông giống thực tế. Phải bảo đảm nội dung phản ánh đúng sự thật khách quan hoặc đúng dữ liệu nghiệp vụ thực tế mà nó đại diện.
+
+1. Phân loại toàn bộ field
+Rà soát cấu trúc cơ sở dữ liệu, DTO, biểu mẫu, API và bảng hiển thị để xác định:
+
+NHÓM A — FIELD PHẢN ÁNH SỰ THẬT KHÁCH QUAN NGOÀI ĐỜI
+Ví dụ: Brand, Product Name, Model, Manufacturer, Barcode/GTIN, Category theo bản chất sản phẩm, thông số kỹ thuật và các thông tin sản phẩm có thể đối chiếu từ nguồn bên ngoài.
+
+NHÓM B — FIELD PHẢN ÁNH DỮ LIỆU THỰC TẾ CỦA CỬA HÀNG
+Ví dụ: Nhà cung cấp thực tế, giá nhập, giá bán, số lượng tồn kho, Serial/IMEI của thiết bị đang quản lý, chính sách bảo hành được áp dụng, hóa đơn, giao dịch, thông tin nhân viên và khách hàng được cung cấp hợp lệ.
+
+NHÓM C — FIELD LÀ DỮ LIỆU ĐỊNH DANH NỘI BỘ
+Ví dụ: SKU nội bộ, mã hóa đơn do hệ thống tạo, mã phiếu, mã khuyến mãi nội bộ, ID bản ghi. Các trường nội bộ không bắt buộc phải tồn tại ngoài đời nhưng phải tuân thủ quy tắc nghiệp vụ, tính duy nhất và các ràng buộc liên quan.
+
+2. Kiểm soát sự thật khách quan
+Ví dụ với field Brand:
+- Không được mặc nhiên công nhận các giá trị như DemoTech, Brand123, TestBrand, 123 hoặc tên tự tạo không có căn cứ xác minh.
+- Ưu tiên thương hiệu thực sự tồn tại như Apple, Samsung, Sony, vivo, LG, Panasonic...
+- Tuy nhiên, không được giới hạn cứng chỉ ở các thương hiệu phổ biến. Những thương hiệu nhỏ, địa phương hoặc mới phải có cơ chế xác minh và bổ sung hợp lệ.
+- Không được kết luận một thương hiệu là giả chỉ vì chưa xuất hiện trong danh mục hiện tại.
+
+3. Kiểm soát tính nhất quán giữa các field
+- Mọi trường dữ liệu trong cùng bản ghi phải mô tả đúng cùng một đối tượng.
+- Ví dụ: Nếu sản phẩm là vivo F9 thì Brand phải tương ứng với vivo; Model phải thuộc sản phẩm đó; Category phải phù hợp; thông số kỹ thuật phải đúng với phiên bản sản phẩm; Barcode phải được đối chiếu với đúng sản phẩm hoặc biến thể khi có nguồn xác minh.
+- Không được gán Brand = Apple chỉ vì Apple là thương hiệu có thật.
+- Một cell có giá trị thật chưa đủ. Giá trị đó còn phải đúng trong ngữ cảnh của toàn bộ bản ghi.
+
+4. Kiểm soát Barcode, Serial và IMEI
+- Không tự tạo chuỗi số ngẫu nhiên rồi trình bày như mã thực tế.
+- Kiểm tra định dạng và các quy tắc kỹ thuật tương ứng.
+- Với GTIN/EAN/UPC, kiểm tra chữ số kiểm tra nếu tiêu chuẩn áp dụng yêu cầu.
+- Không đồng nhất việc mã đúng cấu trúc với việc mã đã được xác minh thuộc về sản phẩm.
+- Serial và IMEI phải được lấy từ thiết bị, nhãn, chứng từ hoặc nguồn có thẩm quyền thích hợp.
+- Không tự sinh mã Serial/IMEI giả rồi gắn nhãn dữ liệu thực tế.
+- Không công khai dữ liệu định danh thiết bị hoặc dữ liệu cá nhân nếu không cần thiết.
+
+5. Kiểm soát dữ liệu kinh doanh nội bộ
+Không sử dụng nguồn bên ngoài để tự suy đoán:
+- Giá nhập thực tế của cửa hàng.
+- Giá bán hiện hành của cửa hàng.
+- Số lượng tồn kho.
+- Tình trạng bảo hành.
+- Thông tin khách hàng.
+- Thông tin nhân viên.
+- Giao dịch đã phát sinh.
+
+Những thông tin này phải được xác định từ dữ liệu vận hành, hồ sơ, chứng từ hoặc thông tin được người có thẩm quyền cung cấp.
+
+6. Nguồn dữ liệu tham chiếu
+Xây dựng cơ chế kiểm tra phù hợp theo từng field, ưu tiên:
+- Website chính thức của nhà sản xuất.
+- Danh mục sản phẩm chính hãng.
+- Thông tin model và thông số kỹ thuật do hãng công bố.
+- Nguồn tiêu chuẩn mã sản phẩm/mã vạch phù hợp.
+- Danh mục tham chiếu đã được xác minh và quản lý.
+- Chứng từ, hồ sơ và dữ liệu vận hành thực tế của cửa hàng.
+
+Lưu lại căn cứ xác minh khi cần thiết. Phân biệt rõ:
+- Dữ liệu đã xác minh.
+- Dữ liệu chờ xác minh.
+- Dữ liệu không hợp lệ.
+- Dữ liệu mô phỏng/demo.
+
+Không được tự ý chuyển trạng thái chưa xác minh thành đã xác minh.
+
+7. Kiểm soát từ lúc nhập đến khi lưu
+Thực hiện đồng bộ tại:
+- Java Swing UI.
+- Backend Java.
+- REST API.
+- Microsoft SQL Server.
+- Các quy trình import, cập nhật hoặc tạo dữ liệu.
+
+Không chỉ kiểm tra trên giao diện. Không cho phép bỏ qua ràng buộc nghiệp vụ bằng cách gửi yêu cầu trực tiếp đến API.
+
+8. Rà soát dữ liệu cũ
+Phát hiện các giá trị như DemoTech, Test, dữ liệu vô nghĩa, tên thương hiệu không có căn cứ, Model không khớp sản phẩm, Barcode không xác minh được, dữ liệu mâu thuẫn giữa các cột. Phải thống kê và phân loại để xử lý.
+
+Không tự ý xóa, ghi đè hoặc thay thế dữ liệu kinh doanh thật nếu chưa có căn cứ và sự cho phép cần thiết. Dữ liệu demo phải được đánh dấu và quản lý tách biệt với dữ liệu sản xuất.
+
+VIII. BỔ SUNG GỢI Ý NHẬP LIỆU THÔNG MINH VÀ THÂN THIỆN
+
+YÊU CẦU: GUIDED INPUT, PLACEHOLDER, AUTOCOMPLETE VÀ CONTEXTUAL VALIDATION.
+
+Người sử dụng có thể không am hiểu kỹ thuật hoặc nghiệp vụ chuyên sâu. Vì vậy giao diện phải chủ động hướng dẫn họ nhập thông tin chính xác.
+
+1. Placeholder
+Bổ sung văn bản gợi ý ngay trong ô nhập khi phù hợp.
+Ví dụ:
+- Brand: "Chọn thương hiệu, ví dụ: Apple, Samsung, Sony..."
+- Product Name: "Nhập tên sản phẩm theo tên chính thức"
+- Model: "Nhập model theo thông tin nhà sản xuất"
+- Barcode: "Nhập hoặc quét mã vạch trên sản phẩm"
+- SKU: "Nhập mã sản phẩm nội bộ"
+- Vendor: "Tìm hoặc chọn nhà cung cấp"
+- Serial/IMEI: "Nhập hoặc quét mã trên thiết bị"
+
+Placeholder phải biến mất khi người dùng nhập dữ liệu và không được tự động lưu như giá trị thật.
+
+2. Gợi ý tự động
+- Bổ sung Autocomplete/Autosuggest ở những field phù hợp.
+- Ví dụ: Khi người dùng gõ "Sam" trong Brand, phần mềm có thể gợi ý "Samsung" nếu thương hiệu này đã tồn tại trong danh mục tham chiếu hợp lệ.
+- Gợi ý phải dựa trên dữ liệu có căn cứ, không tự tạo thông tin rồi trình bày như dữ liệu đã xác minh.
+
+3. Danh sách lựa chọn
+Đối với các field cần kiểm soát chặt, ưu tiên:
+- Dropdown.
+- Combobox.
+- Danh mục tham chiếu.
+- Tìm kiếm và chọn đối tượng.
+- Chọn dữ liệu đã xác minh.
+
+Nếu chưa có giá trị cần chọn, cho phép đề xuất bổ sung theo quy trình xác minh phù hợp.
+
+4. Hướng dẫn theo ngữ cảnh
+Khi người dùng tập trung vào một field, có thể hiển thị:
+- Field này dùng để làm gì.
+- Nên nhập dữ liệu nào.
+- Ví dụ hợp lệ.
+- Quy tắc cần tuân thủ.
+- Mối liên hệ với các field khác.
+
+5. Thông báo lỗi dễ hiểu
+Không chỉ hiển thị "Invalid input". Phải giải thích:
+- Giá trị nào không hợp lệ.
+- Vì sao không hợp lệ.
+- Người dùng cần sửa như thế nào.
+
+Ví dụ: "Mã vạch chưa đáp ứng quy tắc của loại mã đã chọn. Vui lòng kiểm tra lại mã trên bao bì sản phẩm."
+
+Không đưa ra thông báo khẳng định mã là giả nếu mới chỉ phát hiện sai định dạng hoặc chưa xác minh được.
+
+6. Tính thống nhất
+Áp dụng cơ chế hướng dẫn phù hợp cho mọi biểu mẫu của cả ba vai trò. Thiết kế dễ đọc, dễ hiểu, không gây rối và không che khuất nội dung. Phân biệt rõ gợi ý, ví dụ minh họa, giá trị người dùng nhập và dữ liệu thực tế đã được xác minh.
+
+VIII-A. TÌM KIẾM HOẶC TỰ XÂY DỰNG BỘ CƠ SỞ DỮ LIỆU HOÀN CHỈNH KÈM THEO DỰ ÁN
+
+ĐÂY LÀ YÊU CẦU BẮT BUỘC BỔ SUNG. Ngoài hoàn thiện mã nguồn phần mềm, phải tìm kiếm, đánh giá và lựa chọn một bộ cơ sở dữ liệu phù hợp hoặc trực tiếp thiết kế, tạo mới một bộ cơ sở dữ liệu đầy đủ cho phần mềm. Không chỉ giao schema rỗng, ví dụ SQL rời rạc hoặc hướng dẫn người dùng tự tìm database. Bộ database phải thực sự phù hợp với phiên bản phần mềm được bàn giao và có thể khởi tạo, kết nối, sử dụng, kiểm thử được trên Microsoft SQL Server theo hướng dẫn kèm theo.
+
+1. Ưu tiên kiểm tra và tận dụng đúng những gì dự án đã có:
+- Kiểm tra schema, migrations, script khởi tạo, dữ liệu hiện có, DTO, DAO, API và các phụ thuộc giữa phân hệ.
+- Nếu bộ dữ liệu/cấu trúc đã có đáp ứng yêu cầu thì hoàn thiện, chuẩn hóa và tích hợp; không tạo hệ thống dữ liệu thứ hai gây xung đột.
+- Có thể tìm kiếm bộ dữ liệu công khai phù hợp để tham khảo hoặc sử dụng nếu được phép theo giấy phép và nguồn gốc rõ ràng. Không tải hoặc dùng dữ liệu trái phép, dữ liệu rò rỉ, dữ liệu cá nhân thật hoặc thông tin không có quyền sử dụng.
+- Nếu không tìm được bộ dữ liệu đủ điều kiện, phải tự thiết kế và xây dựng một bộ database phù hợp với phần mềm. Không coi việc tìm kiếm không thành công là lý do bỏ qua yêu cầu này.
+
+2. Bộ cơ sở dữ liệu cần có cấu trúc và nội dung đầy đủ:
+- Bao phủ các thực thể và quan hệ cần thiết cho sản phẩm, thương hiệu, loại hàng, nhà cung cấp, nhân viên/tài khoản, khách hàng, kho/quầy, nhập hàng, chuyển kho, bán hàng, hóa đơn, khuyến mãi, Serial/IMEI, bảo hành, lịch sử và báo cáo, cùng các thành phần liên quan được xác định từ mã nguồn thực tế.
+- Định nghĩa đúng bảng, cột, kiểu dữ liệu, khóa chính/khóa ngoại, tính duy nhất, CHECK constraints, chỉ mục, giao dịch, phân quyền và các ràng buộc nghiệp vụ cần thiết.
+- Có dữ liệu khởi tạo hữu ích để trải nghiệm và kiểm thử các luồng chính; không chỉ tạo bảng trống. Phải phân biệt dữ liệu danh mục/sản phẩm có thể xác thực với dữ liệu giao dịch mô phỏng.
+- Bảo đảm dữ liệu được liên kết nhất quán xuyên suốt các bảng, không có bản ghi mồ côi, số lượng tồn âm trái quy tắc, sản phẩm sai thương hiệu/model hoặc chứng từ mâu thuẫn.
+
+3. TÍNH XÁC THỰC CỦA DỮ LIỆU VẪN LÀ ĐIỀU KIỆN KHÔNG THỂ BỎ QUA:
+- Brand, tên sản phẩm, nhà sản xuất, model và thông số kỹ thuật được trình bày là thật phải là những thông tin ngoài đời có thể xác minh, không dùng DemoTech, TestBrand, tên/model bịa đặt hay các giá trị ngẫu nhiên rồi gắn nhãn dữ liệu thật.
+- Phải đối chiếu sự phù hợp giữa Brand - Product - Model - Category - thông số kỹ thuật, và giữa Barcode với đúng sản phẩm/biến thể khi có căn cứ.
+- Barcode/GTIN, Serial và IMEI không được tự tạo ngẫu nhiên rồi khẳng định là mã thực tế; trường nào chưa xác minh được thì để trống, ghi trạng thái chờ xác minh hoặc xử lý theo quy tắc nghiệp vụ, không lấp đầy bằng dữ liệu bịa đặt.
+- Giá nhập, giá bán, tồn kho, khách hàng, nhân viên, nhà cung cấp thực tế, giao dịch và bảo hành của cửa hàng không được suy đoán là sự thật. Chỉ coi là dữ liệu vận hành thật khi có nguồn hợp lệ từ cửa hàng.
+- Để kiểm thử luồng nghiệp vụ khi chưa có dữ liệu kinh doanh thật, được phép xây dựng một dataset DEMO/MÔ PHỎNG riêng, có nhãn và tài liệu minh bạch. Trong đó, các sự kiện giao dịch, giá và số lượng mô phỏng phải hợp lý, đúng ràng buộc, nhưng không được trình bày là lịch sử kinh doanh có thật; không dùng thông tin cá nhân thật hoặc mã định danh thiết bị thật của người khác.
+- Ghi rõ nguồn và mức độ xác minh đối với dữ liệu tham chiếu cần xác thực. Dữ liệu được tạo ra phải tuân thủ TOÀN BỘ các điều kiện về tính xác thực từng field/từng cell, quan hệ ngữ nghĩa, nhập liệu, an toàn và bảo mật đã nêu ở các mục khác của prompt.
+
+4. BÀN GIAO DATABASE CÙNG TRONG MỘT THƯ MỤC DỰ ÁN DUY NHẤT:
+- Tích hợp bộ database vào thư mục dự án hoàn thiện (ví dụ thư mục database/), gồm script tạo mới/khôi phục hoặc phương thức đóng gói phù hợp, schema, migration, seed data, dữ liệu tham chiếu đã xác minh, dataset demo riêng, quy tắc kiểm tra và hướng dẫn cài đặt/khởi tạo/kết nối.
+- Có hướng dẫn thiết lập SQL Server, cấu hình kết nối không chứa mật khẩu thật, cách triển khai từ môi trường trống và cách kiểm tra database đã sẵn sàng; nếu cần driver hoặc phần mềm bên ngoài thì khai báo rõ.
+- Có cơ chế khởi tạo lặp lại an toàn và kiểm tra để không ghi đè, xóa hay trộn nhầm vào database sản xuất. Không tự động xóa dữ liệu cũ hoặc chạy lệnh phá hủy mà chưa được phép.
+- Kiểm chứng khả năng tạo/khôi phục database, kết nối từ backend, nạp dữ liệu khởi tạo, chạy các nghiệp vụ cốt lõi và tính nhất quán quan hệ nếu môi trường thực sự cho phép. Nếu thiếu SQL Server hoặc công cụ liên quan thì phải nói rõ bước nào chưa chạy được, không được bịa kết quả test.
+- Kết quả bàn giao vẫn CHỈ LÀ MỘT THƯ MỤC DỰ ÁN ĐÃ HOÀN THIỆN (hoặc một ZIP chứa đúng thư mục đó nếu cần). Không gửi database như một sản phẩm rời hoặc coi lời mô tả cấu trúc là đã bàn giao database.
+
+5. BẮT BUỘC HỎI LẠI NGAY KHI THIẾU THÔNG TIN QUYẾT ĐỊNH:
+- Nếu chưa rõ người dùng muốn sử dụng database thật đang có, phục hồi dữ liệu sẵn có hay tạo database mới kèm dữ liệu demo; chưa rõ phạm vi dữ liệu thực tế được phép sử dụng; hoặc có nguy cơ ảnh hưởng dữ liệu hiện hành, phải hỏi lại ngay bằng câu hỏi ngắn gọn, cụ thể trước khi thao tác có rủi ro.
+- Không tự ý thay thế dữ liệu thật bằng demo, không tự coi dữ liệu mô phỏng là dữ liệu thật, không tự ra quyết định phá hủy dữ liệu.
+- Những phần đã rõ và an toàn vẫn phải chủ động thực hiện; không trì hoãn toàn bộ công việc chỉ vì một chi tiết chưa rõ.
+
+TIÊU CHÍ NGHIỆM THU RIÊNG: Dự án phải đi kèm bộ database phù hợp, đầy đủ cấu trúc và dữ liệu cần thiết, có khả năng khởi tạo/cài đặt lại, kết nối và vận hành nhất quán với toàn bộ chức năng; dữ liệu có thật phải có căn cứ, dữ liệu demo phải được nhận diện rõ, và các bước chưa thể kiểm chứng phải được báo cáo trung thực trong thư mục dự án.
+
+IX. ĐẢM BẢO TÍNH NHẤT QUÁN TOÀN HỆ THỐNG
+
+Mọi thay đổi phải được đánh giá xuyên suốt:
+Giao diện ↔ Controller ↔ API ↔ Service ↔ DAO ↔ Cơ sở dữ liệu.
+
+Kiểm tra:
+- Tính tương thích.
+- Ràng buộc khóa ngoại.
+- Giao dịch và rollback.
+- Đồng bộ tồn kho.
+- Quyền người dùng.
+- Dữ liệu phiên làm việc.
+- Lịch sử nghiệp vụ.
+- Cập nhật đồng thời.
+- Thông báo lỗi.
+- Khả năng khôi phục.
+
+Không chấp nhận chức năng có giao diện đúng nhưng backend chưa triển khai. Không chấp nhận backend xử lý đúng nhưng dữ liệu hiển thị sai. Không chấp nhận dữ liệu có vẻ hợp lý nhưng không có căn cứ xác minh tương ứng.
+
+X. QUY TRÌNH TRIỂN KHAI
+
+Thực hiện theo quy trình có kiểm soát.
+
+Giai đoạn 1 — Khảo sát
+- Kiểm tra repository và nhánh hiện tại.
+- Đọc kiến trúc, mã nguồn, cấu trúc cơ sở dữ liệu, tài liệu và kiểm thử.
+- Lập danh sách các chức năng và thành phần liên quan.
+- Xác định những vấn đề đã có bằng chứng và những vấn đề cần xác minh thêm.
+
+Giai đoạn 2 — Phân tích yêu cầu
+- Đối chiếu thực trạng với toàn bộ yêu cầu của prompt.
+- Xác định các điểm thiếu, sai, chưa nhất quán hoặc cần nâng cấp.
+- Phân loại mức độ ưu tiên.
+- Hỏi lại tôi về những quyết định thực sự còn mơ hồ hoặc có ảnh hưởng lớn.
+
+Giai đoạn 3 — Thiết kế
+- Thiết kế điều hướng trong một cửa sổ.
+- Thiết kế các thao tác CRUD phù hợp.
+- Xây dựng quy tắc kiểm soát theo từng loại field.
+- Thiết kế gợi ý nhập liệu.
+- Xác định các thay đổi cần thiết đối với API, backend và cơ sở dữ liệu.
+- Xác định tiêu chí nghiệm thu.
+
+Giai đoạn 4 — Triển khai
+- Thực hiện các thay đổi mã nguồn theo từng nhóm có thể kiểm chứng.
+- Ưu tiên những thành phần dùng chung để bảo đảm tính thống nhất.
+- Không bỏ dở thay đổi ở một tầng kỹ thuật khiến các tầng khác không tương thích.
+- Sử dụng migration có kiểm soát nếu cần thay đổi schema.
+- Không chạy migration phá hủy dữ liệu sản xuất.
+- Ưu tiên nhánh làm việc riêng; không tự ý ghi đè hoặc push trực tiếp lên nhánh main nếu chưa được cho phép.
+
+Giai đoạn 5 — Kiểm thử
+Kiểm tra tối thiểu:
+- Các chức năng CRUD theo phân quyền.
+- Xóa dữ liệu có và không có liên kết nghiệp vụ.
+- Điều hướng một cửa sổ và nút Quay lại.
+- Giữ trạng thái khi chuyển màn hình.
+- Gợi ý nhập liệu.
+- Dữ liệu đúng và sai định dạng.
+- Dữ liệu đúng định dạng nhưng sai ngữ nghĩa.
+- Thương hiệu và sản phẩm không khớp nhau.
+- Model và Barcode không tương ứng.
+- Dữ liệu chưa xác minh.
+- Dữ liệu trùng lặp.
+- Các luồng bán hàng, nhập hàng, chuyển kho, bảo hành.
+- Khả năng tương thích giữa giao diện, API và cơ sở dữ liệu.
+- Các chức năng cũ để phòng ngừa lỗi hồi quy.
+
+Giai đoạn 6 — Nghiệm thu
+Đối chiếu từng yêu cầu với kết quả thực tế. Phân biệt:
+- Đã triển khai và kiểm thử đạt.
+- Đã triển khai nhưng chưa kiểm thử đầy đủ.
+- Chưa triển khai.
+- Chưa đủ căn cứ xác minh.
+- Cần thêm thông tin hoặc quyền truy cập.
+
+Không tuyên bố hoàn thành toàn bộ khi vẫn còn yêu cầu chưa đạt.
+
+XI. CÁC THÀNH PHẦN PHẢI NẰM TRONG THƯ MỤC DỰ ÁN BÀN GIAO
+
+Toàn bộ nội dung dưới đây phải được tích hợp vào THƯ MỤC DỰ ÁN HOÀN THIỆN; không bàn giao thành các file rời bên ngoài thư mục:
+1. Mã nguồn đã chỉnh sửa đầy đủ của ứng dụng Java Swing, backend, API, DTO, cấu hình và các module khác thuộc dự án.
+2. Các thành phần cơ sở dữ liệu cần thiết, migration an toàn, script cấu hình/khởi tạo có kiểm soát (nếu có).
+3. Tài nguyên giao diện, dependency manifest, cấu hình mẫu không chứa bí mật, công cụ build/run/test cần thiết.
+4. Bộ kiểm thử tự động và các dữ liệu kiểm thử được đánh dấu rõ ràng là mô phỏng.
+5. Tài liệu hướng dẫn cài đặt, build, cấu hình SQL Server, chạy ứng dụng và kiểm thử trên máy khác.
+6. Báo cáo hiện trạng và danh sách các thiếu sót đã phát hiện, lưu trong thư mục docs/ hoặc vị trí tương đương.
+7. Danh sách thay đổi mã nguồn, các thành phần đã bổ sung và lý do thay đổi.
+8. Ma trận field: tên bảng, field, ý nghĩa, loại dữ liệu, nguồn sự thật, quy tắc kiểm soát, quan hệ với field khác, cách xử lý khi không hợp lệ.
+9. Danh sách gợi ý nhập liệu: placeholder, autocomplete, danh sách lựa chọn và hướng dẫn đã bổ sung cho từng nhóm field quan trọng.
+10. Bằng chứng kiểm thử và nghiệm thu thực tế, nêu rõ phần đã kiểm tra và phần chưa thể kiểm tra.
+11. Danh sách các vấn đề còn tồn tại hoặc chưa đủ căn cứ xác minh, nếu có.
+
+Các tài liệu trên là thành phần NỘI BỘ của thư mục dự án, không phải đầu ra riêng biệt.
+
+XII. TIÊU CHÍ NGHIỆM THU CUỐI CÙNG
+
+Phần mềm chỉ được đánh giá đạt khi đáp ứng đồng thời:
+1. Đúng chức năng: Các thao tác nghiệp vụ cần thiết hoạt động đầy đủ và đúng quyền.
+2. Đúng giao diện: Màn hình, bảng dữ liệu, tiêu đề cột và biểu mẫu nhất quán, dễ sử dụng.
+3. Đúng điều hướng: Các chức năng chính hiển thị trong cùng một cửa sổ, có Quay lại chính xác.
+4. Đúng dữ liệu: Từng field chứa thông tin phù hợp với bản chất và quy tắc của nó.
+5. Đúng sự thật: Những field phản ánh thực thể hoặc thông tin khách quan phải được xác minh bằng nguồn phù hợp.
+6. Đúng quan hệ: Các cell trong cùng bản ghi và các bản ghi liên quan phải nhất quán về mặt thực tế và nghiệp vụ.
+7. Dễ nhập liệu: Có hướng dẫn, gợi ý và thông báo lỗi phù hợp để người dùng không chuyên cũng có thể thao tác đúng.
+8. An toàn: Không phá hủy dữ liệu, làm sai giao dịch hoặc vượt quyền truy cập.
+9. Có thể kiểm chứng: Kết quả có bằng chứng từ mã nguồn, kiểm thử hoặc nguồn dữ liệu đáng tin cậy.
+10. Đúng ý người yêu cầu: Không tự suy diễn những nội dung quan trọng khi chưa hiểu rõ; phải hỏi lại khi cần thiết.
+11. Đúng đầu ra: Thư mục dự án thực tế đã hoàn thiện, có thể mở, build, cấu hình và chạy theo hướng dẫn; tất cả thành phần bàn giao nằm bên trong thư mục này.
+
+XIII. QUY ĐỊNH TUYỆT ĐỐI VỀ ĐẦU RA DUY NHẤT
+
+1. ĐẦU RA CUỐI CÙNG PHẢI LÀ MỘT (01) THƯ MỤC DỰ ÁN HOÀN THIỆN, ví dụ: DienMayDo_HoanThien/ (tên thực tế có thể giữ nguyên tên repository nếu phù hợp).
+2. Thư mục này phải chứa toàn bộ project thực, không chỉ là ví dụ mã nguồn, bản demo, bản mô phỏng giao diện, tài liệu mô tả hoặc danh sách đề xuất.
+3. Bàn giao đầy đủ mã nguồn, cấu trúc thư mục, file cấu hình mẫu, script build/run, migration cần thiết, test và tài liệu hướng dẫn trong cùng thư mục. Không phụ thuộc vào các file rời hoặc đường dẫn cục bộ không có trong sản phẩm bàn giao; các thư viện ngoài phải có cách khai báo/cài đặt hợp lệ và có hướng dẫn rõ ràng.
+4. Kết quả kiểm thử, báo cáo và tài liệu nghiệm thu (nếu cần) chỉ được lưu bên trong thư mục dự án, tuyệt đối không được dùng chúng thay thế cho sản phẩm bàn giao chính.
+5. Nếu môi trường không hỗ trợ tải xuống trực tiếp một thư mục, có thể đóng gói bằng một tệp ZIP duy nhất. Bên trong ZIP phải có đúng một thư mục gốc là dự án hoàn thiện, không kèm các file ngoài thư mục. ZIP chỉ là phương tiện vận chuyển thư mục, KHÔNG phải một sản phẩm thay thế.
+6. Không lấy câu trả lời bằng văn bản, kế hoạch, bảng tổng hợp, ảnh chụp màn hình hoặc đường dẫn repository chưa hoàn thiện làm đầu ra cuối cùng.
+7. Trước khi bàn giao, kiểm tra sự tồn tại của thư mục, tính đầy đủ của mã nguồn, khả năng build/run, các tệp cần thiết và kết quả test thực tế; không tự tuyên bố hoàn thiện nếu không đáp ứng.
+8. Không kèm mật khẩu, token, khóa bí mật, thông tin nhạy cảm hoặc dữ liệu khách hàng thật trong thư mục bàn giao. Dùng cấu hình mẫu và hướng dẫn thiết lập an toàn.
+9. Nếu thiếu công cụ/quyền để tạo hoặc bàn giao chính thư mục dự án, phải thông báo trung thực hạn chế đang gặp và hỏi đúng thông tin/quyền cần thiết. Không giả vờ đã tạo thư mục, không thay bằng sản phẩm khác rồi gọi là hoàn thành.
+10. Trong quá trình làm việc có thể trao đổi, hỏi lại hoặc cập nhật tiến độ khi thật sự cần; tuy nhiên KẾT QUẢ BÀN GIAO CUỐI CÙNG CHỈ CÓ MỘT: THƯ MỤC DỰ ÁN PHẦN MỀM ĐÃ HOÀN THIỆN.
+
+CHỈ THỊ CUỐI CÙNG
+
+Mục tiêu không phải chỉ làm cho phần mềm chạy được, có đầy đủ nút bấm, giao diện đẹp hoặc dữ liệu nhìn có vẻ thực tế.
+
+Mục tiêu là xây dựng một hệ thống quản lý cửa hàng điện máy có chất lượng thực tế, với:
+CHỨC NĂNG ĐẦY ĐỦ — NGHIỆP VỤ CHÍNH XÁC — DỮ LIỆU CÓ CĂN CỨ — TỪNG CELL ĐÚNG NGỮ NGHĨA — GIAO DIỆN THÂN THIỆN — ĐIỀU HƯỚNG THỐNG NHẤT — AN TOÀN — CÓ THỂ NGHIỆM THU.
+
+Không giải quyết yêu cầu một cách đối phó, hình thức hoặc chỉ chỉnh sửa phần dễ nhìn thấy.
+Không tự tạo dữ liệu giả để thay thế sự thật.
+Không tự kết luận khi chưa kiểm tra.
+Không tự đoán ý tôi khi yêu cầu còn mơ hồ và ảnh hưởng đến kết quả.
+Không đánh đổi tính chính xác, an toàn dữ liệu hoặc tính toàn vẹn nghiệp vụ để hoàn thành nhanh.
+
+HÃY BẮT ĐẦU BẰNG VIỆC KIỂM TRA REPOSITORY THỰC TẾ, XÁC ĐỊNH HIỆN TRẠNG, LẬP KẾ HOẠCH TRIỂN KHAI CỤ THỂ VÀ TIẾN HÀNH NHỮNG PHẦN ĐÃ ĐỦ RÕ RÀNG. CHỈ HỎI TÔI KHI THẬT SỰ CẦN LÀM RÕ ĐIỀU KIỆN QUAN TRỌNG. SAU KHI HOÀN THIỆN, CHỈ BÀN GIAO DUY NHẤT MỘT THƯ MỤC DỰ ÁN HOÀN CHỈNH THEO MỤC XIII.
