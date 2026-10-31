@@ -1,104 +1,106 @@
-# API contract (implemented dispatch)
+# API v1 của bản 3.0.0
 
-The explicit allowlist is `Operation.java`; `ApplicationApi.java` defines dispatch.
-This table is generated from the delivered enum. Every route is POST JSON; only
-GET `/health` is different. No SQL text/class names/method names are accepted as
-arbitrary executable input. All monetary values are parsed exactly as BigDecimal.
-Dates use `yyyy-MM-dd`; Instant values use ISO-8601 UTC. IDs are positive numbers;
-optional IDs may be null. Passwords are never part of response DTOs.
+Nguồn: `Operation.java`, `ApplicationApi.java`, `ApiServer.java`. Các thao tác đều POST JSON,
+`Content-Type: application/json`; trừ login, cần `Authorization: Bearer <token>`.
+Tên role: MANAGER = quản lý, CASHIER = thu ngân, WAREHOUSE = kho.
+Service kiểm tra lại actor/role/Enabled/AuthVersion. Tài khoản MustChange chỉ đổi mật khẩu/đăng xuất.
 
-Authorization: `Authorization: Bearer <opaque token>` except login. A login result
-returns token, employeeId, name, role, mustChange and expiresAt. Those profile
-fields are display data; authorization resolves the server-owned token and then
-checks the database again. MustChange sessions may only change password/logout.
+## Envelope và lỗi
 
-Success HTTP 200: `{"data": ...}`; void methods use `{"data":null}`.
-Error: `{"error":{"code":"...","message":"...","correlationId":"..."}}`.
-Headers include no-store, nosniff and X-Request-Id. Errors distinguish 400 invalid
-input, 401 absent/expired session, 403 denied/initial-password requirement,
-404 unknown path, 405 non-POST, 409 SQL uniqueness/constraint conflict,
-413 oversized input, 415 wrong content type, 429 login throttling, 500 unexpected
-failure and 503 database unavailability. SQL details and secrets are not returned.
-Login rejection from AuthService is a generic 403; do not enumerate accounts.
+```json
+{"data": {}}
+```
 
-Limits: 1 MiB request, 8 MiB client response, JSON depth 48 and collection limits.
-Client full-response deadline defaults to 35 seconds. No request is automatically
-retried by application logic; explicit same-UUID retry is offered for sale/stock.
-A 503/timeout is NOT proof that a write rolled back. Resolve/retry the saved request.
-`GET /health` is liveness only, `databaseChecked:false`, no credential-free DB probe.
+```json
+{"error":{"code":"VALIDATION","message":"...","correlationId":"..."}}
+```
 
-| Operation | Route | Roles | Body fields |
-|---|---|---|---|
-| LOGIN | `/api/v1/auth/login` | Unauthenticated login | username, password |
-| LOGOUT | `/api/v1/auth/logout` | MANAGER, CASHIER, WAREHOUSE | {} |
-| PASSWORD | `/api/v1/auth/password` | MANAGER, CASHIER, WAREHOUSE | oldPassword, newPassword |
-| SETTINGS | `/api/v1/settings` | MANAGER, CASHIER, WAREHOUSE | {} |
-| PRODUCT_SEARCH | `/api/v1/products/search` | MANAGER, CASHIER, WAREHOUSE | text |
-| PRODUCT_FIND | `/api/v1/products/find` | MANAGER, CASHIER, WAREHOUSE | code |
-| PRODUCT_GET | `/api/v1/products/get` | MANAGER, CASHIER, WAREHOUSE | id |
-| PRODUCT_SAVE | `/api/v1/products/save` | MANAGER | item: Item |
-| SERIALS | `/api/v1/products/serials` | MANAGER, CASHIER, WAREHOUSE | id, location (KHO / QUAY) |
-| LOOKUPS | `/api/v1/lookups/list` | MANAGER, CASHIER, WAREHOUSE | type (category / brand / vendor) |
-| LOOKUP_SAVE | `/api/v1/lookups/save` | MANAGER | type, id?, name |
-| CUSTOMERS | `/api/v1/customers/search` | MANAGER, CASHIER | text |
-| CUSTOMER | `/api/v1/customers/get` | MANAGER, CASHIER | id |
-| CUSTOMER_SAVE | `/api/v1/customers/save` | MANAGER, CASHIER | id?, name, phone, address |
-| VENDORS | `/api/v1/vendors/list` | MANAGER, WAREHOUSE | {} |
-| VENDOR_SAVE | `/api/v1/vendors/save` | MANAGER | id?, name, phone, address, enabled |
-| EMPLOYEES | `/api/v1/employees/list` | MANAGER | {} |
-| EMPLOYEE_SAVE | `/api/v1/employees/save` | MANAGER | id?, username, name, phone, role, enabled, password (empty retains password) |
-| PROMOTIONS | `/api/v1/promotions/list` | MANAGER, CASHIER | {} |
-| PROMOTION_SAVE | `/api/v1/promotions/save` | MANAGER | id?, code, name, from, to, percent, enabled |
-| QUOTE | `/api/v1/sales/quote` | MANAGER, CASHIER | lines: ItemQuantity[], code, manual |
-| CHECKOUT | `/api/v1/sales/checkout` | MANAGER, CASHIER | request: SaleRequest |
-| SALE_CANCEL | `/api/v1/sales/cancel` | MANAGER, CASHIER | request: SaleRequest |
-| SALE_RESOLVE | `/api/v1/sales/resolve` | MANAGER, CASHIER | request: SaleRequest |
-| INVOICE | `/api/v1/sales/get` | MANAGER, CASHIER | id |
-| INVOICES | `/api/v1/sales/search` | MANAGER, CASHIER | text, from, to |
-| RECEIVE | `/api/v1/inventory/receive` | MANAGER, WAREHOUSE | request: InventoryRequest |
-| TRANSFER | `/api/v1/inventory/transfer` | MANAGER, WAREHOUSE | request: InventoryRequest |
-| STOCK_CANCEL | `/api/v1/inventory/cancel` | MANAGER, WAREHOUSE | request: InventoryRequest |
-| STOCK_RESOLVE | `/api/v1/inventory/resolve` | MANAGER, WAREHOUSE | request: InventoryRequest |
-| STOCK_HISTORY | `/api/v1/inventory/history` | MANAGER, WAREHOUSE | sku |
-| SERIAL_HISTORY | `/api/v1/inventory/serial-history` | MANAGER, WAREHOUSE | serial |
-| WARRANTIES | `/api/v1/warranties/search` | MANAGER, CASHIER | text |
-| CLAIM_RECEIVE | `/api/v1/warranties/receive` | MANAGER, CASHIER | warranty, fault |
-| CLAIMS | `/api/v1/warranties/claims` | MANAGER, CASHIER | warranty? |
-| CLAIM_TRANSITION | `/api/v1/warranties/transition` | MANAGER | claim, expected, next, notes |
-| CLAIM_HISTORY | `/api/v1/warranties/history` | MANAGER, CASHIER | claim |
-| REPORT | `/api/v1/reports/query` | MANAGER | type (summary / employee / best), from, to |
-| LOW_STOCK | `/api/v1/reports/low-stock` | MANAGER, WAREHOUSE | {} |
+Request tối đa 1 MiB; client giới hạn response 8 MiB; JSON UTF-8 nghiêm ngặt.
+400: input/revision; 401: phiên; 403: quyền; 404: route; 405: method; 409: ràng buộc SQL;
+413/415: size/media; 429: login rate; 503: DB chưa xác nhận kết quả; 500: lỗi nội bộ.
+Sau 503/lỗi mạng khi ghi, **không mặc định giao dịch thất bại**; dùng resolve cùng request.
+`GET /health` chỉ liveness, trả `databaseChecked:false`.
 
-## Request DTOs
+## Allowlist 44 thao tác
 
-`SaleRequest`: requestId (UUID), customerId (nullable), payment (CASH/TRANSFER),
-manualDiscount, promotionCode, expectedDiscount and lines. Each ItemQuantity has
-productId, sku, name, expectedPrice, quantity and serials. The server reloads item
-price/enabled state/stock policy and verifies expected price/discount at checkout;
-client display names are not trusted as persisted product snapshots.
+| Operation | Path | Role cho phép |
+|---|---|---|
+| `LOGIN` | `/api/v1/auth/login` | Chưa đăng nhập |
+| `LOGOUT` | `/api/v1/auth/logout` | MANAGER, CASHIER, WAREHOUSE |
+| `PASSWORD` | `/api/v1/auth/password` | MANAGER, CASHIER, WAREHOUSE |
+| `SETTINGS` | `/api/v1/settings` | MANAGER, CASHIER, WAREHOUSE |
+| `PRODUCT_SEARCH` | `/api/v1/products/search` | MANAGER, CASHIER, WAREHOUSE |
+| `PRODUCT_FIND` | `/api/v1/products/find` | MANAGER, CASHIER, WAREHOUSE |
+| `PRODUCT_GET` | `/api/v1/products/get` | MANAGER, CASHIER, WAREHOUSE |
+| `PRODUCT_SAVE` | `/api/v1/products/save` | MANAGER |
+| `LIFECYCLE` | `/api/v1/admin/lifecycle` | MANAGER |
+| `QUALITY_LIST` | `/api/v1/quality/list` | MANAGER |
+| `QUALITY_REVIEW` | `/api/v1/quality/review` | MANAGER |
+| `REFERENCES` | `/api/v1/quality/references` | MANAGER |
+| `AUDIT_LOG` | `/api/v1/admin/audit` | MANAGER |
+| `SERIALS` | `/api/v1/products/serials` | MANAGER, CASHIER, WAREHOUSE |
+| `LOOKUPS` | `/api/v1/lookups/list` | MANAGER, CASHIER, WAREHOUSE |
+| `LOOKUP_SAVE` | `/api/v1/lookups/save` | MANAGER |
+| `CUSTOMERS` | `/api/v1/customers/search` | MANAGER, CASHIER |
+| `CUSTOMER` | `/api/v1/customers/get` | MANAGER, CASHIER |
+| `CUSTOMER_SAVE` | `/api/v1/customers/save` | MANAGER, CASHIER |
+| `VENDORS` | `/api/v1/vendors/list` | MANAGER, WAREHOUSE |
+| `VENDOR_SAVE` | `/api/v1/vendors/save` | MANAGER |
+| `EMPLOYEES` | `/api/v1/employees/list` | MANAGER |
+| `EMPLOYEE_SAVE` | `/api/v1/employees/save` | MANAGER |
+| `PROMOTIONS` | `/api/v1/promotions/list` | MANAGER, CASHIER |
+| `PROMOTION_SAVE` | `/api/v1/promotions/save` | MANAGER |
+| `QUOTE` | `/api/v1/sales/quote` | MANAGER, CASHIER |
+| `CHECKOUT` | `/api/v1/sales/checkout` | MANAGER, CASHIER |
+| `SALE_CANCEL` | `/api/v1/sales/cancel` | MANAGER, CASHIER |
+| `SALE_RESOLVE` | `/api/v1/sales/resolve` | MANAGER, CASHIER |
+| `INVOICE` | `/api/v1/sales/get` | MANAGER, CASHIER |
+| `INVOICES` | `/api/v1/sales/search` | MANAGER, CASHIER |
+| `RECEIVE` | `/api/v1/inventory/receive` | MANAGER, WAREHOUSE |
+| `TRANSFER` | `/api/v1/inventory/transfer` | MANAGER, WAREHOUSE |
+| `STOCK_CANCEL` | `/api/v1/inventory/cancel` | MANAGER, WAREHOUSE |
+| `STOCK_RESOLVE` | `/api/v1/inventory/resolve` | MANAGER, WAREHOUSE |
+| `STOCK_HISTORY` | `/api/v1/inventory/history` | MANAGER, WAREHOUSE |
+| `SERIAL_HISTORY` | `/api/v1/inventory/serial-history` | MANAGER, WAREHOUSE |
+| `WARRANTIES` | `/api/v1/warranties/search` | MANAGER, CASHIER |
+| `CLAIM_RECEIVE` | `/api/v1/warranties/receive` | MANAGER, CASHIER |
+| `CLAIMS` | `/api/v1/warranties/claims` | MANAGER, CASHIER |
+| `CLAIM_TRANSITION` | `/api/v1/warranties/transition` | MANAGER |
+| `CLAIM_HISTORY` | `/api/v1/warranties/history` | MANAGER, CASHIER |
+| `REPORT` | `/api/v1/reports/query` | MANAGER |
+| `LOW_STOCK` | `/api/v1/reports/low-stock` | MANAGER, WAREHOUSE |
 
-`InventoryRequest`: id (UUID), productId, quantity, serials, reference, vendorId
-(nullable except receiving), unitCost, from (nullable for receiving), to. Receive
-requires from=null, to=KHO and a vendor; transfer requires distinct KHO/QUAY sides.
-Client preflights serialized size BEFORE persisting an unsendable pending request.
+## Payload cần chú ý
 
-Product save uses the delivered Item record fields. New items use id=0 and a
-revision placeholder; edits carry the revision read from the backend. Backend
-rejects concurrent stale updates and a serial-policy change after stock history.
+- `auth/login`: `username`, `password`. `auth/password`: `oldPassword`, `newPassword`.
+  Không log password/token; thành công trả ApiSession.
+- `products/save`: `{ "item": Item }`. Item đầy đủ trường trong common-dto.
+  Các field `verificationStatus`, `barcodeStatus`, `demo`, `verificationSource` từ form
+  **không cấp quyền duyệt**; server đặt PENDING và mode thực tế khi tạo.
+  Thay đổi danh tính/mã làm mất duyệt liên quan; sửa bản ghi phải có revision hiện tại.
+- `lookups/save`: `type` (brand/category), `id` (null khi thêm), `name`, `revision` khi sửa.
+- `customers/save`: `id`, `name`, `phone`, `address`, `revision` khi sửa.
+  `vendors/save` thêm `enabled`; `employees/save`: `id`, `username`, `name`, `phone`, `role`, `enabled`, `password`, `revision`.
+  `promotions/save`: `id`, `code`, `name`, `from`, `to`, `percent`, `enabled`, `revision`.
+  Khi sửa, không đổi enabled để lách lifecycle. Password rỗng khi sửa là giữ nguyên.
+- `admin/lifecycle`: `type` (product/customer/vendor/employee/promotion/category/brand),
+  `id`, `revision`, `enabled`, `reason`. Từ chối invoice/stock/history và các type ngoài allowlist.
+- `quality/list`: `type` (product/brand/category). `quality/references` và `admin/audit`: `{}`.
+- `quality/review`: `type`, `id`, `revision`, `field` (identity/barcode),
+  `status` (PENDING/VERIFIED/INVALID/DEMO), `source`, `note`, `referenceId` (có thể null).
+  VERIFIED cần nguồn HTTPS và ghi chú căn cứ; khi chọn reference, so cả brand/category/name/model/description/source.
+- `inventory/receive`, `inventory/transfer`, `inventory/cancel`, `inventory/resolve`:
+  `{ "request": InventoryRequest }` gồm `id`, `productId`, `quantity`, `serials`, `reference`, `vendorId`,
+  `unitCost`, `from`, `to`, `identifierType` (SERIAL/IMEI).
+  Payload pending cũ thiếu identifierType được đọc là SERIAL, giữ nguyên fingerprint cũ.
+- `sales/quote`: `lines` (ItemQuantity), `code`, `manual`.
+  `sales/checkout`, `sales/cancel`, `sales/resolve`: `{ "request": SaleRequest }` với `requestId`,
+  `customerId`, `payment`, `manualDiscount`, `promotionCode`, `expectedDiscount`, `lines`.
+  Mỗi ItemQuantity: `productId`, `sku`, `name`, `expectedPrice`, `quantity`, `serials`.
+- `warranties/transition`: `claim`, `expected`, `next`, `notes`; actor phải quản lý.
+  `warranties/receive`: `warranty`, `fault`. Chuyển trạng thái bảo hành không tự đảo bán hàng.
+- API ngày dùng ISO `yyyy-MM-dd`; UI chuyển đổi dd/MM/yyyy. Tiền là JSON number / BigDecimal,
+  mã/serial/SKU là string. Không đổi mã có số 0 đầu thành số.
 
-## Replay / cancellation semantics
-
-For checkout/receive/transfer, request ID + canonical fingerprint + authenticated
-employee identify one operation. Replaying the same request returns its committed
-result without changing stock again. Reusing an ID with another payload/owner is
-rejected. Sale resolve yields Sale or null; stock resolve yields boolean. Negative
-resolve retains pending state. Cancel true means a durable cancellation fence is
-committed; false means the transaction was already committed, so resolve it.
-Cancellation is not a financial refund or stock reversal.
-
-Customer/vendor/product/account/promotion CRUD and warranty intake do not offer
-this replay guarantee. After losing their reply, search current state before
-submitting again. This limitation is explicit in the runbook and acceptance.
-
-Vendor lookups have an additional service-level restriction (manager/warehouse),
-even though generic LOOKUPS also covers categories/brands for cashiers.
+Không có API bootstrap, SQL tùy ý, DROP, hard delete chứng từ, hoàn tiền hay điều chỉnh đã ghi sổ.
+Bản 3.0.0 yêu cầu client/server/schema đồng bộ; ngoại lệ đọc pending cũ không phải cam kết tương thích mọi client cũ.

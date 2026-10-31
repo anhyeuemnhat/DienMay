@@ -1,8 +1,8 @@
--- DBA REVIEW REQUIRED. Run in the intended dm schema-v2 database, never in master.
+-- DBA REVIEW REQUIRED. Run in the intended dm schema-v4 database, never in master.
 -- Does not create a login/password/user. No SQL credentials are embedded.
 SET XACT_ABORT ON;
-IF NOT EXISTS(SELECT 1 FROM dm.SchemaVersion WHERE Version=2)
-    THROW 51080,N'Apply and review dm schema version 2 first.',1;
+IF NOT EXISTS(SELECT 1 FROM dm.SchemaVersion WHERE Version=4)
+    THROW 51080,N'Apply and review dm schema version 4 first.',1;
 IF DATABASE_PRINCIPAL_ID(N'dienmay_runtime_role') IS NULL
     CREATE ROLE dienmay_runtime_role AUTHORIZATION dbo;
 GRANT SELECT ON SCHEMA::dm TO dienmay_runtime_role;
@@ -26,6 +26,8 @@ GRANT INSERT ON OBJECT::dm.RequestCancellations TO dienmay_runtime_role;
 GRANT INSERT ON OBJECT::dm.Warranties TO dienmay_runtime_role;
 GRANT INSERT, UPDATE ON OBJECT::dm.WarrantyClaims TO dienmay_runtime_role;
 GRANT INSERT ON OBJECT::dm.ClaimHistory TO dienmay_runtime_role;
+GRANT INSERT ON OBJECT::dm.AuditLog TO dienmay_runtime_role;
+DENY UPDATE, DELETE ON OBJECT::dm.AuditLog TO dienmay_runtime_role;
 -- DBA creates a SQL login and maps it to a database user by an approved secret process.
 -- Then, after checking the chosen user name:
 -- ALTER ROLE dienmay_runtime_role ADD MEMBER [dienmay_runtime];

@@ -10,10 +10,15 @@ PASS | security / logout invalidates bearer
 PASS | security / failed login commits lockout accounting but returns no session
 PASS | security / unknown username denied
 PASS | application API / role denial happens before business SQL
+PASS | application API / cashier cannot call LIFECYCLE
+PASS | application API / cashier cannot call QUALITY_LIST
+PASS | application API / cashier cannot call QUALITY_REVIEW
+PASS | application API / cashier cannot call REFERENCES
+PASS | application API / cashier cannot call AUDIT_LOG
 PASS | application API / client-auth metadata cannot replace bearer
 PASS | application API / must-change blocks every business endpoint
 PASS | cancellation DAO double / matching marker blocks delayed execution
 PASS | cancellation DAO double / another employee cannot own same marker
 PASS | cancellation DAO double / payload change is refused
-RESULT | authorization-boundaries | passed=17 failed=0
+RESULT | authorization-boundaries | passed=22 failed=0
 SCOPE | JDBC test doubles. DB locks, constraints and concurrent transactions NOT tested here.

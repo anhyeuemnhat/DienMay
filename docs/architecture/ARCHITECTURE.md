@@ -1,105 +1,50 @@
-# Architecture and design decisions
+# Kiến trúc hiện tại
 
-## Deployment tiers, not renamed folders
+```text
+JFrame AppShell -> CardLayout -> WorkFrame/EditDialog (JPanel)
+  -> AppContext + SwingWorker -> HttpApiClient
+  -> /api/v1/ (POST JSON, bearer token)
+  -> ApiServer / ApplicationApi / AuthService
+  -> service + validation + QualityService / LifecycleService / RecordGuard
+  -> DAO / JDBC transaction / SQL Server dm schema v4
+```
 
-Tier 1 is a desktop JVM containing `client-swing.jar` and `common-dto.jar`.
-Tier 2 is another JVM containing `backend-server.jar`, `common-dto.jar` and the
-Microsoft JDBC driver. Tier 3 is Microsoft SQL Server. The independent backend
-listens on an API socket; no database URL, JDBC driver, DAO or SQL connection is
-needed by the desktop. `ant compile-client` has only common on its classpath.
+`common-dto`: record DTO, enum quyền, JSON nghiêm ngặt, tiền BigDecimal, validation.
+`client-swing`: chỉ gọi HTTP; không import JDBC / service backend. `backend-server`: cấu hình DB,
+phiên, xác thực, các giao dịch nghiệp vụ và công cụ DBA.
+Ant biên dịch client và server độc lập với common, sau đó mới biên dịch tests.
 
-Logical layers also exist inside each process. They do not, by themselves,
-constitute the deployment tiers. `common-dto` is a shared library, not a fourth
-tier/service. SQL Server stays the production database; HTTP fixtures/JDBC doubles
-are confined to `tests/`. No production in-memory database fallback exists.
+## Điều hướng và trạng thái
 
-## Composition and OO changes
+`AppShell` giữ instance panel và lịch sử Back/Forward. Home không phá hủy màn hình hiện tại.
+`EditDialog` giữ snapshot dirty, không lưu nội dung mật khẩu trong snapshot.
+Bản nháp có thể quay lại qua Forward hoặc danh sách Nháp chưa lưu.
+`RowsPanel` giữ bộ lọc, sắp xếp, chọn dòng, kích thước cột và cuộn khi refresh.
+`AppContext.generation` ngăn callback cũ sửa phiên mới; `jobs` chặn rời màn hình khi đang ghi.
+Native window được đặt theo vùng hiển thị khả dụng, tránh lỗi maximize trước khi X11 peer ổn định.
 
-`InventorySystem` is a backend composition root with private final dependencies
-and explicit accessors. The desktop owns an instance of `AppContext`; there is
-no process-global `SingletonPattern` or client `InventorySystem.db` reference.
-The original Store/Warehouse classes only wrapped service construction. Their
-roles are composed directly by InventorySystem rather than retaining redundant
-wrappers across the network. Their removal is recorded in provenance, not hidden.
+## Quyền và dữ liệu
 
-`ApiGateway` enables the UI/controllers to depend on an application boundary;
-`HttpApiClient` implements it. `ApiHandler` separates HTTP concerns from dispatch;
-`ApplicationApi` implements it. `SqlDatabase.Factory` supplies JDBC connections
-and `Work<T>` scopes unit-of-work ownership; test doubles exercise failure paths.
-`SalesService.FailurePoint` injects transaction failures only through constructors.
-Concrete DAO injection is supported by SalesService; no artificial interface was
-created for every trivial class. These are deliberate abstraction boundaries,
-not a claim of exhaustive SOLID certification.
+`Operation` allowlist định tuyến và quyền; service kiểm tra lại tài khoản đang hoạt động,
+role và AuthVersion. Ẩn nút trong Swing không được xem là phân quyền.
+Mật khẩu lưu PBKDF2; bearer token chỉ ở bộ nhớ phiên.
+SQL runtime role không có DDL, không sửa/xóa AuditLog và chứng từ đã ghi sổ.
+Không coi runtime SQL credential là public API.
 
-`Item` and `Sale` are immutable data snapshots; ItemQuantity/SaleRequest protect
-collections and validate price/quantity/request identity. `Cart` owns a private
-line map and exposes a copied list. `PendingStore` owns one OS file lock. Closing
-it releases the lock but never silently discards an unresolved request.
-Inheritance is limited to reusable Swing views (WorkFrame, RowsFrame, StockFrame,
-DashboardFrame); business rules use composition. SaleController/StockController
-separate durable workflow from widgets. Shared input checks improve feedback;
-backend service validation remains authoritative.
+`Revision` + UPDLOCK/HOLDLOCK bảo vệ cập nhật danh mục / con người / khuyến mãi.
+Lifecycle tách khỏi form sửa: có lý do, chặn tự khóa và khóa quản lý cuối cùng.
+Duyệt dữ liệu tách khỏi ghi sản phẩm: PENDING mặc định, có nguồn/ghi chú/người/thời điểm.
+Khi chọn reference, so khớp brand, category, name, model, description và source URL.
+Không chọn reference vẫn cần quản lý tự đối chiếu; chưa có crawler xác minh tự động.
 
-## Why no Spring Boot / ORM
+## Giao dịch
 
-The existing project already implements its transaction semantics with JDBC,
-SQL Server application locks and atomic stock predicates. Retaining that service
-logic behind a small explicit HTTP dispatcher reduces semantic migration.
-The JDK server keeps the offline build possible. Trade-offs: there is no mature
-framework-provided observability, distributed session store, connection pool or
-schema-migration engine. The custom JSON codec and HTTP layer have bounded-input
-and contract tests but still require security/load review before production.
-Do not mistake passing offline tests for production certification.
+Nhập/chuyển/bán chạy transaction SQL, kiểm tra quầy/kho, số lượng, serial,
+duyệt sản phẩm và mode trước ghi. RequestId + hash ràng buộc payload,
+application lock theo request / nghiệp vụ và ràng buộc SQL giảm nguy cơ ghi trùng.
+Client giữ pending request trên đĩa với khóa file. Sau lỗi mạng, resolve/cancel trả kết quả
+cho cùng request; không phát sinh request ID mới để che lấp trạng thái chưa rõ.
+Cancel đã commit là thất bại an toàn, không đảo sổ.
 
-## Authentication and trust
-
-Login validates stored PBKDF2 hashes. The server owns opaque UUID sessions with
-an eight-hour lifetime and a maximum number of in-memory sessions. Services
-recheck DB Role, Enabled, AuthVersion and MustChange. Password change invalidates
-the prior session; account administration increments AuthVersion. A client cannot
-send an employee ID/role in lieu of a bearer token. UI menu filtering is convenience,
-not authorization. Login throttling exists by peer and per-account failed attempts.
-
-All credentials for SQL stay on the backend. API tokens live in client RAM, not
-pending files. Client HTTP is loopback-only; nonlocal endpoints require HTTPS.
-The server likewise rejects nonloopback plaintext binding. TLS certificates/trust
-and host/network policy remain deployment responsibilities. `/health` is liveness,
-not readiness; it explicitly returns `databaseChecked:false`. ServerMain performs
-a schema-v2 DB check before opening its listening socket.
-
-## Transactions and uncertain results
-
-Checkout obtains the same SQL Server application lock for a request UUID on each
-attempt, checks existing owner+fingerprint, locks products in deterministic order,
-checks fresh price/promotion/serial state, then writes invoice, details, stock,
-movement ledger, units and warranty in one transaction. Stock decrements are
-conditional on sufficient quantity. Stock receiving/transfers use a corresponding
-request lock and atomic transaction. SQL unique/check/FK constraints are retained.
-
-The corrected StockDao movement SQL has ten columns and ten placeholders. A
-JDBC-double regression invokes the real method and verifies ten bound arguments;
-the general statement helper catches mismatched placeholder counts before prepare.
-This proves statement shape, not SQL Server query execution.
-
-Client controllers save the canonical request and UUID before sending. A timeout,
-connection loss, invalid response or uncertain commit retains that same file.
-Retry never generates a new UUID. Resolve returns a committed result when present.
-An absent result DOES NOT justify clearing the request: an older network request
-might still arrive. Explicit cancel locks that UUID and writes an append-only
-RequestCancellations marker. Only a confirmed cancellation permits clearing; a
-late execution must check the marker and fail. Committed transactions cannot be
-cancelled by this mechanism; resolve their receipt instead.
-
-The durable cancellation path is additional to the baseline; its real database
-locking/race behavior is included in SqlServerIT but NOT executed here. CRUD and
-warranty intake do not have request-id replay protection and are not automatically
-retried. After an uncertain result for these operations, search/reconcile first.
-
-## Operational limits
-
-One backend instance owns sessions; restart logs users out. Multi-instance session
-sharing is not implemented. Requests are bounded at 1 MiB; client responses at
-8 MiB; JSON depth/count limits apply. Broad searches are capped by the existing
-SQL query limits (500/1000), not a full pagination UI. API POST endpoints are
-command-oriented rather than a fully REST-resource model. No refunds/returns or
-accounting logic beyond the reviewed upstream services is invented.
+Những cơ chế SQL trên đã có mã và integration tests, **chưa được chạy thực tế trong đợt này**.
+Xem `KNOWN_LIMITATIONS.md` và checklist SQL.

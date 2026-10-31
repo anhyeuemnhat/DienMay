@@ -164,6 +164,15 @@ public final class SecurityTests {
       equal(403, denied.status());
       equal(queries, account.queries);
     });
+    for (Operation operation : List.of(Operation.LIFECYCLE, Operation.QUALITY_LIST,
+        Operation.QUALITY_REVIEW, Operation.REFERENCES, Operation.AUDIT_LOG)) {
+      t.test("application API / cashier cannot call " + operation, () -> {
+        int queries = account.queries;
+        equal(403, throwsType(ApiException.class,
+            () -> api.execute(operation, current.token(), Data.map("role", "MANAGER"))).status());
+        equal(queries, account.queries);
+      });
+    }
     t.test("application API / client-auth metadata cannot replace bearer", () -> equal(401,
         throwsType(ApiException.class, () -> api.execute(Operation.REPORT, UUID.randomUUID().toString(),
             Data.map("employeeId", 1, "role", "MANAGER"))).status()));

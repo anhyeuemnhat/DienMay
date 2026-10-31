@@ -1,0 +1,579 @@
+{
+  "baseline": "uploaded RAR, not a byte-verified main checkout",
+  "scope": "implementation source, manifests, assets, SQL, config templates, scripts and tests; excludes docs/evidence/build/dist/local private config",
+  "baseline_files_in_scope": 143,
+  "delivery_files_in_scope": 133,
+  "unchanged_files_in_scope": 64,
+  "changes": [
+    {
+      "path": "backend-server/.classpath",
+      "status": "removed",
+      "baseline_sha256": "eae51c4bf3efbfbcc6863ba1daf67cf2a3eb40e4a4a7ffff26d80eebb63e5ccf",
+      "delivery_sha256": null
+    },
+    {
+      "path": "backend-server/.project",
+      "status": "removed",
+      "baseline_sha256": "6d9157fe06038b5f3fb20e001709a9d537683084b8a6f83aa1334338afcd155b",
+      "delivery_sha256": null
+    },
+    {
+      "path": "backend-server/.settings/org.eclipse.core.resources.prefs",
+      "status": "removed",
+      "baseline_sha256": "ece9eb730b2048a96307d8b1ecc199fc7510188cca75e34f28ae96967c419f00",
+      "delivery_sha256": null
+    },
+    {
+      "path": "backend-server/.settings/org.eclipse.jdt.core.prefs",
+      "status": "removed",
+      "baseline_sha256": "4ea59147f0286dcbf18bf4b173b9fda192a11431977a9e4a64274aeafa40d418",
+      "delivery_sha256": null
+    },
+    {
+      "path": "backend-server/.settings/org.eclipse.m2e.core.prefs",
+      "status": "removed",
+      "baseline_sha256": "773c6d111354b495e68035a89eddbe5881224fea04a237d27ed5ca138835ffd7",
+      "delivery_sha256": null
+    },
+    {
+      "path": "backend-server/lib/LICENSE-mssql-jdbc.txt",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1"
+    },
+    {
+      "path": "backend-server/lib/README.md",
+      "status": "modified",
+      "baseline_sha256": "fdca364aa056167da0a442cb376bb306aca2a79f17b1ab70d3299a51a4bdfa0e",
+      "delivery_sha256": "616aa17aaeb3558fe995f6e7d4b4d6436fda318d3d4437ac67848ed0d22a3069"
+    },
+    {
+      "path": "backend-server/pom.xml",
+      "status": "modified",
+      "baseline_sha256": "833dc8f6c435783995b81b97b725bd74e69f1a48205e6054dc1d0ca7ddf6854d",
+      "delivery_sha256": "4db7fd89768e78f7d687158e1970cc0845cbb974c96f90fcf47820ae7c70f482"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/DatabaseInstaller.java",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "d8b6788f50c6620cfadb4d2422143effee24e02ca02446b1b216ceda2f74834d"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/DatabaseTool.java",
+      "status": "modified",
+      "baseline_sha256": "8e14bc3f4d37ff442eb04a7a5b4a5bf0bfadd5e403376a7e9c5107616f2d0679",
+      "delivery_sha256": "bb6377d42643cedf7ded840167383f10e6148502cda73ff9420060e50877b784"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/InventorySystem.java",
+      "status": "modified",
+      "baseline_sha256": "67a458f9613deef9013339edcb28eaa32b722f3dc84358f9d4826f412b5b7bc0",
+      "delivery_sha256": "44ee35b4580945ca23ff3977a411f4acbe65c8d6b30c99aedede5488912d91ee"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/api/ApplicationApi.java",
+      "status": "modified",
+      "baseline_sha256": "3c2de748a51baba8dd0bcb303dc5dd013c3cecc9b65d12a4b910aec53a194555",
+      "delivery_sha256": "b0fcb12b56c3fa78820ad73f303e6ae31ab4a8a981fd83211b184f6c601d533b"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/db/ProductDao.java",
+      "status": "modified",
+      "baseline_sha256": "09ef80708957af967e735e43f06d830b02e0176c9d3e26c9d2443152ef9a4c3c",
+      "delivery_sha256": "62f6e35605eaf73a3b1e9c546a96095281ddd3a1cd0ddd69594b0ce843aa33a5"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/db/SqlDatabase.java",
+      "status": "modified",
+      "baseline_sha256": "ae6b7bac34e4d50f023cbf2a36ea375880e2deaab5ed1d6c59b3bf0faf0ad0b6",
+      "delivery_sha256": "985540afc5a2601152fad965286d67783510036b9b62368b395cd108b2caabe3"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/service/AuthService.java",
+      "status": "modified",
+      "baseline_sha256": "79761b1b556bc85725a28e6ad02bfb48829d8d2af1c893f629f6198f87ef14af",
+      "delivery_sha256": "ac0e6b8d15ba6d7567a6d4e635fe74ea35e5dbcc3460ca6eb70f69ccc809ca69"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/service/CatalogService.java",
+      "status": "modified",
+      "baseline_sha256": "42360c6a73e38e77f6cd495e6eb52a387867b5039fe30722112eae0e9fc84ce8",
+      "delivery_sha256": "a752b843ecc254666ab862e15d6ddee1e25d80daaa420079c7098d49cc7f2d38"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/service/InventoryService.java",
+      "status": "modified",
+      "baseline_sha256": "f062a71370566388b13d57128b0db8006d20714e5cf633f3f909f08d6d001edb",
+      "delivery_sha256": "812e9139b762c8b4818c0751954846388422d64b8a7329264bd718cc4f527ee0"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/service/LifecycleService.java",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "ae31d43c07ca124bf822708901d6240eafb90411f2845747b407e2b48ae661af"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/service/PeopleService.java",
+      "status": "modified",
+      "baseline_sha256": "cf400a0b3a1745cd0687c893789bbec73a25825106a2d135ce7653f0ba0f2c80",
+      "delivery_sha256": "d56b5ae127a1c63ac27cc7a90138fc18599a86128d5a0207cd2cbf059ff8fc69"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/service/PromotionService.java",
+      "status": "modified",
+      "baseline_sha256": "c6e38ae341b64b7abb963a2bb4ad506db6e7585dd5d3eb8a97c463345e7f66fa",
+      "delivery_sha256": "34bda1f3c644d10eec374a7a46b05fd32ab7524c8d8800bfbf098ad09a14addc"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/service/QualityService.java",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "ade38166a86654a37d36a379a9d77440086c752969df490d5aa834c08d52e0a5"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/service/RecordGuard.java",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "683f96b2139fb30e4d3975e176b90282ec390c96701fdde290b52ff5673b2ef2"
+    },
+    {
+      "path": "backend-server/src/main/java/vn/dienmay/server/service/SalesService.java",
+      "status": "modified",
+      "baseline_sha256": "49009a39f7a8cae07bd953d6b1048493c2560e3abd15a2203b4d59bcff3e8b26",
+      "delivery_sha256": "b66ea0b5af4ca3801fd5d0027ab02193927bf880ff64193eac2d7dbe2e1bd966"
+    },
+    {
+      "path": "build.xml",
+      "status": "modified",
+      "baseline_sha256": "4a200e5fc7aad1c0e4b482162aad48a371108859aa24946e975567847ea8589b",
+      "delivery_sha256": "5644e599e117cccb5f37cc46e42a67fcd5210802e6954e95d87c60e2b2b2d0db"
+    },
+    {
+      "path": "client-swing/.classpath",
+      "status": "removed",
+      "baseline_sha256": "eae51c4bf3efbfbcc6863ba1daf67cf2a3eb40e4a4a7ffff26d80eebb63e5ccf",
+      "delivery_sha256": null
+    },
+    {
+      "path": "client-swing/.project",
+      "status": "removed",
+      "baseline_sha256": "0cc64fcfc96057373261e45e8c9c85697b18347e6163286b5854275fe782b1d6",
+      "delivery_sha256": null
+    },
+    {
+      "path": "client-swing/.settings/org.eclipse.core.resources.prefs",
+      "status": "removed",
+      "baseline_sha256": "3fb195c0e04b24efe65a04334fa60c7aed863dd6e368339e777375a730bbf14a",
+      "delivery_sha256": null
+    },
+    {
+      "path": "client-swing/.settings/org.eclipse.jdt.core.prefs",
+      "status": "removed",
+      "baseline_sha256": "4ea59147f0286dcbf18bf4b173b9fda192a11431977a9e4a64274aeafa40d418",
+      "delivery_sha256": null
+    },
+    {
+      "path": "client-swing/.settings/org.eclipse.m2e.core.prefs",
+      "status": "removed",
+      "baseline_sha256": "773c6d111354b495e68035a89eddbe5881224fea04a237d27ed5ca138835ffd7",
+      "delivery_sha256": null
+    },
+    {
+      "path": "client-swing/pom.xml",
+      "status": "modified",
+      "baseline_sha256": "718d918a697b4f05e7b16ca862603d8318a300adfae6f6b197264b3f5d56c453",
+      "delivery_sha256": "0c75d941b557529078e1df33582da62f7d24b03f3b9888a908d8b65d5167c5d5"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/App.java",
+      "status": "modified",
+      "baseline_sha256": "9b767dce8f508fad02decc58b325faf397e0664e23319b0ca36c2763ec4f3ee6",
+      "delivery_sha256": "0b7716f16d726c467f6a1ffc7ef77509f31965442e3dcd210a6a591cb2cf84c1"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/AppContext.java",
+      "status": "modified",
+      "baseline_sha256": "ee76d54e2622808827b55454c6f5d28a822087d0013f385302ec6526e67724f1",
+      "delivery_sha256": "40bd3d2c1bfa348fa30e120c78ab1580b9af80032ee663ff8aad3660b5a06ca7"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/AppShell.java",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "01b39c843cc97491341170a8028975227500f830440d43a00c91c196897f88be"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/EditDialog.java",
+      "status": "modified",
+      "baseline_sha256": "b51a5f54e38801ee53a68a1d2c7a63738b34e25376fab4823ccfc05d7d1f9b41",
+      "delivery_sha256": "0099cd0c86bb7386d811f6a8ae8be827fe93c1fafac3b772197aef86990e8b94"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/GuidedInput.java",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "8a896a35b3d67ca04eeb2337ef90169ed6ca31a1fdf442bfb11fbf45278b6a77"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/HistoryUI.java",
+      "status": "modified",
+      "baseline_sha256": "72ecf87292de5811037ca515ce2f68a6cb664379cd7ed36fd6645127115feb35",
+      "delivery_sha256": "fd62ed5ae0ca982c54ca38587f0a2760efae2591dc3e8b25e897185e37c9d987"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/LifecycleActions.java",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "08ab912c1f1e51ec453fd5a983d8f632254dd1222d46a3bd075ec5f8af5b0107"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/MainUI.java",
+      "status": "modified",
+      "baseline_sha256": "2901d808c5f7882a0e503fae378fe639e47d40eac8740a4324adde89e919a406",
+      "delivery_sha256": "dec1789c9d4d5436330f0727b0596292f51b09fa9c24e692db40a87e4481da72"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/MakeSaleUI.java",
+      "status": "modified",
+      "baseline_sha256": "d771bcb5c141687e99ae3623b45ca84d581b97c5452b201ed49927042c4eb77a",
+      "delivery_sha256": "0929ff038ce32683f546ffec66cf8e8d4542a072f593cea5c582e4414f235c53"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/Navigation.java",
+      "status": "modified",
+      "baseline_sha256": "6e520f0145e89f84e6698dbb6337ce814dbfb2c4180f2e4262c3024ad7a16a9a",
+      "delivery_sha256": "d880964eef0933478964d1b9d93f70eac6cafc812cc90df4758133a5751a9d3a"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/PeopleUI.java",
+      "status": "modified",
+      "baseline_sha256": "77cf75f325882084bce28e76f75101a8edb289a3c5028a7c0c0e0f24815d41fe",
+      "delivery_sha256": "65bc93e21c2ea589ab5f1369bfae93fa5b0a35f82ff6571ee4aec6a436d92d82"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/ProductsUI.java",
+      "status": "modified",
+      "baseline_sha256": "aab9c143140f83dabd516699399907180da8b69bfdafdf4cfcb810570c7b2a3b",
+      "delivery_sha256": "26d435779c715829bf6a81a9da1abb6fea973d30fce75fc38e5768cf7f9beb43"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/QualityUI.java",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "263d48ae51963a0b505416ebc029e60e3c3e5be22be5aff28756739924f5d145"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/ReceiptsUI.java",
+      "status": "modified",
+      "baseline_sha256": "cf38fdeef1b46d41e88c9745c654a6fcbd48b4088423ccf93108c2dd7b59c981",
+      "delivery_sha256": "7fb02bb374dd2315f0a13487147046d25407d9a8b09a3261329f84ca1d3a9069"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/ReportsUI.java",
+      "status": "modified",
+      "baseline_sha256": "35b14bb6c017ace629fb51f4dbac506f3a2b3cdb6adbf74c2d5702db60d1a1d9",
+      "delivery_sha256": "a94a5804f9b6c6728ecaa9ddd42d21afd158e0399ffcd1b4927e06998e5af6e0"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/RowsFrame.java",
+      "status": "modified",
+      "baseline_sha256": "f374cdde65ca32106c7aca08d0b630cee59fdbfd18472f4800f9fa56840b2ba8",
+      "delivery_sha256": "4ceb5f2bafbe851af98d3acdb08082b76a4e8b37c91ca094c9718cd467d9c101"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/RowsPanel.java",
+      "status": "modified",
+      "baseline_sha256": "02c2df84e8b4a4181c74817f93eb1d3e9d41991051412330b3a2a284258ab1ef",
+      "delivery_sha256": "03f012466aa81a1daf6a7455929909f059551128d947b78aa8694e6f7621cf9c"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/StockFrame.java",
+      "status": "modified",
+      "baseline_sha256": "cd85f6737a23c3a48c6b8866d2594a6bbe959d6bc501856edc12ab2fad80b6b8",
+      "delivery_sha256": "5d933e51ee279fd7031188d425f97279522174318b321d1869362d935f2a94f4"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/TableStyling.java",
+      "status": "modified",
+      "baseline_sha256": "cda6f99f510757f2606c8cc28520c67af98ef77be546cc2e4be56abad9449a55",
+      "delivery_sha256": "92b8b91b8a9fab3ae7e351b8f82151aee1b683b1f068dc5e79fca1a85cf1df17"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/Ui.java",
+      "status": "modified",
+      "baseline_sha256": "601dc18c308376c4b68884c496e223bb850c625db2cd20a313eadf777c471e91",
+      "delivery_sha256": "a8294690bf61edc914f77c01ac7b050ec721d02a77d77d9ac92369c0fa97e544"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/WarrantyUI.java",
+      "status": "modified",
+      "baseline_sha256": "e2bedab595b50a71230191d06b786761cd58869bfd23ed2da43720d0feafbb25",
+      "delivery_sha256": "61073d2310d5f1128040f0ea7ea018993f4fc066a9f21bbf0400bc6c3883a892"
+    },
+    {
+      "path": "client-swing/src/main/java/vn/dienmay/client/ui/WorkFrame.java",
+      "status": "modified",
+      "baseline_sha256": "96390729aae54bd3fb53a9904ec758275d2ad24c768145ac7ea05e1afac023c3",
+      "delivery_sha256": "68b974aec24679f47b00d4f74c21f9ae3b68b3a45d3273fe0a632579ad16025d"
+    },
+    {
+      "path": "common-dto/.classpath",
+      "status": "removed",
+      "baseline_sha256": "eae51c4bf3efbfbcc6863ba1daf67cf2a3eb40e4a4a7ffff26d80eebb63e5ccf",
+      "delivery_sha256": null
+    },
+    {
+      "path": "common-dto/.project",
+      "status": "removed",
+      "baseline_sha256": "37db6fec08aaf3423c1904afe13f306f9c81460f879e24a8a17e0028dc6bbaaf",
+      "delivery_sha256": null
+    },
+    {
+      "path": "common-dto/.settings/org.eclipse.core.resources.prefs",
+      "status": "removed",
+      "baseline_sha256": "ece9eb730b2048a96307d8b1ecc199fc7510188cca75e34f28ae96967c419f00",
+      "delivery_sha256": null
+    },
+    {
+      "path": "common-dto/.settings/org.eclipse.jdt.core.prefs",
+      "status": "removed",
+      "baseline_sha256": "4ea59147f0286dcbf18bf4b173b9fda192a11431977a9e4a64274aeafa40d418",
+      "delivery_sha256": null
+    },
+    {
+      "path": "common-dto/.settings/org.eclipse.m2e.core.prefs",
+      "status": "removed",
+      "baseline_sha256": "773c6d111354b495e68035a89eddbe5881224fea04a237d27ed5ca138835ffd7",
+      "delivery_sha256": null
+    },
+    {
+      "path": "common-dto/pom.xml",
+      "status": "modified",
+      "baseline_sha256": "27d9341314fa8e86c713ba03da9e75983b22ffd231c0c830e6bd3926d10230c1",
+      "delivery_sha256": "d69fab3c549b22aa1a2ad73438f8edf42845474f2aaab4770c803f40eec49ab3"
+    },
+    {
+      "path": "common-dto/src/main/java/vn/dienmay/common/api/Json.java",
+      "status": "modified",
+      "baseline_sha256": "7a3f85b9d480e8c16aab2201bd83213fadb6fad77824c3ee2cd345eec45a8f07",
+      "delivery_sha256": "91df4d3ef966021a992acd41cfd229ac85da1704aa04e6f7ba0b156bf369c958"
+    },
+    {
+      "path": "common-dto/src/main/java/vn/dienmay/common/api/Operation.java",
+      "status": "modified",
+      "baseline_sha256": "007107fb6f97725a4c5e68ea9cf3ff88587fa90a22d9cfe31dce4747ef6fa6b7",
+      "delivery_sha256": "a281ae1238def52fd289febac31d0a8e2eed966d7e7e8fa294115b4b3ccdeaec"
+    },
+    {
+      "path": "common-dto/src/main/java/vn/dienmay/common/model/CatalogRules.java",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "121503807e14babb92816b019f6d3ad19b05807252c3d3246c8095a194016c7f"
+    },
+    {
+      "path": "common-dto/src/main/java/vn/dienmay/common/model/InventoryRequest.java",
+      "status": "modified",
+      "baseline_sha256": "f2b3de748c18dd5f76e036965914fba945af0f827388373cabdb658298c7bd10",
+      "delivery_sha256": "b9602996936f3875b15ac81ab655f7de93468f3a904d4f1dc47f9f90e0912e44"
+    },
+    {
+      "path": "common-dto/src/main/java/vn/dienmay/common/model/Item.java",
+      "status": "modified",
+      "baseline_sha256": "de86096964ce77e0857f21b81daf8937c844880f36940f66c68a8c31b6922cb6",
+      "delivery_sha256": "7d1cf0cf2c2282d09457bf8a2711c3d048881df4f62a0df386fe59f9aa546250"
+    },
+    {
+      "path": "config/database.properties.example",
+      "status": "modified",
+      "baseline_sha256": "5c81d5597f6cf76839c035da8f17e1d4d1611739cd7bd8a74e6dd4427ee5f655",
+      "delivery_sha256": "8c235cf3f81862e187007023108be92dbec2ab084e5a2680fec119b76662cad7"
+    },
+    {
+      "path": "database/README.md",
+      "status": "modified",
+      "baseline_sha256": "a9093b98819dceec2e4982228e6b0a5f9ffecc403c681115dee352dcfb9614a1",
+      "delivery_sha256": "6573be798a8c20707a610fa7a3522d1cf482e7c3876920cc67e9e2fa2e1cf405"
+    },
+    {
+      "path": "database/checks/009_reconciliation.sql",
+      "status": "modified",
+      "baseline_sha256": "97ca3985f264cfb3c03479b7d0ee8b24b610e18fbb8f9c41fa26a7a9ae388a92",
+      "delivery_sha256": "1701598cc25cf9629119bc73ae47708be4ddf7d01b56081f11463a547cc9d7b4"
+    },
+    {
+      "path": "database/checks/013_quality_audit.sql",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "08aa9ef6a3628d41df1c9e8b3cbbde55161306d277931b405780bd278bb5ef95"
+    },
+    {
+      "path": "database/demo/002_demo.sql",
+      "status": "modified",
+      "baseline_sha256": "e069785bdd732610a6ceb3de70efc1df32ff74796df88e0ff2e83238f899dfd2",
+      "delivery_sha256": "38c88068c7a4604019303f6d165d898825a65e46f3ef5b4c12e398ac244c6410"
+    },
+    {
+      "path": "database/migration/010_quality_lifecycle.sql",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "ad777ec84bdbfa6ff729c44c18d926b07dff541024882b7a00e8f8d9841c0fc2"
+    },
+    {
+      "path": "database/migration/011_identifiers.sql",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "840946f09c81d97e3592e90a3a62c55491f352443e7ac6a80727fe9555fdbf86"
+    },
+    {
+      "path": "database/reference/012_reference_catalog.sql",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "2612f4e895950998b0380eaf43e8df620815afd141c9cf2caf5774ac6339cb3d"
+    },
+    {
+      "path": "database/reference/catalog.json",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "b6bee7467ff31d0659660add3c44d567ad0f9e68497d1469de61f6de9066c568"
+    },
+    {
+      "path": "database/schema/000_create_database.sql",
+      "status": "modified",
+      "baseline_sha256": "b7beeade1c204344602f5e775438b1bf32022d22869808125b4ab66693a353a9",
+      "delivery_sha256": "a9baa2b65227f68b50efdfe4e705cec405ded7e0e6128a00b449c23eed313ff3"
+    },
+    {
+      "path": "database/security/008_runtime_role.sql",
+      "status": "modified",
+      "baseline_sha256": "02b0adbb061eb1e62909263b25482b51896f536de2a5fee5f86aea909bedac5c",
+      "delivery_sha256": "679222788ad9ebeb9e8ea8d596d0ff4b63eb137583e51341c661a451bdb2763c"
+    },
+    {
+      "path": "pom.xml",
+      "status": "modified",
+      "baseline_sha256": "f2fe2981cbe2c8926c9ba504df9cc7e0c85ca125f4cc41fe02c5a2d301c93f7a",
+      "delivery_sha256": "8fb5e7ed10b9ec3b090c63106534b2963f6cec321c3c14873de335bab004f5ba"
+    },
+    {
+      "path": "scripts/verify-red-ui-linux.sh",
+      "status": "modified",
+      "baseline_sha256": "1d9d7fe99dfba2924d68669f39c690e68c340983e58b65be2d447853bc85fb76",
+      "delivery_sha256": "bf9f0b314a5b7c3427750427a7fd56b99c05adaa691d3ce47553c9797b79e895"
+    },
+    {
+      "path": "tests/.classpath",
+      "status": "removed",
+      "baseline_sha256": "eae51c4bf3efbfbcc6863ba1daf67cf2a3eb40e4a4a7ffff26d80eebb63e5ccf",
+      "delivery_sha256": null
+    },
+    {
+      "path": "tests/.project",
+      "status": "removed",
+      "baseline_sha256": "5d5852e6a6a55d19e0a739cd159f03a4c0761db560fef142222c474bff5e59c4",
+      "delivery_sha256": null
+    },
+    {
+      "path": "tests/.settings/org.eclipse.core.resources.prefs",
+      "status": "removed",
+      "baseline_sha256": "ece9eb730b2048a96307d8b1ecc199fc7510188cca75e34f28ae96967c419f00",
+      "delivery_sha256": null
+    },
+    {
+      "path": "tests/.settings/org.eclipse.jdt.core.prefs",
+      "status": "removed",
+      "baseline_sha256": "4ea59147f0286dcbf18bf4b173b9fda192a11431977a9e4a64274aeafa40d418",
+      "delivery_sha256": null
+    },
+    {
+      "path": "tests/.settings/org.eclipse.m2e.core.prefs",
+      "status": "removed",
+      "baseline_sha256": "773c6d111354b495e68035a89eddbe5881224fea04a237d27ed5ca138835ffd7",
+      "delivery_sha256": null
+    },
+    {
+      "path": "tests/pom.xml",
+      "status": "modified",
+      "baseline_sha256": "84353eca7517ba815d7efc059aef52b03094726841849102d48993d6492337e0",
+      "delivery_sha256": "9b032d9daf504ba6c814b086d0197f43eb51e56fd9e18473a83981b8da7eb3d5"
+    },
+    {
+      "path": "tests/src/main/java/vn/dienmay/tests/PackagedAppSmoke.java",
+      "status": "modified",
+      "baseline_sha256": "91eef71e1f4bb9b1dff4737770fff29f6cb0de711a7295bbb06d372021859dea",
+      "delivery_sha256": "3be77ef884e0fb4c8610c722ada4b7971e282c41eaa7008c8891ef8a4327150d"
+    },
+    {
+      "path": "tests/src/main/java/vn/dienmay/tests/QualityTests.java",
+      "status": "added",
+      "baseline_sha256": null,
+      "delivery_sha256": "b00c499ad5ff5d6e03d2e0860cdf866e5fa99f80749efdc7bacc8265963653e8"
+    },
+    {
+      "path": "tests/src/main/java/vn/dienmay/tests/RedUiChecks.java",
+      "status": "removed",
+      "baseline_sha256": "bddc502d3d550b77432c7f61a3c2f62e9bb250578d28d43fcd3052320c506cd6",
+      "delivery_sha256": null
+    },
+    {
+      "path": "tests/src/main/java/vn/dienmay/tests/SecurityTests.java",
+      "status": "modified",
+      "baseline_sha256": "4ad3ef6a0f7af01dae6736a726be3db05dc0da1400fc1fa26e1853d62768ab36",
+      "delivery_sha256": "0b3fba9d79d200f4c1229d547f22b2ebc693ec66052cbf582046d1ae3720252e"
+    },
+    {
+      "path": "tests/src/main/java/vn/dienmay/tests/SqlServerIT.java",
+      "status": "modified",
+      "baseline_sha256": "43966e79b7b61d33a6ab0362e9b0681540665c54d44cb4a4762e96c7f5225d6e",
+      "delivery_sha256": "54c3fdbf10c3da9e1ea8cdd00d1542e0f74e34c36cd58e6d429d26d99c001b5d"
+    },
+    {
+      "path": "tests/src/main/java/vn/dienmay/tests/UiFixture.java",
+      "status": "modified",
+      "baseline_sha256": "e8074864a03b45f3d9df5a9cb1770a04eb4519180b8e052f52eff983e2ecdf69",
+      "delivery_sha256": "071bb7cdb297349ce7fdb72bb142b23dc81c26cc1f3e0c18fab8b49b73508725"
+    },
+    {
+      "path": "tests/src/main/java/vn/dienmay/tests/UiSmoke.java",
+      "status": "modified",
+      "baseline_sha256": "194df1049dc13f0d87b13da322378a84ef168c6390df5332e315a7e05c2bebe7",
+      "delivery_sha256": "e69195793f5b243bcfd81397da36b58080b083ddc220fcda3406f4361bc67096"
+    },
+    {
+      "path": "tools/.classpath",
+      "status": "removed",
+      "baseline_sha256": "eae51c4bf3efbfbcc6863ba1daf67cf2a3eb40e4a4a7ffff26d80eebb63e5ccf",
+      "delivery_sha256": null
+    },
+    {
+      "path": "tools/.project",
+      "status": "removed",
+      "baseline_sha256": "1ace4d14820e5c356b3ff89a8ea482452628652d504a4f1e1f49021d67faf63c",
+      "delivery_sha256": null
+    },
+    {
+      "path": "tools/.settings/org.eclipse.core.resources.prefs",
+      "status": "removed",
+      "baseline_sha256": "ece9eb730b2048a96307d8b1ecc199fc7510188cca75e34f28ae96967c419f00",
+      "delivery_sha256": null
+    },
+    {
+      "path": "tools/.settings/org.eclipse.jdt.core.prefs",
+      "status": "removed",
+      "baseline_sha256": "4ea59147f0286dcbf18bf4b173b9fda192a11431977a9e4a64274aeafa40d418",
+      "delivery_sha256": null
+    },
+    {
+      "path": "tools/.settings/org.eclipse.m2e.core.prefs",
+      "status": "removed",
+      "baseline_sha256": "773c6d111354b495e68035a89eddbe5881224fea04a237d27ed5ca138835ffd7",
+      "delivery_sha256": null
+    },
+    {
+      "path": "tools/pom.xml",
+      "status": "modified",
+      "baseline_sha256": "43a80dc6d899f34deac84621e2d89d49e789911a79bbeac69c3689410f2a350a",
+      "delivery_sha256": "6d0f56a43ce5db51b1d0749c76ee7e4704e6682e152ebcc133995960b44ba642"
+    }
+  ]
+}

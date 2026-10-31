@@ -68,8 +68,23 @@ public final class ApplicationApi implements ApiHandler {
         system.auth().require(c, session, Role.values());
         return Data.map("name", system.database().setting("store.name", "Dien May"),
             "address", system.database().setting("store.address", ""),
-            "phone", system.database().setting("store.phone", ""));
+            "phone", system.database().setting("store.phone", ""),
+            "mode", vn.dienmay.server.service.QualityService.mode(c));
       });
+      case LIFECYCLE -> {
+        system.lifecycle().setActive(session, text(p, "type"), id(p, "id"),
+            Json.number(p.get("revision")).intValueExact(), flag(p, "enabled"), text(p, "reason"));
+        yield null;
+      }
+      case QUALITY_LIST -> system.quality().list(session, text(p, "type"));
+      case REFERENCES -> system.quality().references(session);
+      case AUDIT_LOG -> system.quality().auditLog(session);
+      case QUALITY_REVIEW -> {
+        system.quality().review(session, text(p, "type"), id(p, "id"),
+            Json.number(p.get("revision")).intValueExact(), text(p, "field"), text(p, "status"),
+            text(p, "source"), text(p, "note"), optionalId(p, "referenceId"));
+        yield null;
+      }
       case PRODUCT_SEARCH -> system.catalog().search(session, text(p, "text"));
       case PRODUCT_FIND -> system.catalog().find(session, text(p, "code"));
       case PRODUCT_GET -> system.catalog().get(session, id(p, "id"));
@@ -77,19 +92,19 @@ public final class ApplicationApi implements ApiHandler {
       case SERIALS -> system.catalog().serials(session, id(p, "id"), text(p, "location"));
       case LOOKUPS -> system.catalog().lookups(session, text(p, "type"));
       case LOOKUP_SAVE -> system.catalog().saveLookup(session, text(p, "type"), optionalId(p, "id"),
-          text(p, "name"));
+          text(p, "name"), revision(p));
       case CUSTOMERS -> system.people().customers(session, text(p, "text"));
       case CUSTOMER -> system.people().customer(session, id(p, "id"));
       case CUSTOMER_SAVE -> system.people().saveCustomer(session, optionalId(p, "id"),
-          text(p, "name"), text(p, "phone"), text(p, "address"));
+          text(p, "name"), text(p, "phone"), text(p, "address"), revision(p));
       case VENDORS -> system.people().vendors(session);
       case VENDOR_SAVE -> system.people().saveVendor(session, optionalId(p, "id"), text(p, "name"),
-          text(p, "phone"), text(p, "address"), flag(p, "enabled"));
+          text(p, "phone"), text(p, "address"), flag(p, "enabled"), revision(p));
       case EMPLOYEES -> system.people().employees(session);
       case EMPLOYEE_SAVE -> saveEmployee(session, p);
       case PROMOTIONS -> system.promotions().list(session);
       case PROMOTION_SAVE -> system.promotions().save(session, optionalId(p, "id"), text(p, "code"),
-          text(p, "name"), date(p, "from"), date(p, "to"), money(p, "percent"), flag(p, "enabled"));
+          text(p, "name"), date(p, "from"), date(p, "to"), money(p, "percent"), flag(p, "enabled"), revision(p));
       case QUOTE -> system.sales().quote(session, Json.list(p.get("lines"), ItemQuantity.class),
           text(p, "code"), money(p, "manual"));
       case CHECKOUT -> system.sales().checkout(session, Json.convert(p.get("request"), SaleRequest.class));
@@ -126,6 +141,10 @@ public final class ApplicationApi implements ApiHandler {
     };
   }
 
+  private static int revision(Map<String, Object> p) {
+    return optionalId(p, "id") == null ? 0 : Json.number(p.get("revision")).intValueExact();
+  }
+
   private ApiSession changePassword(AuthService.Session session, Map<String, Object> p)
       throws Exception {
     char[] oldPassword = text(p, "oldPassword").toCharArray();
@@ -145,7 +164,7 @@ public final class ApplicationApi implements ApiHandler {
     try {
       return system.people().saveEmployee(session, optionalId(p, "id"), text(p, "username"),
           text(p, "name"), text(p, "phone"), Role.valueOf(text(p, "role")),
-          flag(p, "enabled"), password);
+          flag(p, "enabled"), password, revision(p));
     } finally {
       Arrays.fill(password, '\0');
       p.remove("password");

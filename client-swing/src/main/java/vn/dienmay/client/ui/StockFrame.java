@@ -41,6 +41,7 @@ public class StockFrame extends WorkFrame {
   private final JTextField cost = new JTextField("0", 24);
   private final JComboBox<Ui.Choice> vendor = new JComboBox<>();
   private final JComboBox<String> source = new JComboBox<>(new String[] {"KHO", "QUAY"});
+  private final JComboBox<String> identifierType = new JComboBox<>(new String[] {"SERIAL", "IMEI"});
   private final JTextArea serials = new JTextArea(12, 30);
   private final JPanel editor = new JPanel(new BorderLayout(12, 12));
   private final JButton submit;
@@ -58,14 +59,13 @@ public class StockFrame extends WorkFrame {
     try {
       controller = new StockController(app.gateway(), app.pendingDirectory(), app.session().employeeId(), receiving);
     } catch (IOException ex) {
-      super.dispose();
       throw new IllegalStateException("Không mở được yêu cầu chờ; không xóa tệp. " + ex.getMessage(), ex);
     }
     JPanel productInput = Ui.toolbar(sku, Ui.button("Tìm sản phẩm", this::findProduct));
     JPanel fields = receiving
         ? Ui.fields("SKU / mã vạch *", productInput, "Sản phẩm", product,
             "Nhà cung cấp *", vendor, "Số lượng *", quantity,
-            "Đơn giá nhập *", cost, "Chứng từ / lý do *", reference)
+            "Đơn giá nhập *", cost, "Chứng từ / lý do *", reference, "Loại mã thiết bị", identifierType)
         : Ui.fields("SKU / mã vạch *", productInput, "Sản phẩm", product,
             "Chuyển từ", source, "Số lượng *", quantity,
             "Chứng từ / lý do *", reference);
@@ -102,6 +102,9 @@ public class StockFrame extends WorkFrame {
     resolve = Ui.button("Đối soát", this::resolve);
     cancel = Ui.button("Yêu cầu hủy an toàn", this::cancel);
     body.add(Ui.toolbar(submit, retry, resolve, cancel), BorderLayout.SOUTH);
+    GuidedInput.install(sku, "Nhập hoặc quét SKU/mã vạch; bấm Tìm sản phẩm");
+    GuidedInput.install(serials, "Mỗi dòng một mã từ nhãn/chứng từ. Không tự sinh mã.");
+    identifierType.setToolTipText("IMEI: 15 chữ số, kiểm tra Luhn; đúng cấu trúc chưa chứng minh nguồn gốc.");
     sku.addActionListener(event -> findProduct());
     if (receiving) {
       app.request(this, Operation.LOOKUPS, Data.map("type", "vendor"), result -> {
@@ -122,6 +125,7 @@ public class StockFrame extends WorkFrame {
       reference.setText(pending.reference());
       cost.setText(pending.unitCost().toPlainString());
       serials.setText(String.join("\n", pending.serials()));
+      identifierType.setSelectedItem(pending.identifierType());
       if (pending.from() != null) {
         source.setSelectedItem(pending.from());
       }
@@ -186,7 +190,8 @@ public class StockFrame extends WorkFrame {
     }
     return new InventoryRequest(UUID.randomUUID(), selected.id(), count, values, reference.getText(),
         receiving ? supplier.id() : null, receiving ? Money.of(cost.getText()) : Money.ZERO,
-        from, receiving ? "KHO" : "KHO".equals(from) ? "QUAY" : "KHO");
+        from, receiving ? "KHO" : "KHO".equals(from) ? "QUAY" : "KHO",
+        receiving ? (String) identifierType.getSelectedItem() : "SERIAL");
   }
 
   private void submit() {
@@ -270,7 +275,16 @@ public class StockFrame extends WorkFrame {
   }
 
   @Override
-  public void dispose() {
+  public boolean hasUnsavedChanges() { return controller != null && controller.pending() != null ||
+      !reference.getText().isBlank() || !serials.getText().isBlank() || !sku.getText().isBlank(); }
+
+  @Override
+  public boolean canLeave() {
+    return !hasUnsavedChanges() || Ui.confirm(this, "Co du lieu nhap / giao dich cho. Giu nguyen de quay lai sau?");
+  }
+
+  @Override
+  public void onClosed() {
     if (!closed) {
       closed = true;
       try {
@@ -279,6 +293,5 @@ public class StockFrame extends WorkFrame {
         Ui.error(this, ex);
       }
     }
-    super.dispose();
   }
 }

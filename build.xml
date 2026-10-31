@@ -78,6 +78,7 @@
     <offline-suite class="UnitTests" log="unit-tests.log"/>
     <offline-suite class="ApiTests" log="api-tests.log"/>
     <offline-suite class="SecurityTests" log="security-tests.log"/>
+    <offline-suite class="QualityTests" log="quality-tests.log"/>
   </target>
   <target name="sql-it" depends="compile-tests">
     <java classname="vn.dienmay.tests.SqlServerIT" fork="true" failonerror="true" dir="${basedir}">
@@ -99,10 +100,10 @@
     </jar>
     <jar destfile="${dist}/backend-server.jar" basedir="${build}/backend">
       <manifest><attribute name="Main-Class" value="vn.dienmay.server.ServerMain"/>
-        <attribute name="Class-Path" value="common-dto.jar ../backend-server/lib/mssql-jdbc-13.4.0.jre11.jar"/>
+        <attribute name="Class-Path" value="common-dto.jar ../backend-server/lib/mssql-jdbc-13.6.0.jre11.jar"/>
       </manifest>
     </jar>
-    <echo>Independent runtime artifacts are in dist/. Backend SQL JDBC driver is NOT bundled.</echo>
+    <echo>Independent runtime artifacts are in dist/. SQL JDBC driver is in backend-server/lib; client has no database driver.</echo>
   </target>
   <target name="verify" depends="style,test,package"/>
 </project>

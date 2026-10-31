@@ -71,6 +71,7 @@ public final class InventoryService {
       RequestCancellationDao.requireActive(c, "STOCK", request.id(), request.fingerprint(),
           session.employeeId());
       Item item = products.get(c, request.productId(), true);
+      QualityService.requireTradable(c, item);
       StockDao.checkSerials(item, request.quantity(), request.serials());
       if (receiving) {
         if (!item.enabled()) {
@@ -87,9 +88,14 @@ public final class InventoryService {
         long movement = stock.movement(c, request.id(), item.id(), "KHO", request.quantity(),
             "RECEIVE", request.reference(), session.employeeId(), null, request.vendorId(),
             request.unitCost());
+        if (QualityService.mode(c).equals("PRODUCTION") && request.serials().stream()
+            .anyMatch(code -> code.startsWith("DEMO-"))) {
+          throw new IllegalArgumentException("Khong nhap dinh danh DEMO vao database that.");
+        }
         for (String serial : request.serials()) {
-          long unit = insert(c, "INSERT dm.ProductUnits(ProductId,Serial,Location) "
-              + "OUTPUT INSERTED.Id VALUES(?,?,'KHO')", item.id(), serial);
+          long unit = insert(c, "INSERT dm.ProductUnits(ProductId,Serial,Location,IdentifierType,IdentifierSource) "
+              + "OUTPUT INSERTED.Id VALUES(?,?,'KHO',?,?)", item.id(), serial,
+              request.identifierType(), request.reference());
           stock.attachUnit(c, movement, unit);
         }
         update(c, "UPDATE dm.Products SET CostPrice=?,Revision=Revision+1 WHERE Id=?",
@@ -101,6 +107,10 @@ public final class InventoryService {
             "TRANSFER", request.reference(), session.employeeId(), null, null, null);
         long in = stock.movement(c, request.id(), item.id(), request.to(), request.quantity(),
             "TRANSFER", request.reference(), session.employeeId(), null, null, null);
+        if (QualityService.mode(c).equals("PRODUCTION") && request.serials().stream()
+            .anyMatch(code -> code.startsWith("DEMO-"))) {
+          throw new IllegalArgumentException("Khong nhap dinh danh DEMO vao database that.");
+        }
         for (String serial : request.serials()) {
           long unit = stock.transferUnit(c, item.id(), serial, request.from(), request.to());
           stock.attachUnit(c, out, unit);
@@ -168,7 +178,8 @@ public final class InventoryService {
       throws SQLException {
     return db.read(c -> {
       auth.require(c, session, Role.MANAGER, Role.WAREHOUSE);
-      return rows(c, "SELECT u.Serial,p.SKU,u.Status,m.CreatedAt,m.Kind,m.Location,m.Delta,m.Reference "
+      return rows(c, "SELECT u.Serial,u.IdentifierType,u.IdentifierSource,p.SKU,u.Status,m.CreatedAt,m.Kind," +
+          "m.Location,m.Delta,m.Reference "
           + "FROM dm.ProductUnits u JOIN dm.Products p ON p.Id=u.ProductId "
           + "LEFT JOIN dm.StockMovementUnits mu ON mu.UnitId=u.Id "
           + "LEFT JOIN dm.StockMovements m ON m.Id=mu.MovementId WHERE u.Serial=? ORDER BY m.Id",

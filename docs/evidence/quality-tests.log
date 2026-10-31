@@ -1,0 +1,58 @@
+PASS | GTIN / checksum fixture 5012345670003 is structural, not a product claim
+PASS | GTIN / checksum fixture 042100005264 is structural, not a product claim
+PASS | GTIN / checksum fixture 00000000 is structural, not a product claim
+PASS | GTIN / checksum fixture 00000000000000 is structural, not a product claim
+PASS | GTIN / leading zero preserved
+PASS | GTIN / incorrect check digit rejected
+PASS | GTIN / wrong declared type rejected
+PASS | GTIN / Unicode digits and letters rejected
+PASS | Barcode / no arbitrary code with NONE
+PASS | Barcode / unknown is blank, not invented
+PASS | Barcode / OTHER retains exact leading zeros
+PASS | IMEI / mathematical fixture is not proof of a device
+PASS | IMEI / wrong length and check digit
+PASS | Phone / optional and caller supplied
+PASS | Evidence / only HTTPS without embedded credentials or fragment
+PASS | Legacy Item constructor never asserts verified status
+PASS | Legacy numeric serial never guessed to be IMEI
+PASS | Old persisted JSON migrates only the missing identifierType
+PASS | Explicit IMEI validates before a request can be sent
+PASS | Identifier type participates in non-legacy fingerprint
+PASS | Installer / exact isolated targets accepted
+PASS | Installer / system databases, mismatch and injection rejected
+PASS | Installer / explicit confirmation, no relabeling DEMO as production
+PASS | Installer / supplied batch separator and forbidden SQLCMD
+PASS | Revision / matching update and row lock
+PASS | Revision / stale write cannot overwrite
+PASS | Revision / ordinary update cannot bypass lifecycle reason
+PASS | Revision / table allowlist and positive version
+PASS | Tradability / pending identity cannot be sold or moved
+PASS | Tradability / unclassified database fails closed
+PASS | Tradability / pending barcode despite valid checksum is blocked
+PASS | Tradability / DEMO and real inventory cannot mix
+PASS | Tradability / absent barcode is allowed with verified identity
+PASS | Tradability / disabled or pending reference fails closed
+PASS | Catalog create / forged approved status ignored and environment owns IsDemo
+PASS | Catalog update / stale revision rolls back before write
+PASS | Review / stale snapshot cannot certify changed record
+PASS | Review / rejects cross-field reference mismatch at column 0
+PASS | Review / rejects cross-field reference mismatch at column 1
+PASS | Review / rejects cross-field reference mismatch at column 2
+PASS | Review / rejects cross-field reference mismatch at column 3
+PASS | Review / rejects cross-field reference mismatch at column 4
+PASS | Review / rejects cross-field reference mismatch at column 5
+PASS | Review / matching explicit review binds actor and creates audit
+PASS | Review / barcode approval requires verified identity and nonblank code
+PASS | Lifecycle / cannot delete posted invoices or unknown entity
+PASS | Lifecycle / reason and revision required
+PASS | Lifecycle / manager cannot disable own account
+PASS | Lifecycle / last manager protection
+PASS | Lifecycle / only soft update plus append-only audit
+PASS | Service / lifecycle not accessible through direct cashier call
+PASS | Service / review not accessible through direct cashier call
+PASS | Cell semantics / business names and internal codes never translated as enums or dates
+PASS | Table / numeric sorting, translated filter, stable selection and empty schema
+PASS | Guided input / placeholder paint never alters document
+PASS | Guided input / suggestions come only from supplied controlled choices
+RESULT | quality-lifecycle-navigation-rules | passed=56 failed=0
+SCOPE | Pure rules, Swing components, explicit JDBC doubles. SQL Server semantics NOT tested.

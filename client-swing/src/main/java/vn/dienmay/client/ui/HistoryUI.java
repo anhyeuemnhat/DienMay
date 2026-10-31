@@ -21,6 +21,17 @@ public final class HistoryUI extends RowsFrame {
         : operation == Operation.SERIAL_HISTORY ? "Lịch sử Serial / IMEI" : "Lịch sử kho",
         "Dữ liệu chứng từ đã lưu; giờ hiển thị theo Việt Nam");
     this.operation = operation;
+    if (operation == Operation.SERIAL_HISTORY) {
+      rows.columns("Serial", "IdentifierType", "IdentifierSource", "SKU", "Status", "CreatedAt", "Kind", "Location",
+          "Delta", "Reference");
+    } else if (operation == Operation.LOW_STOCK) {
+      rows.columns("Id", "SKU", "Name", "TotalStock", "ReorderLevel");
+    } else {
+      rows.columns("Id", "CreatedAt", "SKU", "Location", "Delta", "Kind", "Reference", "EmployeeName", "UnitCost",
+          "RequestId");
+    }
+    GuidedInput.install(search, operation == Operation.SERIAL_HISTORY ? "Nhập chính xác mã trên thiết bị" :
+        "Nhập SKU nội bộ");
     if (operation != Operation.LOW_STOCK) {
       actions.add(new JLabel(operation == Operation.SERIAL_HISTORY ? "Serial / IMEI chính xác:" : "SKU:"));
       actions.add(search);

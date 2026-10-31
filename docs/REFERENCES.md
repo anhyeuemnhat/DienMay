@@ -1,67 +1,30 @@
-# Sources and application traceability
+# Nguồn tham chiếu và giới hạn xác minh
 
-## User-supplied textbooks (actual sections reviewed)
+Đợt đối chiếu: 31/10/2026. Nguồn dưới đây không phải bằng chứng về giao dịch hay hàng tồn thực tế của cửa hàng.
 
-Page below means **PDF file page, one-based**, not an assumed chapter page.
-`ptud.pdf` has one printed slide per page. The Nhap mon Cong nghe phan mem PDFs
-usually place two printed slides on each PDF page. Twelve chapter PDFs were
-extracted from the supplied archive; only the relevant sections listed here were
-reviewed. This is NOT a claim to have read every page of all twelve chapters.
-No unread content is cited as supporting a design decision.
+| Nguồn chính thức | Phạm vi đã đối chiếu / ứng dụng |
+|---|---|
+| [Sony WH-CH520 specifications](https://www.sony.com.vn/electronics/support/wireless-headphones-bluetooth-headphones/wh-ch520/specifications) | Sony, model WH-CH520, tai nghe không dây, driver 30 mm, Bluetooth 5.2, khối lượng xấp xỉ 147 g. Dùng cho hai tệp reference SQL/JSON. |
+| [LG 24MR400-B](https://www.lg.com/vn/man-hinh-may-tinh/man-hinh-van-phong-pho-thong/24mr400-b/) | LG, model 24MR400-B, màn hình 23.8 inch, IPS, 1920 x 1080, tối đa 100 Hz; D-sub tối đa 75 Hz. Không đồng nhất 100 Hz cho mọi cổng. |
+| [GS1 UK: check digit](https://www.gs1uk.org/knowledge-hub/standards/what-is-a-check-digit) | Quy tắc chữ số kiểm tra mã GS1. Ví dụ trong test là vector toán học, không gán cho sản phẩm demo. |
+| [GS1 glossary](https://ref.gs1.org/glossary/) | Thuật ngữ GTIN. Cấu trúc hợp lệ không chứng minh quyền sử dụng hay quan hệ mã-sản phẩm. |
+| [RFC 7254](https://www.rfc-editor.org/rfc/rfc7254.html) | Cấu trúc IMEI 15 chữ số và check digit. Kiểm tra Luhn trong code chỉ kiểm tra cấu trúc, không xác minh thiết bị/quyền sở hữu. |
+| [Microsoft JDBC release notes](https://learn.microsoft.com/en-us/sql/connect/jdbc/release-notes-for-the-jdbc-driver) | Thông tin phát hành và Java compatibility của driver 13.6.0. Dependency được pin, không tuyên bố luôn là bản mới nhất. |
+| [Microsoft JDBC download](https://learn.microsoft.com/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server) | Nguồn để DBA tải/kiểm tra lại driver. JAR bàn giao có sẵn trong RAR của người dùng, chưa đối chiếu hash nhà phát hành. |
+| [Microsoft: JDBC TLS](https://learn.microsoft.com/en-us/sql/connect/jdbc/connecting-with-ssl-encryption?view=sql-server-ver17) | `trustServerCertificate=true` bỏ xác minh certificate; chỉ cân nhắc trong môi trường lab có kiểm soát. Production dùng certificate tin cậy và xác minh hostname. |
+| [Microsoft JDBC v13.6.0 LICENSE](https://github.com/microsoft/mssql-jdbc/blob/v13.6.0/LICENSE) | MIT license được đọc qua GitHub connector và lưu kèm JAR. |
 
-| Material / location | What that source actually presents | Application to this delivery |
-|---|---|---|
-| ptud, chapter 4, p.19, slide 19 | Data, Business, Client in the 3-Tiers model; no tier skipping | Independent Swing/API/SQL deployment and no desktop SQL link |
-| ptud pp.113-114 | UI independence from processing; usability/efficiency | Transport/controller separation, asynchronous UI work |
-| ptud pp.121-124 | Screen list, navigation, components and events as design outputs | SCREENS.md and navigation diagram |
-| ptud p.128 | Consistent presentation/naming; short route to main work | One menu selection or home shortcut opens a work screen |
-| ptud p.136 | Functional organization: system/storage/search/calculation/reports | Six menu groups matched to DienMay functions |
-| ptud pp.139-142 | Lookup/input/notification/report screen concerns | Search filters, validation, confirmation/status, table/receipt output |
-| ptud p.155 | Context-relevant information and effective screen space | Resizable tables and maximized work windows |
-| ptud p.159 | Functional-menu example: System/Catalog/Update/Processing/Search/Reports | Direct basis for Navigation functional groups |
-| ptud p.175 | Main menu organization | Account/system actions separated from work/report actions |
-| Chuong2.pdf p.9, slides 17-18 | Interface implementation example and encapsulation | Private dependencies and ApiGateway/ApiHandler contracts |
-| Chuong2.pdf p.12, slides 23-24 | Messages and polymorphism discussion | Interface-dispatched gateways and reusable view hierarchy |
-| Chuong5.pdf p.6, slides 11-12 | Design class diagrams describe cooperating classes | Current-source class diagram rather than an old schematic |
-| Chuong5.pdf p.9, slide 18 | Deployment diagram describes nodes/network organization | Three deployable tiers and their actual connections |
-| Chuong7.pdf p.4, slides 7-8 | Boundary, entity, control analysis classes | UI, immutable models and workflow controllers (implementation interpretation) |
-| Chuong8.pdf p.6, slides 11-12 | Architecture patterns; MVC responsibilities | Deliberate UI/model/controller boundaries |
-| Chuong8.pdf p.8, slides 15-16 | MVC trade-offs; layered architecture | Avoid framework excess, distinguish logical layers from physical deployment |
-| Chuong8.pdf p.11, slide 22; p.12, slides 23-24 | Client/server roles and network trade-offs | Explicit remote errors, timeouts, deployment and restart behavior |
-| Chuong12.pdf p.5, slides 9-10 | Build plans and implementation workflow | Ordered implementation plan and repeatable Ant verify |
-| Chuong12.pdf p.6, slides 11-12 | Executable components mapped to nodes, integration | Separate client/backend executables; integration gate kept distinct |
-| Chuong12.pdf p.9, slide 17 | White-/black-box unit testing; other testing levels remain | Boundary/state tests do not replace SQL/system acceptance |
+## Phân biệt thông tin đã biết và dữ liệu cửa hàng
 
-Some course examples are C#; this delivery applies the design concepts in Java,
-not a claim that the course prescribes Java syntax, HTTP, TLS, JSON or PBKDF2.
-The concrete session lifetime, cancellation fence, API paths, Java records, DI
-boundaries and SQL permissions are implementation decisions based on reviewed
-source/engineering analysis, not quotations from the textbooks. The textbook's
-Repository Architecture is not silently equated to a Java Repository interface.
+Hai model tham chiếu không xác nhận cửa hàng đang bán chúng. Tên hiển thị tiếng Việt
+là mô tả sản phẩm, không phải cam kết trích nguyên văn mọi tên marketing của hãng.
+Barcode không đủ căn cứ được để trống. Serial `DEMO-SN-*`, giá, số lượng,
+chính sách bảo hành, nhà cung cấp, khách hàng và giao dịch seed là mô phỏng có nhãn.
+Các giá trị này không lấy từ thông tin hãng và không được trình bày là dữ liệu thật.
 
-The screenshot/diagram sections were read as rendered pages where available;
-text from chapter PDFs was extracted without OCR. Uploaded textbooks are not
-repackaged in the ZIP; the user already has them. See reference-inputs.json for
-hashes identifying the inspected source files.
+## Mã nguồn và tài liệu đầu vào
 
-## Reviewed project source
-
-Repository: https://github.com/anhyeuemnhat/DienMay
-Pinned source base: https://github.com/anhyeuemnhat/DienMay/tree/83bec84a21714275296552a2f201962cc19089ba
-`docs/provenance/upstream-files.csv` lists the reviewed files. Source claims in
-the audit refer to that commit, not to uninspected newer commits. Missing source
-coverage is documented explicitly in ACQUISITION.md.
-
-## External implementation documentation (not substitutes for uploaded textbooks)
-
-Official references checked during this implementation:
-
-- Java HTTP server module: https://docs.oracle.com/en/java/javase/17/docs/api/jdk.httpserver/module-summary.html
-- Google Java Style: https://google.github.io/styleguide/javaguide.html
-- Microsoft JDBC release notes: https://learn.microsoft.com/en-us/sql/connect/jdbc/release-notes-for-the-jdbc-driver
-- SQL Server graphical installation: https://learn.microsoft.com/en-us/sql/database-engine/install-windows/install-sql-server-from-the-installation-wizard-setup
-- Remote SQL Server TCP setup: https://learn.microsoft.com/en-us/sql/relational-databases/lesson-2-connecting-from-another-computer
-
-JDBC 13.4.0.jre11 is pinned to the reviewed upstream dependency and its documented
-JDK17/21 support, not advertised as the latest version. Google style is a reference;
-the actually executed checker enforces the narrower rules documented separately.
+Base chỉnh sửa là RAR đính kèm; main trên GitHub chỉ được kiểm tra metadata/tree.
+Xem `provenance/ACQUISITION.md`. Không tuyên bố đã đọc giáo trình/PDF nào không có trong
+đợt làm việc này. Các bảng trích giáo trình và báo cáo nghiệm thu cũ trong RAR
+đã được thay bằng bằng chứng của bản sửa hiện tại.

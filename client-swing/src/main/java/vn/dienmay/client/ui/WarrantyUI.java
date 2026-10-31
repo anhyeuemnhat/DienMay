@@ -15,6 +15,9 @@ public final class WarrantyUI extends RowsFrame {
 
   public WarrantyUI(AppContext app) {
     super(app, "Bảo hành", "Tìm mã bảo hành, hóa đơn, Serial hoặc điện thoại");
+    rows.columns("Id", "Code", "InvoiceCode", "SKU", "ProductName", "Serial", "CustomerName", "CustomerPhone",
+        "StartDate", "EndDate", "WarrantyMonths", "CoveredQuantity", "Validity");
+    GuidedInput.install(search, "Mã bảo hành / hóa đơn / Serial / điện thoại");
     actions.add(search);
     actions.add(Ui.button("Tra cứu", this::reload));
     actions.add(Ui.button("Tiếp nhận sửa chữa", this::receive));
@@ -38,17 +41,19 @@ public final class WarrantyUI extends RowsFrame {
         () -> Data.map("warranty", warranty, "fault", fault.getText()), result -> {
           Ui.message(this, "Đã tạo phiếu: " + result);
           claims(warranty);
-        }).setVisible(true);
+        }).open();
   }
 
   private void claims(Long warranty) {
     RowsFrame frame = new RowsFrame(app, "Phiếu bảo hành", "Trạng thái và lịch sử xử lý");
+    frame.rows.columns("Id", "WarrantyCode", "ReceivedAt", "Fault", "EmployeeName", "Status", "Notes", "CompletedAt");
     Runnable refresh = () -> frame.load(Operation.CLAIMS, Data.map("warranty", warranty));
     frame.actions.add(Ui.button("Tải lại", refresh));
     frame.actions.add(Ui.button("Lịch sử trạng thái", () -> {
       long claim = Json.number(frame.rows.selected().get("Id")).longValueExact();
       RowsFrame history = new RowsFrame(app, "Lịch sử phiếu " + claim, "Không chỉnh sửa lịch sử");
-      history.setVisible(true);
+      history.rows.columns("Id", "ChangedAt", "EmployeeName", "OldStatus", "NewStatus", "Notes");
+      history.open();
       history.load(Operation.CLAIM_HISTORY, Data.map("claim", claim));
     }));
     if (Operation.CLAIM_TRANSITION.allows(app.session().role())) {
@@ -66,10 +71,10 @@ public final class WarrantyUI extends RowsFrame {
         new EditDialog(app, frame, "Chuyển trạng thái phiếu",
             Ui.fields("Trạng thái mới", next, "Ghi chú *", Ui.scroll(notes)), Operation.CLAIM_TRANSITION,
             () -> Data.map("claim", claim, "expected", expected, "next", next.getSelectedItem(),
-                "notes", notes.getText()), result -> refresh.run()).setVisible(true);
+                "notes", notes.getText()), result -> refresh.run()).open();
       }));
     }
-    frame.setVisible(true);
+    frame.open();
     refresh.run();
   }
 }

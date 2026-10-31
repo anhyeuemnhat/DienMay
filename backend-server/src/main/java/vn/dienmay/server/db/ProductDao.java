@@ -15,7 +15,8 @@ public final class ProductDao {
   private static final String SELECT = "SELECT p.Id,p.SKU,COALESCE(p.Barcode,N''),p.Name,"
       + "p.CategoryId,p.BrandId,c.Name,b.Name,p.Model,p.Description,p.CostPrice,p.SellingPrice,"
       + "p.WarrantyMonths,p.TrackSerial,p.Enabled,p.ReorderLevel,COALESCE(k.Quantity,0),"
-      + "COALESCE(q.Quantity,0),p.Revision FROM dm.Products p %s "
+      + "COALESCE(q.Quantity,0),p.Revision,p.VerificationStatus,p.BarcodeType,p.BarcodeStatus,p" +
+          ".IsDemo,p.VerificationSource FROM dm.Products p %s "
       + "JOIN dm.Categories c ON c.Id=p.CategoryId JOIN dm.Brands b ON b.Id=p.BrandId "
       + "LEFT JOIN dm.Stock k ON k.ProductId=p.Id AND k.Location='KHO' "
       + "LEFT JOIN dm.Stock q ON q.ProductId=p.Id AND q.Location='QUAY' ";
@@ -24,7 +25,8 @@ public final class ProductDao {
     return new Item(r.getLong(1), r.getString(2), r.getString(3), r.getString(4), r.getLong(5),
         r.getLong(6), r.getString(7), r.getString(8), r.getString(9), r.getString(10),
         r.getBigDecimal(11), r.getBigDecimal(12), r.getInt(13), r.getBoolean(14), r.getBoolean(15),
-        r.getInt(16), r.getInt(17), r.getInt(18), r.getInt(19));
+        r.getInt(16), r.getInt(17), r.getInt(18), r.getInt(19),
+        r.getString(20), r.getString(21), r.getString(22), r.getBoolean(23), r.getString(24));
   }
 
   public Item get(Connection c, long id, boolean lock) throws SQLException {

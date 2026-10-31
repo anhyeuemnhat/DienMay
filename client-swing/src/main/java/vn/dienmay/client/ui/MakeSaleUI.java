@@ -65,10 +65,13 @@ public final class MakeSaleUI extends WorkFrame {
     try {
       controller = new SaleController(app.gateway(), app.pendingDirectory(), app.session().employeeId());
     } catch (IOException ex) {
-      super.dispose();
       throw new IllegalStateException("Không mở được yêu cầu chờ; không xóa tệp. " + ex.getMessage(), ex);
     }
     workspaceMode("dense");
+    lines.dataContext(app::environmentMode);
+    lines.columns("Id", "SKU", "Name", "Quantity", "UnitPrice", "Total", "Serial");
+    GuidedInput.install(code, "Quet / nhap SKU hoac ma vach da doi chieu");
+    GuidedInput.install(serial, "Ma tren thiet bi; de trong de chon tu ton quay");
     code.setName("productCode");
     code.addActionListener(event -> Ui.safe(this, this::add));
     inputs = Ui.toolbar(new JLabel("SKU / mã vạch:"), code,
@@ -151,7 +154,9 @@ public final class MakeSaleUI extends WorkFrame {
 
   private void chooseCustomer() {
     RowsFrame frame = new RowsFrame(app, "Chọn khách hàng", "Tìm theo tên hoặc điện thoại");
+    frame.rows.columns("Id", "FullName", "Phone", "Address", "Enabled", "Revision");
     JTextField query = new JTextField(24);
+    GuidedInput.install(query, "Tim khach hang da duoc cung cap hop le");
     Runnable search = () -> frame.load(Operation.CUSTOMERS, Data.map("text", query.getText()));
     frame.actions.add(query);
     frame.actions.add(Ui.button("Tìm", search));
@@ -164,7 +169,7 @@ public final class MakeSaleUI extends WorkFrame {
       customerName.setText(String.valueOf(selected.get("FullName")));
       frame.dispose();
     }));
-    frame.setVisible(true);
+    frame.open();
     search.run();
   }
 
@@ -291,7 +296,19 @@ public final class MakeSaleUI extends WorkFrame {
   }
 
   @Override
-  public void dispose() {
+  public boolean hasUnsavedChanges() { return controller != null && controller.pending() != null ||
+      !cart.lines().isEmpty() || !code.getText().isBlank()
+      || !serial.getText().isBlank() || !customer.getText().isBlank() || !promotion.getText().isBlank()
+      || !manual.getText().strip().equals("0") || payment.getSelectedIndex() != 0
+      || Ui.integer(quantity) != 1; }
+
+  @Override
+  public boolean canLeave() {
+    return !hasUnsavedChanges() || Ui.confirm(this, "Co du lieu nhap / giao dich cho. Giu nguyen de quay lai sau?");
+  }
+
+  @Override
+  public void onClosed() {
     if (!closed) {
       closed = true;
       try {
@@ -300,6 +317,5 @@ public final class MakeSaleUI extends WorkFrame {
         Ui.error(this, ex);
       }
     }
-    super.dispose();
   }
 }

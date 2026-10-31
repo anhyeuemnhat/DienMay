@@ -132,7 +132,7 @@ public final class TableStyling {
       setBorder(focus ? BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(selected ? Color.WHITE :
           Ui.FOCUS, 2),
           BorderFactory.createEmptyBorder(5, 8, 5, 8)) : BorderFactory.createEmptyBorder(7, 10, 7, 10));
-      setToolTipText(shown == null ? null : String.valueOf(shown));
+      setToolTipText(shown == null ? null : "Giá trị: " + shown);
       return this;
     }
   }

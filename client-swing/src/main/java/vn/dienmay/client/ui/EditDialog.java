@@ -2,41 +2,82 @@ package vn.dienmay.client.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dialog;
-import java.awt.Window;
+import java.awt.Container;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import javax.swing.AbstractButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.SwingUtilities;
+import javax.swing.JPasswordField;
+import javax.swing.JSpinner;
+import javax.swing.text.JTextComponent;
 import vn.dienmay.client.AppContext;
 import vn.dienmay.common.api.Operation;
 
-/** A real asynchronous editor that keeps entered values visible after server-side validation errors. */
-@SuppressWarnings("serial") // View state is never Java-serialized.
-public final class EditDialog extends JDialog {
+/** Legacy name; the editor is now a retained JPanel in AppShell, never a JDialog. */
+@SuppressWarnings("serial")
+public final class EditDialog extends WorkFrame {
+  private final JComponent fields;
+  private final List<Object> original;
+  private boolean completed;
+  private Runnable cancelled;
+
   public EditDialog(AppContext app, Component owner, String title, JComponent fields,
       Operation operation, Supplier<Map<String, Object>> values, Consumer<Object> onSaved) {
-    super(owner instanceof Window w ? w : owner == null ? null : SwingUtilities.getWindowAncestor(owner),
-        title + " — Điện Máy Đỏ", Dialog.ModalityType.APPLICATION_MODAL);
-    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-    addWindowListener(new java.awt.event.WindowAdapter() {
-      @Override
-      public void windowClosing(java.awt.event.WindowEvent event) {
-        if (app.jobs() == 0) {
-          dispose();
-        }
-      }
-    });
-    setLayout(new BorderLayout(10, 10));
-    add(Ui.scroll(fields), BorderLayout.CENTER);
-    add(Ui.toolbar(Ui.button("Lưu", () -> app.request(this, operation, values.get(), result -> {
+    super(app, title, "Dữ liệu chỉ được ghi khi bấm Lưu và backend xác nhận.");
+    this.fields = fields;
+    original = snapshot(fields);
+    body.add(Ui.scroll(fields), BorderLayout.CENTER);
+    javax.swing.JButton save = Ui.button("Lưu", () -> app.request(this, operation, values.get(), result -> {
+      completed = true;
       dispose();
       onSaved.accept(result);
-    })), Ui.button("Hủy", () -> { if (app.jobs() == 0) { dispose(); } })), BorderLayout.SOUTH);
-    Ui.decorateDialog(this, title);
-    Ui.fonts(this);
-    Ui.fitDialog(this);
+    }));
+    save.setName("editorSave");
+    javax.swing.JButton cancel = Ui.button("Hủy thao tác", this::cancel);
+    cancel.setName("editorCancel");
+    body.add(Ui.toolbar(save, cancel), BorderLayout.SOUTH);
+    defaultAction(save);
+  }
+
+  public void onCancel(Runnable action) { cancelled = action; }
+
+  private void cancel() {
+    if (app.jobs() > 0 || hasUnsavedChanges() && !Ui.confirm(this,
+        "Bỏ các thay đổi chưa lưu của biểu mẫu này?")) { return; }
+    completed = true;
+    if (cancelled != null) { cancelled.run(); }
+    else { dispose(); }
+  }
+
+  @Override public boolean hasUnsavedChanges() { return !completed && !Objects.equals(original, snapshot(fields)); }
+
+  @Override public boolean canLeave() {
+    if (app.session() != null && app.session().mustChange() && !completed) {
+      Ui.message(this, "Cần đổi mật khẩu hoặc hủy để đăng xuất.");
+      return false;
+    }
+    return !hasUnsavedChanges() || Ui.confirm(this,
+        "Biểu mẫu chưa lưu. Giữ bản nháp và chuyển màn hình?");
+  }
+
+  private static List<Object> snapshot(Component component) {
+    List<Object> values = new ArrayList<>();
+    if (component instanceof JPasswordField password) {
+      char[] secret = password.getPassword();
+      values.add(secret.length > 0); // Never retain a second plaintext password copy.
+      java.util.Arrays.fill(secret, '\0');
+    } else if (component instanceof JTextComponent text) { values.add(text.getText()); }
+    else if (component instanceof JComboBox<?> combo) { values.add(combo.getSelectedItem()); return values; }
+    else if (component instanceof JSpinner spinner) { values.add(spinner.getValue()); return values; }
+    else if (component instanceof AbstractButton button) { values.add(button.isSelected()); }
+    if (component instanceof Container container) {
+      for (Component child : container.getComponents()) { values.addAll(snapshot(child)); }
+    }
+    return values;
   }
 }

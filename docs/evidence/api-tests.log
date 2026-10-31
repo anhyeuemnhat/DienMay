@@ -39,8 +39,8 @@ PASS | HTTP / wrong content type
 PASS | HTTP / duplicate JSON rejected
 PASS | HTTP / malformed JSON rejected
 PASS | HTTP / oversized body rejected
-request=a5752716-51cc-4377-ab73-37b7a56cde8f failure=SQLException
 PASS | HTTP / SQL details sanitized and correlation retained
+request=2e744de5-e623-43ed-a77a-9e1ee9e9c273 failure=SQLException
 PASS | HTTP / security exception is forbidden
 PASS | HTTP / health is liveness not SQL readiness
 PASS | HTTP / login rate limit enforced

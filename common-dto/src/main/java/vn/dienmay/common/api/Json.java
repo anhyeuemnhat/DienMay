@@ -120,6 +120,11 @@ public final class Json {
     }
     if (type.isRecord() && type.getPackageName().startsWith("vn.dienmay.")) {
       Map<String, Object> fields = object(value);
+      // Explicit migration for pre-v3 durable stock requests; no arbitrary missing fields accepted.
+      if (type == vn.dienmay.common.model.InventoryRequest.class && !fields.containsKey("identifierType")) {
+        fields = new LinkedHashMap<>(fields);
+        fields.put("identifierType", "SERIAL");
+      }
       RecordComponent[] components = type.getRecordComponents();
       if (fields.size() != components.length) {
         throw new IllegalArgumentException("Unexpected or missing fields for " + type.getSimpleName());

@@ -27,4 +27,24 @@ WHERE i.Subtotal<>COALESCE(d.DetailGross,0);
 SELECT c.Kind,c.RequestId,c.EmployeeId FROM dm.RequestCancellations c
 WHERE (c.Kind='SALE' AND EXISTS(SELECT 1 FROM dm.Invoices i WHERE i.RequestId=c.RequestId))
    OR (c.Kind='STOCK' AND EXISTS(SELECT 1 FROM dm.InventoryRequests r WHERE r.RequestId=c.RequestId));
+
+-- Expected: zero orphaned or stale search index codes (never repairs automatically).
+SELECT p.Id,p.SKU FROM dm.Products p WHERE NOT EXISTS
+    (SELECT 1 FROM dm.ProductCodes c WHERE c.ProductId=p.Id AND c.Code=p.SKU)
+ OR (p.Barcode IS NOT NULL AND NOT EXISTS
+    (SELECT 1 FROM dm.ProductCodes c WHERE c.ProductId=p.Id AND c.Code=p.Barcode));
+SELECT c.Code,c.ProductId FROM dm.ProductCodes c JOIN dm.Products p ON p.Id=c.ProductId
+WHERE c.Code<>p.SKU AND (p.Barcode IS NULL OR c.Code<>p.Barcode);
+-- Expected: one sold unit is associated with exactly its own product invoice line.
+SELECT u.Id,u.Serial,u.Status FROM dm.ProductUnits u
+WHERE (u.Status='SOLD' AND NOT EXISTS(SELECT 1 FROM dm.InvoiceUnits iu WHERE iu.UnitId=u.Id))
+ OR (u.Status='IN_STOCK' AND EXISTS(SELECT 1 FROM dm.InvoiceUnits iu WHERE iu.UnitId=u.Id));
+SELECT iu.UnitId,iu.DetailId FROM dm.InvoiceUnits iu JOIN dm.InvoiceDetails d ON d.Id=iu.DetailId
+JOIN dm.ProductUnits u ON u.Id=iu.UnitId WHERE u.ProductId<>d.ProductId;
+-- Expected: no header/detail warranty mismatch; unit coverage stays on its invoice.
+SELECT w.Id FROM dm.Warranties w JOIN dm.InvoiceDetails d ON d.Id=w.DetailId
+WHERE w.WarrantyMonths<>d.WarrantyMonths OR w.EndDate<>DATEADD(month,w.WarrantyMonths,w.StartDate)
+ OR (w.UnitId IS NOT NULL AND NOT EXISTS
+    (SELECT 1 FROM dm.InvoiceUnits u WHERE u.UnitId=w.UnitId AND u.DetailId=w.DetailId));
+SELECT s.ProductId,s.Location FROM dm.Stock s WHERE s.Quantity<0;
 GO

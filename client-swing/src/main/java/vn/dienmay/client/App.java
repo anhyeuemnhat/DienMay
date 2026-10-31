@@ -18,7 +18,7 @@ public final class App {
         Ui.installTheme();
         String url = System.getenv().getOrDefault("DIENMAY_API_URL", "http://127.0.0.1:8080");
         AppContext context = new AppContext(new HttpApiClient(URI.create(url)));
-        new MainUI(context).setVisible(true);
+        new MainUI(context).open();
       } catch (RuntimeException ex) {
         Ui.error(null, ex);
       }

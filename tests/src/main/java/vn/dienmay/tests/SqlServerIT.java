@@ -63,6 +63,31 @@ public final class SqlServerIT {
   private static Sale serialSale;
   private static String prefix;
   private static char[] password;
+  private static Map<String, Object> reference;
+  private static long referenceId;
+
+  private static int revision(String table, long id) throws SQLException {
+    if (!List.of("Employees", "Brands", "Categories", "Promotions").contains(table)) {
+      throw new IllegalArgumentException("Test table allowlist");
+    }
+    return Math.toIntExact(scalar("SELECT Revision FROM dm." + table + " WHERE Id=?", id));
+  }
+
+  private static long lookup(String type, String table, String name) throws SQLException {
+    long id = scalar("SELECT COALESCE(MIN(Id),0) FROM dm." + table + " WHERE Name=?", name);
+    if (id == 0) { id = app.catalog().saveLookup(manager, type, null, name); }
+    app.quality().review(manager, type, id, revision(table, id), "identity", "VERIFIED",
+        Data.text(reference, "SourceUrl"),
+            "Isolated DEMO test: imports bundled official reference; no store fact is asserted.", null);
+    return id;
+  }
+
+  private static void approve(long id) throws SQLException {
+    Item current = app.catalog().get(manager, id);
+    app.quality().review(manager, "product", id, current.revision(), "identity", "VERIFIED",
+        Data.text(reference, "SourceUrl"),
+            "Isolated DEMO test: exact tuple of curated official reference, simulated store values.", referenceId);
+  }
 
   private SqlServerIT() {}
 
@@ -78,8 +103,9 @@ public final class SqlServerIT {
 
   private static Item draft(long id, int revision, String sku, boolean serial, int months,
       BigDecimal price) {
-    return new Item(id, sku, "000" + sku, "Integration fixture " + sku, category, brand,
-        "Test", "Test", "M", "Synthetic integration fixture", Money.of("60"), price,
+    return new Item(id, sku, "", Data.text(reference, "ProductName"), category, brand,
+        Data.text(reference, "CategoryName"), Data.text(reference, "BrandName"), Data.text(reference, "Model"),
+        Data.text(reference, "Specifications"), Money.of("60"), price,
         months, serial, true, 2, 0, 0, revision);
   }
 
@@ -144,6 +170,9 @@ public final class SqlServerIT {
       throw new SecurityException("Actual database does not match the explicit test database");
     }
     db.checkConnection();
+    if (!"DEMO".equals(db.read(vn.dienmay.server.service.QualityService::mode))) {
+      throw new SecurityException("SQL integration tests require an isolated *_Test database classified DEMO");
+    }
     app = new InventorySystem(db);
     prefix = "IT" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
     password = UUID.randomUUID().toString().toCharArray();
@@ -165,11 +194,15 @@ public final class SqlServerIT {
     manager = app.auth().login(prefix + "MANAGER", password);
     cashier = app.auth().login(prefix + "CASHIER", password);
     warehouse = app.auth().login(prefix + "WAREHOUSE", password);
-    category = app.catalog().saveLookup(manager, "category", null, prefix + " category");
-    brand = app.catalog().saveLookup(manager, "brand", null, prefix + " brand");
-    vendor = app.people().saveVendor(manager, null, prefix + " vendor", "0900000001", "Test", true);
-    customer = app.people().saveCustomer(cashier, null, prefix + " customer", "0900001234", "Test");
-    product = app.catalog().save(manager, draft(0, 0, prefix + "SKU", false, 12, Money.of("100.25")));
+    reference = app.quality().references(manager).stream()
+        .filter(r -> "Sony".equals(r.get("BrandName")) && "WH-CH520".equals(r.get("Model")))
+        .findFirst().orElseThrow(() -> new IllegalStateException("Run init-test with bundled reference catalog first"));
+    referenceId = ((Number) reference.get("Id")).longValue();
+    category = lookup("category", "Categories", Data.text(reference, "CategoryName"));
+    brand = lookup("brand", "Brands", Data.text(reference, "BrandName"));
+    vendor = app.people().saveVendor(manager, null, prefix + " DEMO vendor", "", "DEMO / not a real address", true);
+    customer = app.people().saveCustomer(cashier, null, prefix + " DEMO customer", "", "DEMO / not a real address");
+    product = app.catalog().save(manager, draft(0, 0, "000" + prefix + "SKU", false, 12, Money.of("100.25")));
     TestKit t = new TestKit();
     t.test("SQL / role authentication", () -> {
       equal(Role.MANAGER, manager.role());
@@ -183,6 +216,17 @@ public final class SqlServerIT {
     t.test("SQL / warehouse cannot manage employees", () -> throwsType(SecurityException.class,
         () -> app.people().saveEmployee(warehouse, null, prefix + "ILLEGAL", "Illegal", "", Role.MANAGER, true,
             password)));
+    t.test("SQL / pending identity is blocked before receiving stock", () -> {
+      equal("PENDING", app.catalog().get(manager, product).verificationStatus());
+      throwsType(IllegalArgumentException.class, () -> app.inventory().receive(warehouse, receive(product, 1)));
+      equal(0L, quantity(product, "KHO"));
+    });
+    approve(product);
+    t.test("SQL / reference-reviewed product is explicitly DEMO with no invented barcode", () -> {
+      Item checked = app.catalog().get(manager, product);
+      equal("VERIFIED", checked.verificationStatus()); equal("", checked.barcode()); check(checked.demo(),
+          "DEMO marker");
+    });
     InventoryRequest receiving = receive(product, 100);
     t.test("SQL / receive persists movement and same UUID is idempotent", () -> {
       app.inventory().receive(warehouse, receiving);
@@ -203,7 +247,7 @@ public final class SqlServerIT {
       throwsType(IllegalArgumentException.class, () -> app.inventory().transfer(warehouse, transfer(product, 1000)));
       equal(before, quantity(product, "KHO"));
     });
-    t.test("SQL / leading zero barcode lookup", () -> equal(product,
+    t.test("SQL / leading zero internal SKU lookup, no unverified barcode", () -> equal(product,
         app.catalog().find(cashier, "000" + prefix + "SKU").id()));
     SaleRequest first = saleRequest(product, 2);
     t.test("SQL / sale commits invoice stock movement and warranty", () -> {
@@ -276,18 +320,19 @@ public final class SqlServerIT {
       SaleRequest stale = new SaleRequest(UUID.randomUUID(), customer, "CASH", Money.ZERO, code, quote.discount(),
           draft.lines());
       app.promotions().save(manager, promotion, code, "Changed", day.minusDays(1), day.plusDays(1), Money.of("20"),
-          true);
+          true, revision("Promotions", promotion));
       throwsType(IllegalArgumentException.class, () -> app.sales().checkout(cashier, stale));
     });
     t.test("SQL / serialized receive transfer sale and warranty", () -> {
       serialProduct = app.catalog().save(manager, draft(0, 0, prefix + "SER", true, 12, Money.of("1000")));
-      app.inventory().receive(warehouse, receive(serialProduct, 2, prefix + "S1", prefix + "S2"));
-      app.inventory().transfer(warehouse, transfer(serialProduct, 2, prefix + "S1", prefix + "S2"));
-      serialSale = app.sales().checkout(cashier, saleRequest(serialProduct, 1, prefix + "S1"));
+      approve(serialProduct);
+      app.inventory().receive(warehouse, receive(serialProduct, 2, "DEMO-" + prefix + "S1", "DEMO-" + prefix + "S2"));
+      app.inventory().transfer(warehouse, transfer(serialProduct, 2, "DEMO-" + prefix + "S1", "DEMO-" + prefix + "S2"));
+      serialSale = app.sales().checkout(cashier, saleRequest(serialProduct, 1, "DEMO-" + prefix + "S1"));
       equal(1L, quantity(serialProduct, "QUAY"));
       equal(1L, scalar("SELECT COUNT(*) FROM dm.Warranties w JOIN dm.InvoiceDetails d ON d.Id=w.DetailId "
           + "JOIN dm.ProductUnits u ON u.Id=w.UnitId WHERE d.InvoiceId=? AND u.Serial=? "
-          + "AND w.EndDate=DATEADD(month,12,w.StartDate)", serialSale.id(), prefix + "S1"));
+          + "AND w.EndDate=DATEADD(month,12,w.StartDate)", serialSale.id(), "DEMO-" + prefix + "S1"));
     });
     t.test("SQL / duplicate serial receiving rolls back stock", () -> {
       long before = quantity(serialProduct, "KHO");
@@ -296,7 +341,7 @@ public final class SqlServerIT {
       equal(before, quantity(serialProduct, "KHO"));
     });
     t.test("SQL / sold serial cannot be resold", () -> {
-      SaleRequest duplicate = saleRequest(serialProduct, 1, prefix + "S1");
+      SaleRequest duplicate = saleRequest(serialProduct, 1, "DEMO-" + prefix + "S1");
       throwsType(IllegalArgumentException.class, () -> app.sales().checkout(cashier, duplicate));
       equal(1L, quantity(serialProduct, "QUAY"));
     });
@@ -308,8 +353,7 @@ public final class SqlServerIT {
     });
     t.test("SQL / warranty lookup and claim audit transitions", () -> {
       check(!app.warranties().search(cashier, serialSale.code()).isEmpty(), "Invoice warranty lookup");
-      check(!app.warranties().search(cashier, prefix + "S1").isEmpty(), "Serial warranty lookup");
-      check(!app.warranties().search(cashier, "0900001234").isEmpty(), "Customer phone lookup");
+      check(!app.warranties().search(cashier, "DEMO-" + prefix + "S1").isEmpty(), "Serial warranty lookup");
       long warranty = scalar("SELECT w.Id FROM dm.Warranties w JOIN dm.InvoiceDetails d ON "
           + "d.Id=w.DetailId WHERE d.InvoiceId=?", serialSale.id());
       long claim = app.warranties().receive(cashier, warranty, "Integration fault");
@@ -360,11 +404,11 @@ public final class SqlServerIT {
       }
     });
     t.test("SQL / disabled employee invalidates existing session", () -> {
-      app.people().saveEmployee(manager, warehouse.employeeId(), prefix + "WAREHOUSE", "Warehouse", "", Role.WAREHOUSE,
-          false, null);
+      app.lifecycle().setActive(manager, "employee", warehouse.employeeId(),
+          revision("Employees", warehouse.employeeId()), false, "DEMO integration deactivation");
       throwsType(SecurityException.class, () -> app.catalog().search(warehouse, ""));
-      app.people().saveEmployee(manager, warehouse.employeeId(), prefix + "WAREHOUSE", "Warehouse", "", Role.WAREHOUSE,
-          true, null);
+      app.lifecycle().setActive(manager, "employee", warehouse.employeeId(),
+          revision("Employees", warehouse.employeeId()), true, "DEMO integration restoration");
       warehouse = app.auth().login(prefix + "WAREHOUSE", password);
     });
     t.test("SQL / first password change required and old session revoked", () -> {
@@ -427,6 +471,26 @@ public final class SqlServerIT {
             + "GROUP BY s.ProductId,s.Location,s.Quantity HAVING "
                 + "s.Quantity<>COALESCE(SUM(CONVERT(bigint,m.Delta)),0)) x",
         product, serialProduct)));
+    t.test("SQL / product archive preserves ledger and blocks further receiving", () -> {
+      Item current = app.catalog().get(manager, product);
+      long movements = scalar("SELECT COUNT(*) FROM dm.StockMovements WHERE ProductId=?", product);
+      app.lifecycle().setActive(manager, "product", product, current.revision(), false, "DEMO archive acceptance");
+      try {
+        throwsType(IllegalArgumentException.class, () -> app.inventory().receive(warehouse, receive(product, 1)));
+        equal(movements, scalar("SELECT COUNT(*) FROM dm.StockMovements WHERE ProductId=?", product));
+      } finally {
+        Item latest = app.catalog().get(manager, product);
+        app.lifecycle().setActive(manager, "product", product, latest.revision(), true, "DEMO restore acceptance");
+      }
+    });
+    t.test("SQL / customer stale update refused and archive preserves invoice snapshot", () -> {
+      int version = Math.toIntExact(scalar("SELECT Revision FROM dm.Customers WHERE Id=?", customer));
+      app.lifecycle().setActive(manager, "customer", customer, version, false, "DEMO archive customer");
+      equal(firstSale, app.sales().load(cashier, firstSale.id()));
+      throwsType(IllegalArgumentException.class, () -> app.people().saveCustomer(manager, customer,
+          "DEMO stale write", "", "", version));
+      app.lifecycle().setActive(manager, "customer", customer, version + 1, true, "DEMO restore customer");
+    });
     t.finish("sql-server-integration");
   }
 }

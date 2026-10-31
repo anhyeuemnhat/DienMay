@@ -21,6 +21,7 @@ public final class Navigation {
   private static final String SEARCH = "Tra cứu";
   private static final String REPORT = "Báo cáo";
   private static final List<Destination> DESTINATIONS = List.of(
+      new Destination(CATALOG, "Kiểm chứng dữ liệu", Operation.QUALITY_LIST, QualityUI::new),
       new Destination(SYSTEM, "Nhân viên / tài khoản", Operation.EMPLOYEES,
           app -> new PeopleUI(app, PeopleUI.Kind.EMPLOYEES)),
       new Destination(CATALOG, "Sản phẩm / tồn kho", Operation.PRODUCT_SEARCH, ProductsUI::new),
@@ -60,7 +61,7 @@ public final class Navigation {
     app.open(destination.title(), () -> destination.create().apply(app));
   }
 
-  public static JMenuBar menu(AppContext app, JFrame owner) {
+  public static JMenuBar menu(AppContext app, java.awt.Component owner) {
     JMenuBar bar = new JMenuBar();
     bar.setBackground(Ui.HEADER);
     bar.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 12, 3, 12));

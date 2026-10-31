@@ -1,0 +1,24 @@
+{
+  "scope": "Manufacturer identity facts only. No verified GTIN, physical serial, price, stock or manufacturer warranty is supplied.",
+  "checkedBy": "Bundle author, based on official manufacturer pages; not an employee attestation",
+  "products": [
+    {
+      "brand": "Sony",
+      "category": "Tai nghe",
+      "name": "Tai nghe không dây Sony WH-CH520",
+      "model": "WH-CH520",
+      "specifications": "Driver 30 mm; Bluetooth 5.2; khối lượng khoảng 147 g.",
+      "source": "https://www.sony.com.vn/electronics/support/wireless-headphones-bluetooth-headphones/wh-ch520/specifications",
+      "checkedOn": "2026-10-31"
+    },
+    {
+      "brand": "LG",
+      "category": "Màn hình máy tính",
+      "name": "Màn hình LG 24MR400-B",
+      "model": "24MR400-B",
+      "specifications": "23,8 inch; IPS; 1920 x 1080; tần số quét tối đa 100 Hz (D-sub tối đa 75 Hz).",
+      "source": "https://www.lg.com/vn/man-hinh-may-tinh/man-hinh-van-phong-pho-thong/24mr400-b/",
+      "checkedOn": "2026-10-31"
+    }
+  ]
+}
