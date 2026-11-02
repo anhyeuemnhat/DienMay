@@ -143,8 +143,13 @@ public final class AppContext {
   }
 
   private boolean confirmDiscard(Component owner) {
-    return shell == null || shell.screens().stream().noneMatch(WorkFrame::hasUnsavedChanges)
-        || Ui.confirm(owner, "Có dữ liệu chưa lưu. Bản nháp sẽ mất; yêu cầu chờ đối soát vẫn được giữ. Tiếp tục?");
+    boolean dirty = shell != null && shell.screens().stream().anyMatch(WorkFrame::hasUnsavedChanges);
+    // Requests survive even when their screen has not been reopened after a client restart.
+    boolean durable = session != null && java.util.List.of("sale", "receive", "transfer", "delete", "reversal")
+        .stream().anyMatch(kind -> java.nio.file.Files.exists(pendingDirectory()
+            .resolve(session.employeeId() + "-" + kind + ".properties")));
+    return (!dirty && !durable) || Ui.confirm(owner,
+        "Có dữ liệu chưa lưu. Bản nháp sẽ mất; yêu cầu chờ đối soát vẫn được giữ. Tiếp tục?");
   }
 
   public void logout(Component owner) {

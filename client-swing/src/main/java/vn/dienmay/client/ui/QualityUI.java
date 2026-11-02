@@ -41,6 +41,7 @@ public final class QualityUI extends RowsFrame {
           "CreatedAt");
       screen.load(Operation.AUDIT_LOG, Data.map());
     }));
+    RecordDeleteActions.install(app, this, this::type, this::reload);
     types.addActionListener(event -> reload());
     rows.columns("Id", "Name", "Enabled", "Revision", "VerificationStatus", "VerificationSource");
     reload();

@@ -1,9 +1,9 @@
 # BACKEND HOST ONLY. Copy to database.properties; never commit the resulting file.
 # Prefer the DIENMAY_DB_PASSWORD environment variable instead of a password in this file.
-db.url=jdbc:sqlserver://localhost:1433;databaseName=DienMay;encrypt=true;trustServerCertificate=false
+db.url=jdbc:sqlserver://localhost:1433;databaseName=DienMayDo_Demo;encrypt=true;trustServerCertificate=false
 # A SQL login provisioned by your DBA, not sa.
 db.user=dienmay_runtime
 db.password=
-store.name=Cua hang Dien May
+store.name=Dien May Do
 store.address=
 store.phone=

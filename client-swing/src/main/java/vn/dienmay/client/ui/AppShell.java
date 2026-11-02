@@ -26,19 +26,23 @@ public final class AppShell extends JFrame {
   private final Deque<WorkFrame> history = new ArrayDeque<>();
   private final Deque<WorkFrame> forwardHistory = new ArrayDeque<>();
   private final JButton forward;
-  private final JButton drafts;
-  private final JLabel environment = new JLabel(" ");
   private final JButton back;
   private final JButton home;
   private final JLabel breadcrumb = new JLabel();
   private WorkFrame current;
   private WorkFrame dashboard;
   private int sequence;
+  private boolean fullscreen = true;
+  private java.awt.Rectangle restoredBounds;
+  private final JPanel windowControls = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 2, 0));
+  private java.awt.Point dragOrigin;
+  private java.awt.Point dragWindowOrigin;
 
   public AppShell(AppContext app) {
     super(Ui.windowTitle());
     this.app = app;
     setName("dienmayMainWindow");
+    setUndecorated(true); // Must precede peer creation, including the first setVisible().
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
     back = Ui.button("← Quay lại", this::back);
     back.setName("navigationBack");
@@ -46,21 +50,29 @@ public final class AppShell extends JFrame {
     home.setName("navigationHome");
     forward = Ui.button("Tiến →", this::forward);
     forward.setName("navigationForward");
-    drafts = Ui.button("Nháp chưa lưu", this::showDrafts);
-    drafts.setName("navigationDrafts");
-    environment.setName("environmentBanner");
-    environment.setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 16, 5, 16));
-    environment.setFont(Ui.TEXT_FONT.deriveFont(java.awt.Font.BOLD, 13f));
+    breadcrumb.setName("navigationBreadcrumb");
     JPanel navigation = new JPanel(new BorderLayout());
-    navigation.add(Ui.toolbar(back, forward, home, drafts, breadcrumb), BorderLayout.NORTH);
-    navigation.add(environment, BorderLayout.SOUTH);
+    navigation.add(Ui.toolbar(back, forward, home, breadcrumb), BorderLayout.CENTER);
     add(navigation, BorderLayout.NORTH);
     add(cards, BorderLayout.CENTER);
-    setMinimumSize(new Dimension(840, 600));
     java.awt.Rectangle bounds = getGraphicsConfiguration().getBounds();
-    java.awt.Insets insets = getToolkit().getScreenInsets(getGraphicsConfiguration());
-    setBounds(bounds.x + insets.left, bounds.y + insets.top,
-        bounds.width - insets.left - insets.right, bounds.height - insets.top - insets.bottom);
+    setMinimumSize(new Dimension(Math.min(720, bounds.width), Math.min(480, bounds.height)));
+    restoredBounds = new java.awt.Rectangle(bounds.x + bounds.width / 10, bounds.y + bounds.height / 10,
+        bounds.width * 4 / 5, bounds.height * 4 / 5);
+    setBounds(bounds); // Full monitor bounds, never ScreenInsets: includes the taskbar area.
+    windowControls.setOpaque(false);
+    windowControls.setName("customWindowControls");
+    windowControls.add(windowButton("–", "windowMinimize", "Thu nhỏ ứng dụng", this::minimize));
+    windowControls.add(windowButton("□", "windowRestore", "Cửa sổ / Toàn màn hình (F11)", this::toggleFullscreen));
+    windowControls.add(windowButton("✕", "windowClose", "Đóng ứng dụng", app::exit));
+    bind("F11", "toggleFullscreen", this::toggleFullscreen);
+    bind("alt F4", "guardedClose", app::exit);
+    addWindowStateListener(event -> {
+      if (fullscreen && (event.getOldState() & ICONIFIED) != 0
+          && (event.getNewState() & ICONIFIED) == 0) {
+        javax.swing.SwingUtilities.invokeLater(this::applyFullscreen);
+      }
+    });
     addComponentListener(new java.awt.event.ComponentAdapter() {
       @Override public void componentResized(java.awt.event.ComponentEvent event) {
         validate();
@@ -110,20 +122,20 @@ public final class AppShell extends JFrame {
     }
     current = screen;
     layout.show(cards, names.get(screen));
-    setJMenuBar(app.session() == null || app.session().mustChange() ? null : Navigation.menu(app, this));
+    updateChrome();
     getRootPane().setDefaultButton(screen.defaultAction());
-    breadcrumb.setText((dashboard == null || screen == dashboard ? "" : "Trang chủ / ") + screen.screenTitle());
+    breadcrumb.setText(screen == dashboard ? "" :
+        (dashboard == null ? "" : "Trang chủ / ") + screen.screenTitle());
     forward.setEnabled(!forwardHistory.isEmpty() && app.session() != null && !app.session().mustChange());
-    drafts.setEnabled(app.session() != null && !app.session().mustChange());
     back.setEnabled(!history.isEmpty() && (app.session() == null || !app.session().mustChange()));
-    home.setEnabled(dashboard != null && screen != dashboard && !app.session().mustChange());
+    home.setEnabled(dashboard != null && screen != dashboard && app.session() != null && !app.session().mustChange());
     Ui.fonts(screen);
     revalidate();
     repaint();
     if (!isVisible()) {
-      // Use the usable display bounds without a pre-map maximize race on X11.
+      // Map first, then expand the borderless frame to its monitor (without exclusive mode).
       setVisible(true);
-      javax.swing.SwingUtilities.invokeLater(() -> { toFront(); validate(); repaint(); });
+      javax.swing.SwingUtilities.invokeLater(() -> { applyFullscreen(); toFront(); validate(); repaint(); });
     }
   }
 
@@ -139,30 +151,104 @@ public final class AppShell extends JFrame {
     activate(forwardHistory.pop());
   }
 
+  /** Data mode is retained in AppContext/backend; no application-wide banner or native title suffix. */
   public void environmentMode(String mode) {
-    String text = switch (mode) {
-      case "DEMO" -> "DEMO / MÔ PHỎNG - Giá, tồn kho, khách hàng và giao dịch không phải dữ liệu cửa hàng thật";
-      case "PRODUCTION" -> "DỮ LIỆU CỬA HÀNG - Chỉ ghi nghiệp vụ theo chứng từ và quyền được cấp";
-      default -> "CHƯA XÁC NHẬN MÔI TRƯỜNG - Kiểm tra kết nối / phân loại database trước khi thao tác";
-    };
-    environment.setText(text);
-    environment.setToolTipText(text);
-    setTitle(Ui.windowTitle() + " | " + mode);
+    getRootPane().putClientProperty("dataMode", mode);
   }
 
-  private void showDrafts() {
-    if (!allowNavigation()) { return; }
-    List<WorkFrame> values = screens().stream().filter(WorkFrame::hasUnsavedChanges).toList();
-    if (values.isEmpty()) { Ui.message(this, "Không có bản nháp chưa lưu trong phiên."); return; }
-    javax.swing.JList<String> choices = new javax.swing.JList<>(values.stream()
-        .map(WorkFrame::screenTitle).toArray(String[]::new));
-    choices.setSelectedIndex(0);
-    choices.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-    if (Ui.option(this, Ui.scroll(choices), "Mở lại bản nháp trong phiên",
-        javax.swing.JOptionPane.OK_CANCEL_OPTION, javax.swing.JOptionPane.PLAIN_MESSAGE)
-        == javax.swing.JOptionPane.OK_OPTION && choices.getSelectedIndex() >= 0) {
-      navigateChecked(values.get(choices.getSelectedIndex()));
+  private JButton windowButton(String label, String name, String help, Runnable action) {
+    JButton button = new ThemeButton(label, Ui.HEADER, java.awt.Color.WHITE);
+    button.setName(name);
+    button.setToolTipText(help);
+    button.getAccessibleContext().setAccessibleName(help);
+    button.setMargin(new java.awt.Insets(5, 13, 5, 13));
+    button.addActionListener(event -> Ui.safe(this, action));
+    return button;
+  }
+
+  private void bind(String stroke, String name, Runnable action) {
+    getRootPane().getInputMap(javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW)
+        .put(javax.swing.KeyStroke.getKeyStroke(stroke), name);
+    getRootPane().getActionMap().put(name, new javax.swing.AbstractAction() {
+      @Override public void actionPerformed(java.awt.event.ActionEvent event) { Ui.safe(AppShell.this, action); }
+    });
+  }
+
+  private void updateChrome() {
+    javax.swing.JMenuBar bar = app.session() == null || app.session().mustChange()
+        ? new javax.swing.JMenuBar() : Navigation.menu(app, this);
+    bar.setBackground(Ui.HEADER);
+    bar.setOpaque(true);
+    bar.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 8, 2, 6));
+    javax.swing.Box.Filler dragSpace = (javax.swing.Box.Filler) javax.swing.Box.createHorizontalGlue();
+    dragSpace.setMinimumSize(new Dimension(16, 30));
+    java.awt.event.MouseAdapter drag = new java.awt.event.MouseAdapter() {
+      @Override public void mousePressed(java.awt.event.MouseEvent event) {
+        if (!fullscreen) { dragOrigin = event.getLocationOnScreen(); dragWindowOrigin = getLocation(); }
+      }
+      @Override public void mouseDragged(java.awt.event.MouseEvent event) {
+        if (!fullscreen && dragOrigin != null) {
+          java.awt.Point now = event.getLocationOnScreen();
+          setLocation(dragWindowOrigin.x + now.x - dragOrigin.x, dragWindowOrigin.y + now.y - dragOrigin.y);
+        }
+      }
+      @Override public void mouseReleased(java.awt.event.MouseEvent event) { dragOrigin = null; }
+      @Override public void mouseClicked(java.awt.event.MouseEvent event) {
+        if (event.getClickCount() == 2) { toggleFullscreen(); }
+      }
+    };
+    bar.addMouseListener(drag);
+    bar.addMouseMotionListener(drag);
+    dragSpace.addMouseListener(drag);
+    dragSpace.addMouseMotionListener(drag);
+    bar.add(dragSpace);
+    bar.add(windowControls);
+    setJMenuBar(bar); // Always present, including login and mandatory password change.
+  }
+
+  public boolean isBorderlessFullscreen() { return fullscreen; }
+
+  public void toggleFullscreen() {
+    if (fullscreen) {
+      fullscreen = false;
+      setExtendedState(NORMAL);
+      setBounds(restoredBounds);
+    } else {
+      restoredBounds = getBounds();
+      fullscreen = true;
+      applyFullscreen();
     }
+    validate();
+    repaint();
+  }
+
+  public void minimize() {
+    setExtendedState(ICONIFIED);
+  }
+
+  private void applyFullscreen() {
+    if (!fullscreen || !isDisplayable() || (getExtendedState() & ICONIFIED) != 0) { return; }
+    // Use borderless, full-monitor bounds rather than exclusive GraphicsDevice fullscreen.
+    // Exclusive mode puts owned confirmation dialogs below the main window on Windows;
+    // clicking "Xoa ban ghi" can then look as though the application has disappeared.
+    // Keeping normal window-manager ownership preserves modal dialogs and Alt-Tab.
+    java.awt.GraphicsDevice device = getGraphicsConfiguration().getDevice();
+    java.awt.Rectangle monitor = device.getDefaultConfiguration().getBounds();
+    setBounds(monitor);
+    // Some window managers keep the last restored x/y when expanding to monitor size.
+    // Explicitly reset the location so F11 returns to the exact monitor rectangle.
+    setLocation(monitor.getLocation());
+    // A window manager may process the preceding restored-window move asynchronously.
+    // Reapply only x/y after native configure events have settled; never resize a modal.
+    javax.swing.Timer positionCorrection = new javax.swing.Timer(100, event -> {
+      if (fullscreen && isDisplayable() && (getExtendedState() & ICONIFIED) == 0) {
+        java.awt.Point topLeft = getGraphicsConfiguration().getDevice().getDefaultConfiguration().getBounds()
+            .getLocation();
+        if (!topLeft.equals(getLocation())) { setLocation(topLeft); }
+      }
+    });
+    positionCorrection.setRepeats(false);
+    positionCorrection.start();
   }
 
   public void home() {
@@ -177,7 +263,7 @@ public final class AppShell extends JFrame {
     cards.removeAll();
     current = null;
     dashboard = isDashboard ? first : null;
-    if (app.session() == null) { environment.setText(" "); setTitle(Ui.windowTitle()); }
+    if (app.session() == null) { environmentMode("UNKNOWN"); }
     activate(first);
   }
 
@@ -199,6 +285,7 @@ public final class AppShell extends JFrame {
     names.clear();
     history.clear();
     forwardHistory.clear();
+    ToastNotifications.clear(this);
     super.dispose();
   }
 }

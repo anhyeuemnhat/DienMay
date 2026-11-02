@@ -18,10 +18,12 @@ public final class InventorySystem {
   private final SqlDatabase database;
   private final QualityService quality;
   private final LifecycleService lifecycle;
+  private final vn.dienmay.server.service.RecordDeletionService deletion;
   private final AuthService auth;
   private final CatalogService catalog;
   private final SalesService sales;
   private final InventoryService inventory;
+  private final vn.dienmay.server.service.InventoryReversalService reversals;
   private final PeopleService people;
   private final PromotionService promotions;
   private final WarrantyService warranties;
@@ -33,14 +35,17 @@ public final class InventorySystem {
     catalog = new CatalogService(database, auth);
     quality = new QualityService(database, auth);
     lifecycle = new LifecycleService(database, auth);
+    deletion = new vn.dienmay.server.service.RecordDeletionService(database, auth);
     sales = new SalesService(database, auth);
     inventory = new InventoryService(database, auth);
+    reversals = new vn.dienmay.server.service.InventoryReversalService(database, auth);
     people = new PeopleService(database, auth);
     promotions = new PromotionService(database, auth);
     warranties = new WarrantyService(database, auth);
     reports = new ReportService(database, auth);
   }
 
+  public vn.dienmay.server.service.RecordDeletionService deletion() { return deletion; }
   public QualityService quality() { return quality; }
   public LifecycleService lifecycle() { return lifecycle; }
 
@@ -60,6 +65,7 @@ public final class InventorySystem {
     return sales;
   }
 
+  public vn.dienmay.server.service.InventoryReversalService reversals() { return reversals; }
   public InventoryService inventory() {
     return inventory;
   }

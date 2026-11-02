@@ -125,6 +125,10 @@ public final class Json {
         fields = new LinkedHashMap<>(fields);
         fields.put("identifierType", "SERIAL");
       }
+      if (type == vn.dienmay.common.model.InventoryRequest.class && !fields.containsKey("priceConfirmation")) {
+        fields = new LinkedHashMap<>(fields);
+        fields.put("priceConfirmation", null); // v4 pending files retain their original fingerprint.
+      }
       RecordComponent[] components = type.getRecordComponents();
       if (fields.size() != components.length) {
         throw new IllegalArgumentException("Unexpected or missing fields for " + type.getSimpleName());

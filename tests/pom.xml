@@ -41,5 +41,9 @@
           <argument>-Dstdout.encoding=UTF-8</argument><argument>-Dstderr.encoding=UTF-8</argument>
           <argument>-classpath</argument><classpath/><argument>vn.dienmay.tests.QualityTests</argument>
           </arguments>
-          </configuration></execution></executions></plugin></plugins></build>
+          </configuration></execution><execution><id>controlled-operations</id><phase>verify</phase><goals><goal>exec</goal></goals><configuration>
+<executable>java</executable><workingDirectory>${maven.multiModuleProjectDirectory}</workingDirectory>
+<arguments><argument>-Djava.awt.headless=true</argument><argument>-Dfile.encoding=UTF-8</argument>
+<argument>-classpath</argument><classpath/><argument>vn.dienmay.tests.ControlledOperationsTests</argument></arguments>
+</configuration></execution></executions></plugin></plugins></build>
 </project>

@@ -112,6 +112,11 @@ public final class UiFixture implements ApiHandler {
       };
       case LOW_STOCK -> List.of(Data.map("Id", 1, "SKU", phone.sku(), "Name", phone.name(),
           "TotalStock", 3, "ReorderLevel", 3));
+      case RECEIPTS -> List.of(Data.map("Id", 1, "RequestId", "00000000-0000-0000-0000-000000000001",
+          "CreatedAt", "2026-10-29T01:00:00Z", "SKU", phone.sku(), "Name", phone.name(), "Quantity", 2,
+          "UnitCost", phone.costPrice(), "Reference", "Synthetic UI fixture - not real receipt",
+          "VendorName", "DEMO vendor", "EmployeeName", "UI TEST", "Status", "POSTED", "ReversalMovementId", null,
+          "ReversalReason", null, "Revision", 1, "PreviousCostPrice", Money.of("600000")));
       case STOCK_HISTORY, SERIAL_HISTORY -> List.of(Data.map("Id", 1, "CreatedAt", "2026-10-29T01:00:00Z",
           "SKU", phone.sku(), "Location", "KHO", "Delta", 4, "Kind", "RECEIVE",
           "Reference", "TEST FIXTURE", "EmployeeName", "UI TEST", "UnitCost", phone.costPrice()));

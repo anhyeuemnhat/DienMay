@@ -1,6 +1,9 @@
 package vn.dienmay.client.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Graphics2D;
+import java.awt.Graphics;
+import java.awt.RenderingHints;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -57,8 +60,8 @@ public final class RowsPanel extends JPanel {
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     table.setRowSorter(sorter);
-    setOpaque(true);
-    setBackground(java.awt.Color.WHITE);
+    setOpaque(false);
+    setName("rowsGlassPanel");
     TableStyling.install(table, (column, value) -> display(keys.isEmpty() ? "" : keys.get(column), value));
     filter.getDocument().addDocumentListener(new DocumentListener() {
       private void update() {
@@ -92,7 +95,25 @@ public final class RowsPanel extends JPanel {
     });
     add(Ui.toolbar(new JLabel("Lọc kết quả:"), filter, count,
         Ui.button("Xuất CSV", this::export), Ui.button("In bảng", this::print)), BorderLayout.NORTH);
-    add(Ui.scroll(table), BorderLayout.CENTER);
+    javax.swing.JScrollPane scroll = Ui.scroll(table);
+    scroll.setOpaque(false);
+    scroll.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+    scroll.getViewport().setOpaque(false);
+    scroll.getViewport().setBackground(Ui.TABLE_GLASS);
+    add(scroll, BorderLayout.CENTER);
+  }
+
+  @Override
+  protected void paintComponent(Graphics graphics) {
+    super.paintComponent(graphics);
+    Graphics2D canvas = (Graphics2D) graphics.create();
+    try {
+      canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      canvas.setColor(Ui.TABLE_GLASS);
+      canvas.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+    } finally {
+      canvas.dispose();
+    }
   }
 
   /** Initial headers remain useful when an API query returns no rows. */
@@ -229,6 +250,9 @@ public final class RowsPanel extends JPanel {
         case "WAREHOUSE" -> "Nhân viên kho";
         case "CASH" -> "Tiền mặt";
         case "TRANSFER" -> key.equals("Kind") ? "Chuyển kho" : "Chuyển khoản";
+        case "RECEIVE_REVERSAL" -> "Đảo nhập hàng";
+        case "POSTED" -> "Đã ghi sổ";
+        case "REVERSED" -> "Đã đảo";
         case "RECEIVE" -> "Nhập hàng";
         case "SALE" -> "Bán hàng";
         case "OPENING" -> "Tồn đầu kỳ";
@@ -244,6 +268,10 @@ public final class RowsPanel extends JPanel {
 
   public static String label(String key) {
     return switch (key) {
+      case "VendorName" -> "Nhà cung cấp";
+      case "PreviousCostPrice" -> "Giá vốn trước nhập";
+      case "ReversalMovementId" -> "Chứng từ đảo";
+      case "ReversalReason" -> "Lý do đảo";
       case "Category", "CategoryName" -> "Loại sản phẩm";
       case "Brand", "BrandName" -> "Thương hiệu";
       case "Barcode" -> "Mã vạch";

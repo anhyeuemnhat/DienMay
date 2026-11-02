@@ -96,6 +96,7 @@ public final class DatabaseInstaller {
     script(c, "migration/010_quality_lifecycle.sql");
     script(c, "migration/011_identifiers.sql");
     script(c, "reference/012_reference_catalog.sql");
+    script(c, "migration/014_controlled_operations.sql");
   }
 
   public static void run(SqlDatabase database, String[] args) throws Exception {
@@ -177,8 +178,8 @@ public final class DatabaseInstaller {
           script(c, "demo/002_demo.sql");
         }
         case "classify-production" -> {
-          if (!initialized || !exists(c, "SELECT COUNT(*) FROM dm.SchemaVersion WHERE Version=4")) {
-            throw new SecurityException("Reviewed schema version 4 required.");
+          if (!initialized || !exists(c, "SELECT COUNT(*) FROM dm.SchemaVersion WHERE Version=5")) {
+            throw new SecurityException("Reviewed schema version 5 required.");
           }
           c.setAutoCommit(false);
           try {

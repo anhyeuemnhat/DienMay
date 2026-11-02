@@ -46,13 +46,16 @@ public final class ThemeButton extends JButton {
     Graphics2D canvas = (Graphics2D) graphics.create();
     try {
       canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      boolean glass = fill.getAlpha() < 255;
       Color background = !isEnabled() ? Ui.DISABLED_BACKGROUND
+          : glass ? new Color(fill.getRed(), fill.getGreen(), fill.getBlue(),
+              Math.min(245, fill.getAlpha() + (getModel().isPressed() ? 35 : getModel().isRollover() ? 18 : 0)))
           : getModel().isPressed() ? fill.darker() : getModel().isRollover()
           ? (fill.equals(Color.WHITE) ? Ui.ALTERNATE_ROW : fill.darker()) : fill;
       canvas.setColor(background);
       canvas.fillRoundRect(2, 2, getWidth() - 4, getHeight() - 4, 10, 10);
-      canvas.setColor(isEnabled() ? (fill.equals(Color.WHITE) ? Ui.CONTROL_BORDER : fill)
-          : Ui.CONTROL_BORDER);
+      canvas.setColor(isEnabled() ? (glass ? new Color(104, 10, 28, 185)
+          : fill.equals(Color.WHITE) ? Ui.CONTROL_BORDER : fill) : Ui.CONTROL_BORDER);
       canvas.drawRoundRect(2, 2, getWidth() - 5, getHeight() - 5, 10, 10);
       if (hasFocus()) {
         canvas.setColor(Ui.FOCUS);

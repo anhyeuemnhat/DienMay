@@ -40,6 +40,7 @@ public final class ProductsUI extends RowsFrame {
       actions.add(Ui.button("Khôi phục", () -> lifecycle(true)));
       actions.add(Ui.button("Kiểm chứng dữ liệu", () -> app.open("quality", () -> new QualityUI(app))));
     }
+    RecordDeleteActions.install(app, this, () -> "product", this::reload);
     rows.columns("Id", "SKU", "Barcode", "Name", "Category", "Brand", "Model", "SellingPrice",
         "WarehouseQuantity", "CounterQuantity", "WarrantyMonths", "TrackSerial", "Enabled",
         "VerificationStatus", "BarcodeType", "BarcodeStatus", "IsDemo", "Revision");
@@ -118,11 +119,14 @@ public final class ProductsUI extends RowsFrame {
         "OTHER"});
     barcodeType.setSelectedItem(item == null ? "NONE" : item.barcodeType());
     JTextField name = Ui.text(item == null ? "" : item.name());
+    name.setName("productName");
     JTextField model = Ui.text(item == null ? "" : item.model());
     JTextArea description = new JTextArea(item == null ? "" : item.description(), 3, 24);
     description.setLineWrap(true);
     JTextField cost = Ui.text(item == null ? "0" : item.costPrice().toPlainString());
     JTextField price = Ui.text(item == null ? "0" : item.sellingPrice().toPlainString());
+    cost.setName("productCost");
+    price.setName("productPrice");
     JComboBox<Ui.Choice> category = new JComboBox<>(categories.toArray(Ui.Choice[]::new));
     JComboBox<Ui.Choice> brand = new JComboBox<>(brands.toArray(Ui.Choice[]::new));
     if (item != null) {
@@ -150,6 +154,17 @@ public final class ProductsUI extends RowsFrame {
             item == null ? 0 : item.warehouseQuantity(), item == null ? 0 : item.counterQuantity(),
             item == null ? 0 : item.revision(),
             "PENDING", (String) barcodeType.getSelectedItem(), "PENDING", item != null && item.demo(), "")), result ->
-                reload()).open();
+                reload()).beforeSubmit(payload -> {
+                  Item value = (Item) payload.get("item");
+                  vn.dienmay.common.model.PricePolicy.validateProduct(value);
+                  if (!vn.dienmay.common.model.PricePolicy.belowCost(value.costPrice(), value.sellingPrice())) {
+                    return payload;
+                  }
+                  if (!PriceConfirmations.confirmProduct(this, value)) { return null; }
+                  Map<String, Object> confirmed = new java.util.LinkedHashMap<>(payload);
+                  confirmed.put("priceConfirmation", new vn.dienmay.common.model.PriceConfirmation(
+                      value.id(), value.revision(), value.costPrice(), value.sellingPrice()));
+                  return confirmed;
+                }).open();
   }
 }

@@ -10,12 +10,23 @@ import java.util.UUID;
 /** Extracted from InventoryService.Request without changing its fingerprint algorithm. */
 public record InventoryRequest(
     UUID id, long productId, int quantity, List<String> serials, String reference,
-    Long vendorId, BigDecimal unitCost, String from, String to, String identifierType) {
+    Long vendorId, BigDecimal unitCost, String from, String to, String identifierType, PriceConfirmation
+        priceConfirmation) {
 
   /** Compatibility constructor: legacy serials are NOT silently interpreted as IMEI. */
   public InventoryRequest(UUID id, long productId, int quantity, List<String> serials, String reference,
       Long vendorId, BigDecimal unitCost, String from, String to) {
-    this(id, productId, quantity, serials, reference, vendorId, unitCost, from, to, "SERIAL");
+    this(id, productId, quantity, serials, reference, vendorId, unitCost, from, to, "SERIAL", null);
+  }
+
+  public InventoryRequest(UUID id, long productId, int quantity, List<String> serials, String reference,
+      Long vendorId, BigDecimal unitCost, String from, String to, String identifierType) {
+    this(id, productId, quantity, serials, reference, vendorId, unitCost, from, to, identifierType, null);
+  }
+
+  public InventoryRequest withConfirmation(PriceConfirmation confirmation) {
+    return new InventoryRequest(id, productId, quantity, serials, reference, vendorId, unitCost,
+        from, to, identifierType, confirmation);
   }
 
   public InventoryRequest {
@@ -36,6 +47,10 @@ public record InventoryRequest(
     }
     reference = Validation.required(reference, 200, "So chung tu/ly do");
     unitCost = Money.exact(unitCost);
+    if (priceConfirmation != null && (from != null || priceConfirmation.productId() != productId
+        || priceConfirmation.costPrice().compareTo(unitCost) != 0)) {
+      throw new IllegalArgumentException("Confirmation does not match the receiving request.");
+    }
     if (!Set.of("KHO", "QUAY").contains(to)) {
       throw new IllegalArgumentException("Vi tri dich khong hop le.");
     }
@@ -52,6 +67,9 @@ public record InventoryRequest(
     }
     serials.forEach(serial -> SaleRequest.token(b, serial));
     if (!identifierType.equals("SERIAL")) { SaleRequest.token(b, "identifierType=" + identifierType); }
+    if (priceConfirmation != null) {
+      SaleRequest.token(b, "priceConfirmation=" + priceConfirmation.fingerprint());
+    }
     return SaleRequest.digest(b.toString());
   }
 }

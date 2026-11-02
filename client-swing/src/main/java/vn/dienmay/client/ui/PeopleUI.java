@@ -43,7 +43,7 @@ public final class PeopleUI extends RowsFrame {
   private final JTextField search = new JTextField(22);
 
   public PeopleUI(AppContext app, Kind kind) {
-    super(app, kind.title, "Thêm / cập nhật / tra cứu • Không xóa lịch sử nghiệp vụ");
+    super(app, kind.title, "Thêm / cập nhật / tra cứu");
     this.kind = kind;
     if (kind == Kind.CUSTOMERS) {
       actions.add(new JLabel("Tên / điện thoại:"));
@@ -62,6 +62,7 @@ public final class PeopleUI extends RowsFrame {
     if (kind == Kind.CATEGORIES || kind == Kind.BRANDS) {
       actions.add(Ui.button("Kiểm chứng", () -> app.open("quality", () -> new QualityUI(app))));
     }
+    RecordDeleteActions.install(app, this, this::entityType, this::reload);
     switch (kind) {
       case CUSTOMERS -> rows.columns("Id", "FullName", "Phone", "Address", "Enabled", "Revision");
       case VENDORS -> rows.columns("Id", "Name", "Phone", "Address", "Enabled", "Revision");
@@ -75,11 +76,14 @@ public final class PeopleUI extends RowsFrame {
   }
 
   private void lifecycle(boolean enabled) {
-    String type = switch (kind) {
+    LifecycleActions.edit(app, this, entityType(), rows.selected(), enabled, this::reload);
+  }
+
+  private String entityType() {
+    return switch (kind) {
       case CUSTOMERS -> "customer"; case VENDORS -> "vendor"; case EMPLOYEES -> "employee";
       case PROMOTIONS -> "promotion"; case CATEGORIES -> "category"; case BRANDS -> "brand";
     };
-    LifecycleActions.edit(app, this, type, rows.selected(), enabled, this::reload);
   }
 
   private String lookupType() {

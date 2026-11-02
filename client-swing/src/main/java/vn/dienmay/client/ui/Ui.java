@@ -50,6 +50,13 @@ public final class Ui {
   public static final Color DISABLED_TEXT = new Color(92, 78, 85);
   public static final Color SUCCESS = new Color(23, 91, 65);
   public static final Color CARD = new Color(255, 255, 255, 247);
+  /** Frosted UI layers keep the red branding visible without sacrificing dark-text readability. */
+  public static final Color GLASS_SURFACE = new Color(255, 255, 255, 205);
+  public static final Color DASHBOARD_ACTION = new Color(255, 255, 255, 200);
+  public static final Color TABLE_GLASS = new Color(255, 255, 255, 154);
+  public static final Color TABLE_ROW_EVEN = new Color(255, 255, 255, 78);
+  public static final Color TABLE_ROW_ODD = new Color(255, 255, 255, 42);
+  public static final Color TABLE_SELECTED = new Color(104, 10, 28, 240);
   public static final Font TEXT_FONT = new Font(Font.DIALOG, Font.PLAIN, 14);
   public static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/uuuu")
       .withResolverStyle(ResolverStyle.STRICT);
@@ -137,6 +144,14 @@ public final class Ui {
     boolean danger = lower.startsWith("xóa");
     Color fill = commit ? SUCCESS : primary ? PRIMARY : danger ? HEADER : Color.WHITE;
     JButton button = new ThemeButton(title, fill, fill.equals(Color.WHITE) ? TEXT : Color.WHITE);
+    button.addActionListener(event -> safe(button, action));
+    return button;
+  }
+
+  /** Only dashboard shortcuts are translucent; forms and destructive buttons keep solid fills. */
+  public static JButton dashboardAction(String title, Runnable action) {
+    JButton button = new ThemeButton(title, DASHBOARD_ACTION, TEXT);
+    button.setName("dashboardAction");
     button.addActionListener(event -> safe(button, action));
     return button;
   }
@@ -258,7 +273,7 @@ public final class Ui {
 
   /** Functional context stays in the workspace, never in the one-line brand strip. */
   public static JPanel section(String title, String detail) {
-    JPanel panel = new SurfacePanel(new BorderLayout(4, 4), CARD, 14);
+    JPanel panel = new SurfacePanel(new BorderLayout(4, 4), GLASS_SURFACE, 14);
     panel.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 16));
     JLabel label = new JLabel(title);
     label.setFont(TEXT_FONT.deriveFont(Font.BOLD, 21f));
@@ -279,7 +294,7 @@ public final class Ui {
   }
 
   public static JPanel toolbar(Component... components) {
-    JPanel panel = new SurfacePanel(new WrapLayout(), CARD, 12);
+    JPanel panel = new SurfacePanel(new WrapLayout(), GLASS_SURFACE, 12);
     for (Component component : components) {
       panel.add(component);
     }

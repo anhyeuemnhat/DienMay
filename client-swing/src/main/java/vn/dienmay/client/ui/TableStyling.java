@@ -20,14 +20,15 @@ import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-/** Opaque, wrapping cells; all columns remain reachable using the table's horizontal scrollbar. */
+/** Frosted, wrapping cells; all columns remain reachable using the horizontal scrollbar. */
 public final class TableStyling {
   private TableStyling() {}
 
   public static void install(JTable table, BiFunction<Integer, Object, Object> format) {
     table.setFont(Ui.TEXT_FONT);
-    table.setOpaque(true);
-    table.setBackground(Color.WHITE);
+    // The empty viewport must let the branded background and the frosted RowsPanel show through.
+    table.setOpaque(false);
+    table.setBackground(Ui.TABLE_GLASS);
     table.setForeground(Ui.TEXT);
     table.setSelectionBackground(Ui.SELECTION);
     table.setSelectionForeground(Color.WHITE);
@@ -115,7 +116,7 @@ public final class TableStyling {
 
     private WrappingCell(BiFunction<Integer, Object, Object> format) {
       this.format = format;
-      setOpaque(true);
+      setOpaque(false);
       setEditable(false);
       setLineWrap(true);
       setWrapStyleWord(true);
@@ -128,12 +129,26 @@ public final class TableStyling {
       setText(shown == null ? "" : String.valueOf(shown));
       setFont(table.getFont());
       setForeground(selected ? Color.WHITE : Ui.TEXT);
-      setBackground(selected ? Ui.SELECTION : row % 2 == 0 ? Color.WHITE : Ui.ALTERNATE_ROW);
+      setBackground(selected ? Ui.TABLE_SELECTED : row % 2 == 0 ? Ui.TABLE_ROW_EVEN : Ui.TABLE_ROW_ODD);
       setBorder(focus ? BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(selected ? Color.WHITE :
           Ui.FOCUS, 2),
           BorderFactory.createEmptyBorder(5, 8, 5, 8)) : BorderFactory.createEmptyBorder(7, 10, 7, 10));
       setToolTipText(shown == null ? null : "Giá trị: " + shown);
       return this;
+    }
+
+    @Override
+    protected void paintComponent(java.awt.Graphics graphics) {
+      // Swing's text-area delegate paints only the text; draw alpha tint below it ourselves.
+      // Keeping the renderer non-opaque prevents white rectangles when cells scroll or resize.
+      java.awt.Graphics2D canvas = (java.awt.Graphics2D) graphics.create();
+      try {
+        canvas.setColor(getBackground());
+        canvas.fillRect(0, 0, getWidth(), getHeight());
+      } finally {
+        canvas.dispose();
+      }
+      super.paintComponent(graphics);
     }
   }
 

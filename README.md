@@ -1,64 +1,43 @@
-# Điện Máy Đỏ - bản nâng cấp 3.0.0
+# Điện Máy Đỏ — bản mã nguồn đã chỉnh sửa, schema v5
 
-**Trạng thái: bản bàn giao mã nguồn để tiếp tục nghiệm thu, CHƯA đạt nghiệm thu toàn bộ.**
+**Có mã triển khai và bằng chứng build/kiểm thử trong gói. Chưa nghiệm thu toàn bộ trên Windows và SQL Server; không coi đây là bản sẵn sàng production.**
 
-Dự án thật gồm Java Swing, backend REST Java, DTO dùng chung, bộ SQL Server,
-kiểm thử, tài nguyên và hướng dẫn trong cùng thư mục này.
-Không có mật khẩu mặc định, tài khoản thật hoặc database sản xuất kèm theo.
+Bản này được sửa trực tiếp từ `DienMayDo123.rar`, giữ các module `client-swing`, `backend-server`, `common-dto`, `database`, `tests`, `tools`; không thay dự án bằng mã mẫu. Các fixture mô phỏng chỉ nằm trong kiểm thử, không thay backend nghiệp vụ.
 
 ## Bắt đầu
 
-1. Đọc **[README_RUN.md](README_RUN.md)** để build, cấu hình và chạy.
-2. Khởi tạo SQL Server theo **[database/README.md](database/README.md)**.
-   Có schema, migration, danh mục tham chiếu và dataset DEMO riêng; không chỉ có schema rỗng.
-3. Xem **[ACCEPTANCE_REPORT.md](ACCEPTANCE_REPORT.md)** trước khi dùng dữ liệu thật.
-
 ```sh
 ant clean verify
-# Sau khi đã cấu hình và khởi tạo SQL Server:
-sh scripts/database-tool.sh check
-sh scripts/run-backend.sh
-# Terminal khác:
-sh scripts/run-client.sh
 ```
 
-Windows dùng các tệp `.bat` cùng tên. JDK 17+ và Apache Ant cần được cài trên máy.
-`dist/` có các JAR đã build; vẫn giữ đầy đủ mã nguồn để build lại.
+JDK 17+ và Apache Ant. Lệnh trên biên dịch riêng client/backend qua DTO chung, chạy **248 bài offline**, tạo ba JAR trong `dist/`; không ghi database. JDBC driver được giữ trong `backend-server/lib`. Maven POM được cập nhật bộ test mới nhưng chưa chạy Maven tại môi trường này.
 
-## Các thay đổi chính
+Đọc `README_RUN.md` để cài đặt, `database/README.md` và `docs/CONTROLLED_OPERATIONS.md` để nâng cấp có kiểm soát. Không chạy migration production khi chưa backup, thử khôi phục và phê duyệt triển khai.
 
-- Một cửa sổ chính `AppShell`; các màn hình và biểu mẫu là panel.
-  Quay lại, Tiến, Trang chủ, Nháp chưa lưu; cảnh báo trước khi rời màn hình có thay đổi.
-- Ngừng sử dụng / khôi phục danh mục và tài khoản có lý do, phiên bản bản ghi,
-  kiểm tra quyền và nhật ký. Không xóa lịch sử chứng từ.
-- Quy trình quản lý xác minh thương hiệu / loại / sản phẩm / mã vạch,
-  lưu nguồn, ghi chú, người duyệt, thời điểm. API không tự tin trạng thái duyệt gửi từ form sản phẩm.
-- GTIN/EAN/UPC và IMEI có kiểm tra cấu trúc; đúng cấu trúc **không** đồng nghĩa đúng sản phẩm/thiết bị.
-- Bảng dữ liệu phân biệt mã chuỗi, ngày, tiền, trạng thái; gợi ý nhập liệu không bị lưu như giá trị thật.
-- SQL Server schema v4: 24 bảng / 182 cột, migration bổ sung, công cụ khởi tạo có chốt chặn DEMO,
-  hai sản phẩm tham chiếu có nguồn hãng, giao dịch mô phỏng liên kết xuyên suốt.
+## Thay đổi thực tế
 
-## Đã kiểm chứng / chưa kiểm chứng
+- Một `AppShell` không viền, toàn màn hình theo monitor, ba nút cửa sổ luôn tồn tại, F11/Alt+F4 và bảo vệ dữ liệu chưa lưu. Bỏ demo banner, nút Nháp chưa lưu trên toolbar và status bar; thay `message()` bằng toast có nút đóng.
+- Dashboard dùng toàn chiều rộng, card trong suốt, lưới thích ứng; Kiểm chứng dữ liệu ở Hệ thống, không còn shortcut nhưng giữ quy trình/API.
+- Xác nhận giá dưới vốn tại sửa sản phẩm và nhập hàng: BigDecimal, tuple giá/Revision, backend kiểm tra và audit. PendingStore giữ cả IMEI và metadata xác nhận qua khởi động lại.
+- Xóa vật lý có điều kiện cho 7 loại thực thể, chỉ Manager. Nút trực tiếp tại màn hình, preview, lý do, kiểm tra lại transaction, audit và biên nhận đối soát. Không thay ARCHIVE/RESTORE bằng DELETE.
+- Tab phiếu nhập đã ghi sổ: preview và đảo bằng movement bù trừ, không xóa chứng từ gốc; bảo vệ tồn/Serial/giá vốn, UUID/idempotency và đối soát bền vững.
+- Migration `014` lên v5, quyền SQL giới hạn `015`, kiểm tra đối soát chỉ đọc `016`; không sửa migration lịch sử và không cấp DELETE toàn schema.
 
-191 kiểm thử không cần SQL Server đã đạt. Kiểm thử Swing dùng HTTP mô phỏng,
-không dùng database thật; kết quả và ảnh ở `docs/evidence/`.
-**Môi trường thực hiện không có SQL Server**: tạo DB, chạy migration/seed,
-giao dịch SQL, khóa đồng thời và kết nối backend với DB chưa được chạy thực tế.
-Bộ SQL integration test đã biên dịch nhưng kết quả hiện tại là `SKIP`, không phải `PASS`.
+## Kết quả và giới hạn
 
-**Chưa có nghiệp vụ hủy / hoàn / điều chỉnh chứng từ đã ghi sổ.**
-Nút hủy yêu cầu chỉ chặn giao dịch chưa hoàn tất; không được coi là hoàn tiền hay đảo doanh thu.
-Xem [các vấn đề còn mở](docs/KNOWN_LIMITATIONS.md). Không chạy migration trực tiếp lên dữ liệu thật khi chưa sao lưu và nghiệm thu.
+248 bài offline đạt; tại mỗi độ phân giải 1366×768 và 1920×1080, 143 kiểm tra Swing và 19 kịch bản modal đạt. Swing chạy với HTTP fixture, không phải DB thật. **72 kịch bản SQL Server đã biên dịch nhưng chưa chạy**; quyền stored procedure, migration, transaction, rollback và tranh chấp thật cần nghiệm thu tiếp. Kết quả đầy đủ, lệnh và log ở `TEST_RESULTS.md`.
 
-## Tài liệu trong dự án
+Đảo phiếu được chặn khi thiếu snapshot giá vốn hoặc có giao dịch kho về sau trên cùng sản phẩm. Các giới hạn cụ thể ở `IMPLEMENTATION_STATUS.md` và `docs/KNOWN_LIMITATIONS.md`. Không có chức năng hoàn tiền/đảo bán hàng ngoài phạm vi này.
 
-| Nội dung | Vị trí |
+## Tài liệu và toàn vẹn
+
+| Nội dung | Tệp |
 |---|---|
-| Cài đặt / build / chạy | `README_RUN.md`, `database/README.md` |
-| Hiện trạng, thay đổi, nghiệm thu | `docs/AUDIT.md`, `CHANGELOG.md`, `ACCEPTANCE_REPORT.md` |
-| Ma trận tất cả cột, nguồn sự thật, quy tắc | `docs/data/FIELD_MATRIX.md`, `docs/data/schema-inventory.json` |
-| Gợi ý nhập liệu và điều hướng | `docs/data/GUIDED_INPUT.md`, `docs/gui-design/SCREENS.md` |
-| Kiến trúc, 44 API, triển khai | `docs/architecture/` |
-| Bằng chứng kiểm thử | `docs/testing/`, `docs/evidence/` |
-| Nguồn danh mục / nguồn mã | `docs/REFERENCES.md`, `docs/provenance/` |
-| Toàn vẹn tệp / thư viện | `SHA256SUMS.txt`, `THIRD_PARTY_NOTICES.md` |
+| Cài đặt và vận hành | `README_RUN.md`, `database/README.md` |
+| Thay đổi, trạng thái từng yêu cầu | `CHANGELOG.md`, `IMPLEMENTATION_STATUS.md` |
+| Bằng chứng và nghiệm thu còn thiếu | `TEST_RESULTS.md`, `docs/evidence/`, `docs/testing/` |
+| API và an toàn giao dịch mới | `docs/architecture/API.md`, `docs/CONTROLLED_OPERATIONS.md` |
+| Danh sách tệp thay đổi / loại bỏ | `DELIVERY_MANIFEST.md` |
+| SHA-256 từng tệp / giấy phép | `SHA256SUMS.txt`, `THIRD_PARTY_NOTICES.md` |
+
+Gói không chứa cache Eclipse/trình duyệt, mật khẩu SQL, token hay database khách hàng. `config/database.properties` là cấu hình đã làm sạch; người triển khai phải cấp kết nối và bí mật riêng trên máy backend.

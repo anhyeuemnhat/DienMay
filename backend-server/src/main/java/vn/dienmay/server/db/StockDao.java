@@ -49,6 +49,15 @@ public final class StockDao {
         request, product, location, delta, kind, reference, employee, invoice, vendor, cost);
   }
 
+  /** Receipt snapshots are inserted with the original movement, never patched after commit. */
+  public long receipt(Connection c, UUID request, long product, int quantity, String reference,
+      long employee, Long vendor, BigDecimal cost, BigDecimal previousCost) throws SQLException {
+    return insert(c, "INSERT dm.StockMovements(RequestId,ProductId,Location,Delta,Kind,Reference,EmployeeId,"
+        + "VendorId,UnitCost,PreviousCostPrice,CostRevisionAfter) OUTPUT INSERTED.Id "
+        + "SELECT ?,?, 'KHO',?,'RECEIVE',?,?,?,?,?,CostRevision+1 FROM dm.Products WHERE Id=?",
+        request, product, quantity, reference, employee, vendor, cost, previousCost, product);
+  }
+
   public long sellUnit(Connection c, long product, String serial) throws SQLException {
     try (PreparedStatement s = statement(c,
         "UPDATE dm.ProductUnits SET Status='SOLD' OUTPUT INSERTED.Id "

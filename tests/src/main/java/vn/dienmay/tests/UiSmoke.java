@@ -98,10 +98,14 @@ public final class UiSmoke {
   private static void inspect(AppContext app) {
     oneWindow(app);
     Rectangle outer = new Rectangle(app.shell().getLocationOnScreen(), app.shell().getSize());
-    for (String id : List.of("navigationBack", "navigationForward", "navigationHome", "navigationDrafts")) {
+    for (String id : List.of("navigationBack", "navigationForward", "navigationHome", "windowMinimize", "windowRestore",
+        "windowClose")) {
       AbstractButton b = button(app.shell(), id);
       check(outer.contains(new Rectangle(b.getLocationOnScreen(), b.getSize())), "Clipped navigation: " + id);
     }
+    check(app.shell().isUndecorated(), "Native title bar returned");
+    check(descendants(app.shell()).stream().noneMatch(c -> "navigationDrafts".equals(c.getName())
+        || "environmentBanner".equals(c.getName())), "Removed UI component returned");
     for (Component c : descendants(app.shell().current())) {
       if (c instanceof JTable t && c.isShowing()) {
         check(t.getParent().getHeight() >= 120, "Data table viewport too small");
@@ -139,6 +143,17 @@ public final class UiSmoke {
     });
   }
 
+  private static double luminance(java.awt.Color color) {
+    double[] v = {color.getRed() / 255.0, color.getGreen() / 255.0, color.getBlue() / 255.0};
+    for (int i = 0; i < v.length; i++) { v[i] = v[i] <= 0.04045 ? v[i] / 12.92 : Math.pow((v[i] + 0.055) / 1.055, 2.4);
+        }
+    return v[0] * 0.2126 + v[1] * 0.7152 + v[2] * 0.0722;
+  }
+  private static double contrast(java.awt.Color first, java.awt.Color second) {
+    double a = luminance(first), b = luminance(second);
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  }
+
   public static void main(String[] args) throws Exception {
     if (GraphicsEnvironment.isHeadless()) { throw new IllegalStateException("Run under Xvfb or a desktop display"); }
     int width = Toolkit.getDefaultToolkit().getScreenSize().width;
@@ -156,16 +171,23 @@ public final class UiSmoke {
         try {
           edt(() -> { new MainUI(app).open(); return null; });
           Thread.sleep(250);
-          tests.test(role + " / login uses single JFrame", () -> edt(() -> { oneWindow(app); return null; }));
+          tests.test(role + " / login keeps borderless chrome on single JFrame", () -> edt(() -> {
+            inspect(app); return null;
+          }));
           if (role == Role.MANAGER) { screenshot(app, out.resolve("01-login.png")); }
           ApiSession session = Json.convert(gateway.call(Operation.LOGIN, "", Data.map("username", role.name())),
               ApiSession.class);
           edt(() -> { app.acceptSession(session); return null; });
           idle(app);
           WorkFrame home = edt(() -> app.shell().current());
-          tests.test(role + " / dashboard and DEMO banner", () -> edt(() -> {
+          tests.test(role + " / dashboard without global DEMO banner", () -> edt(() -> {
             inspect(app); equal("DEMO", app.environmentMode());
-            equal(6, app.shell().getJMenuBar().getMenuCount());
+            equal(6L, java.util.Arrays.stream(app.shell().getJMenuBar().getComponents())
+                .filter(c -> c instanceof javax.swing.JMenu).count());
+            javax.swing.JLabel crumb = (javax.swing.JLabel) descendants(app.shell()).stream()
+                .filter(c -> "navigationBreadcrumb".equals(c.getName())).findFirst().orElseThrow();
+            equal("", crumb.getText());
+            equal(app.shell().getGraphicsConfiguration().getBounds(), app.shell().getBounds());
             return null;
           }));
           screenshot(app, out.resolve("02-home-" + role.name() + ".png"));
@@ -174,12 +196,93 @@ public final class UiSmoke {
             check(destinations.stream().allMatch(d -> d.permission().allows(role)), "Role menu mismatch");
             equal(role == Role.MANAGER ? 17 : role == Role.CASHIER ? 6 : 7, destinations.size());
           });
+          tests.test(role + " / transparent full-width filtered dashboard cards", () -> edt(() -> {
+            List<Component> cards = descendants(home).stream()
+                .filter(c -> "dashboardFunctionCard".equals(c.getName())).toList();
+            equal((long) cards.size(), destinations.stream().filter(Navigation.Destination::showOnDashboard).count());
+            check(!cards.isEmpty(), "Missing cards");
+            java.awt.Dimension cardSize = cards.get(0).getSize();
+            for (Component card : cards) {
+              check(!((javax.swing.JPanel) card).isOpaque(), "Opaque function card");
+              equal(cardSize, card.getSize());
+              check(!button(card, ((AbstractButton) descendants(card).stream().filter(c -> c instanceof AbstractButton)
+                  .findFirst().orElseThrow()).getText()).getText().contains("Ki\u1ec3m ch\u1ee9ng"),
+                  "Quality dashboard shortcut was not removed");
+              javax.swing.JLabel label = (javax.swing.JLabel) descendants(card).stream()
+                  .filter(c -> c instanceof javax.swing.JLabel).findFirst().orElseThrow();
+              check(contrast(label.getForeground(), label.getBackground()) >= 4.5, "Label contrast below AA");
+            }
+            check(cards.get(0).getParent().getWidth() >= app.shell().getWidth() - 100,
+                "Dashboard still reserves a mascot column");
+            if (role == Role.MANAGER) {
+              Navigation.Destination quality = destinations.stream()
+                  .filter(d -> d.permission() == Operation.QUALITY_LIST).findFirst().orElseThrow();
+              equal("H\u1ec7 th\u1ed1ng", quality.group()); check(!quality.showOnDashboard(), "Quality shortcut");
+            }
+            return null;
+          }));
+          if (role == Role.MANAGER) {
+            tests.test("Custom restore/fullscreen preserves geometry and undecorated state", () -> {
+              edt(() -> { button(app.shell(), "windowRestore").doClick(); return null; });
+              Thread.sleep(200);
+              Rectangle restored = edt(() -> app.shell().getBounds());
+              edt(() -> { check(!app.shell().isBorderlessFullscreen(), "Restore failed");
+                app.shell().setLocation(37, 41); app.shell().toggleFullscreen(); return null; });
+              Thread.sleep(200);
+              edt(() -> { equal(app.shell().getGraphicsConfiguration().getBounds(), app.shell().getBounds());
+                app.shell().toggleFullscreen(); return null; });
+              Thread.sleep(200);
+              edt(() -> { equal(new Rectangle(37, 41, restored.width, restored.height), app.shell().getBounds());
+                check(app.shell().isUndecorated(), "Restored native title bar");
+                app.shell().toggleFullscreen(); return null; });
+            });
+            tests.test("Custom minimize and restore returns to fullscreen", () -> {
+              edt(() -> { button(app.shell(), "windowMinimize").doClick(); return null; });
+              Thread.sleep(300);
+              edt(() -> { check((app.shell().getExtendedState() & Frame.ICONIFIED) != 0, "Not iconified");
+                app.shell().setExtendedState(Frame.NORMAL); return null; });
+              Thread.sleep(300);
+              edt(() -> { inspect(app); equal(app.shell().getGraphicsConfiguration().getBounds(),
+                app.shell().getBounds()); return null; });
+            });
+          }
           int index = 3;
           for (Navigation.Destination destination : destinations) {
             edt(() -> { Navigation.open(app, destination); return null; });
             idle(app);
             WorkFrame screen = edt(() -> app.shell().current());
             tests.test(role + " / screen " + destination.title(), () -> edt(() -> { inspect(app); return null; }));
+            tests.test(role + " / scoped destructive action " + destination.permission(), () -> edt(() -> {
+              boolean recordScreen = List.of(Operation.QUALITY_LIST, Operation.EMPLOYEES,
+                  Operation.PRODUCT_SEARCH, Operation.CUSTOMERS, Operation.VENDORS, Operation.LOOKUP_SAVE,
+                  Operation.RECEIVE, Operation.PROMOTIONS).contains(destination.permission());
+              List<Component> removes = descendants(screen).stream()
+                  .filter(c -> "recordDelete".equals(c.getName())).toList();
+              equal(recordScreen && role == Role.MANAGER ? 1 : 0, removes.size());
+              if (!removes.isEmpty()) { check(!removes.get(0).isEnabled(), "Delete enabled without selection"); }
+              return null;
+            }));
+            if (destination.permission() == Operation.RECEIVE) {
+              edt(() -> {
+                javax.swing.JTabbedPane tabs = (javax.swing.JTabbedPane) descendants(screen).stream()
+                    .filter(c -> "receiveTabs".equals(c.getName())).findFirst().orElseThrow();
+                equal(2, tabs.getTabCount()); tabs.setSelectedIndex(1); return null;
+              });
+              idle(app);
+              tests.test(role + " / posted receipts are inside Receive and retain history columns", () -> edt(() -> {
+                inspect(app);
+                Component panel = descendants(screen).stream().filter(c -> "postedReceiptsPanel".equals(c.getName()))
+                    .findFirst().orElseThrow();
+                JTable receiptTable = (JTable) descendants(panel).stream().filter(c -> c instanceof JTable)
+                    .findFirst().orElseThrow();
+                equal(1, receiptTable.getRowCount());
+                receiptTable.setRowSelectionInterval(0, 0);
+                if (role == Role.MANAGER) { check(button(panel, "recordDelete").isEnabled(),
+                    "Selected delete disabled"); }
+                return null;
+              }));
+            }
+
             if (role == Role.MANAGER) {
               screenshot(app, out.resolve(String.format("%02d-%s.png", index++, destination.permission().name())));
             }
@@ -212,6 +315,10 @@ public final class UiSmoke {
                 .map(c -> (JTextField) c).findFirst().orElseThrow());
             String original = edt(field::getText);
             edt(() -> { field.setText("000-DRAFT"); return null; });
+            confirm(() -> { button(app.shell(), "windowClose").doClick(); return null; }, JOptionPane.NO_OPTION);
+            tests.test("Custom close Cancel preserves dirty form and main window", () -> edt(() -> {
+              oneWindow(app); equal(editor, app.shell().current()); equal("000-DRAFT", field.getText()); return null;
+            }));
             confirm(() -> { app.shell().back(); return null; }, JOptionPane.NO_OPTION);
             tests.test("Unsaved-change rejection keeps current editor", () -> edt(() -> {
               equal(editor, app.shell().current()); return null;

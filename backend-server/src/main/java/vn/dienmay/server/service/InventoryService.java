@@ -84,10 +84,11 @@ public final class InventoryService {
             throw new IllegalArgumentException("Nha cung cap khong hoat dong.");
           }
         }
+        vn.dienmay.common.model.PricePolicy.require(item.id(), item.revision(), request.unitCost(),
+            item.sellingPrice(), request.priceConfirmation());
         stock.add(c, item.id(), "KHO", request.quantity());
-        long movement = stock.movement(c, request.id(), item.id(), "KHO", request.quantity(),
-            "RECEIVE", request.reference(), session.employeeId(), null, request.vendorId(),
-            request.unitCost());
+        long movement = stock.receipt(c, request.id(), item.id(), request.quantity(), request.reference(),
+            session.employeeId(), request.vendorId(), request.unitCost(), item.costPrice());
         if (QualityService.mode(c).equals("PRODUCTION") && request.serials().stream()
             .anyMatch(code -> code.startsWith("DEMO-"))) {
           throw new IllegalArgumentException("Khong nhap dinh danh DEMO vao database that.");
@@ -98,7 +99,12 @@ public final class InventoryService {
               request.identifierType(), request.reference());
           stock.attachUnit(c, movement, unit);
         }
-        update(c, "UPDATE dm.Products SET CostPrice=?,Revision=Revision+1 WHERE Id=?",
+        if (vn.dienmay.common.model.PricePolicy.belowCost(request.unitCost(), item.sellingPrice())) {
+          QualityService.audit(c, "product", item.id(), "RECEIVE_BELOW_COST", "cost=" + item.costPrice(),
+              "cost=" + request.unitCost() + ";selling=" + item.sellingPrice(),
+              "request=" + request.id() + ";explicit acknowledgement", session.employeeId());
+        }
+        update(c, "UPDATE dm.Products SET CostPrice=?,CostRevision=CostRevision+1,Revision=Revision+1 WHERE Id=?",
             request.unitCost(), item.id());
       } else {
         stock.subtract(c, item.id(), request.from(), request.quantity());

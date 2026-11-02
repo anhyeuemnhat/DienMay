@@ -50,6 +50,7 @@ public class StockFrame extends WorkFrame {
   private final JButton cancel;
   private Item selected;
   private boolean closed;
+  private PostedReceiptsPanel postedReceipts;
 
   protected StockFrame(AppContext app, boolean receiving) {
     super(app, receiving ? "Nhập hàng" : "Chuyển kho / quầy",
@@ -61,6 +62,9 @@ public class StockFrame extends WorkFrame {
     } catch (IOException ex) {
       throw new IllegalStateException("Không mở được yêu cầu chờ; không xóa tệp. " + ex.getMessage(), ex);
     }
+    sku.setName("stockSku");
+    cost.setName("stockCost");
+    reference.setName("stockReference");
     JPanel productInput = Ui.toolbar(sku, Ui.button("Tìm sản phẩm", this::findProduct));
     JPanel fields = receiving
         ? Ui.fields("SKU / mã vạch *", productInput, "Sản phẩm", product,
@@ -98,10 +102,25 @@ public class StockFrame extends WorkFrame {
     editor.add(split, BorderLayout.CENTER);
     body.add(editor, BorderLayout.CENTER);
     submit = Ui.button("Xác nhận ghi kho", this::submit);
+    submit.setName("stockSubmit");
     retry = Ui.button("Thử lại cùng mã", this::retry);
     resolve = Ui.button("Đối soát", this::resolve);
     cancel = Ui.button("Yêu cầu hủy an toàn", this::cancel);
-    body.add(Ui.toolbar(submit, retry, resolve, cancel), BorderLayout.SOUTH);
+    JPanel inputActions = Ui.toolbar(submit, retry, resolve, cancel);
+    if (receiving) {
+      body.remove(editor);
+      JPanel input = new JPanel(new BorderLayout(8, 8));
+      input.setOpaque(false);
+      input.add(editor, BorderLayout.CENTER);
+      input.add(inputActions, BorderLayout.SOUTH);
+      postedReceipts = new PostedReceiptsPanel(app, this);
+      javax.swing.JTabbedPane tabs = new javax.swing.JTabbedPane();
+      tabs.setName("receiveTabs");
+      tabs.addTab("Nhập hàng", input);
+      tabs.addTab("Phiếu nhập đã ghi sổ", postedReceipts);
+      tabs.addChangeListener(event -> { if (tabs.getSelectedIndex() == 1) { postedReceipts.activate(); } });
+      body.add(tabs, BorderLayout.CENTER);
+    } else { body.add(inputActions, BorderLayout.SOUTH); }
     GuidedInput.install(sku, "Nhập hoặc quét SKU/mã vạch; bấm Tìm sản phẩm");
     GuidedInput.install(serials, "Mỗi dòng một mã từ nhãn/chứng từ. Không tự sinh mã.");
     identifierType.setToolTipText("IMEI: 15 chữ số, kiểm tra Luhn; đúng cấu trúc chưa chứng minh nguồn gốc.");
@@ -195,7 +214,14 @@ public class StockFrame extends WorkFrame {
   }
 
   private void submit() {
-    InventoryRequest request = buildRequest();
+    if (app.jobs() != 0 || controller.pending() != null) { return; }
+    InventoryRequest draft = buildRequest();
+    if (receiving && vn.dienmay.common.model.PricePolicy.belowCost(draft.unitCost(), selected.sellingPrice())) {
+      if (!PriceConfirmations.confirmReceipt(this, selected, draft.unitCost())) { return; }
+      draft = draft.withConfirmation(new vn.dienmay.common.model.PriceConfirmation(
+          selected.id(), selected.revision(), draft.unitCost(), selected.sellingPrice()));
+    }
+    InventoryRequest request = draft;
     if (!Ui.confirm(this, "Xác nhận ghi " + request.quantity() + " sản phẩm?")) {
       return;
     }
@@ -251,7 +277,12 @@ public class StockFrame extends WorkFrame {
 
   private void failed(Throwable error) {
     refreshState();
-    Ui.error(this, error);
+    if (error instanceof vn.dienmay.common.api.ApiException api
+        && java.util.Set.of("BELOW_COST_CONFIRMATION_REQUIRED", "PRICE_CONFIRMATION_STALE").contains(api.code())) {
+      Ui.message(this, "Giá đã thay đổi hoặc cần xác nhận. Yêu cầu vẫn được giữ. "
+          + "Dùng Yêu cầu hủy an toàn để chốt yêu cầu cũ, rồi tải lại sản phẩm và xác nhận lại. "
+          + "Không sửa hoặc tạo lại mã của giao dịch chưa đối soát.");
+    } else { Ui.error(this, error); }
   }
 
   private void refreshState() {
@@ -275,7 +306,8 @@ public class StockFrame extends WorkFrame {
   }
 
   @Override
-  public boolean hasUnsavedChanges() { return controller != null && controller.pending() != null ||
+  public boolean hasUnsavedChanges() { return postedReceipts != null && postedReceipts.hasPending()
+      || controller != null && controller.pending() != null ||
       !reference.getText().isBlank() || !serials.getText().isBlank() || !sku.getText().isBlank(); }
 
   @Override
@@ -289,6 +321,7 @@ public class StockFrame extends WorkFrame {
       closed = true;
       try {
         controller.close();
+        if (postedReceipts != null) { postedReceipts.close(); }
       } catch (IOException ex) {
         Ui.error(this, ex);
       }

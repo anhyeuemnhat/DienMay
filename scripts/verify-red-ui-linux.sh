@@ -5,6 +5,7 @@ cd "$(dirname "$0")/.."
 mkdir -p docs/evidence
 ant clean verify > docs/evidence/ant-clean-verify.log 2>&1
 sh scripts/ui-smoke-linux.sh
+sh scripts/ui-modal-linux.sh
 for size in 1366x768 1920x1080; do
   timeout 45s xvfb-run -a -s "-screen 0 ${size}x24" sh -c '
     openbox >/tmp/dienmay-package-wm-$$.log 2>&1 &

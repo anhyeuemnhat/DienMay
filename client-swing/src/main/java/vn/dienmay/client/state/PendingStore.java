@@ -28,13 +28,15 @@ import vn.dienmay.common.model.Validation;
 /** Retains the upstream durable properties protocol and one OS lock per employee/action. */
 public final class PendingStore implements AutoCloseable {
   private final Path file;
+  private final String kind;
   private final FileChannel channel;
   private final FileLock lock;
 
   public PendingStore(Path directory, long employee, String kind) throws IOException {
-    if (employee <= 0 || !Set.of("sale", "receive", "transfer").contains(kind)) {
+    if (employee <= 0 || !Set.of("sale", "receive", "transfer", "delete", "reversal").contains(kind)) {
       throw new IllegalArgumentException("Ten luu yeu cau khong hop le.");
     }
+    this.kind = kind;
     Files.createDirectories(directory);
     restrict(directory, true);
     file = directory.resolve(employee + "-" + kind + ".properties");
@@ -206,6 +208,8 @@ public final class PendingStore implements AutoCloseable {
     set(p, "cost", request.unitCost());
     set(p, "from", request.from());
     set(p, "to", request.to());
+    set(p, "identifierType", request.identifierType());
+    set(p, "priceConfirmation", vn.dienmay.common.api.Json.stringify(request.priceConfirmation()));
     writeSerials(p, "", request.serials());
     write(p);
   }
@@ -224,7 +228,10 @@ public final class PendingStore implements AutoCloseable {
       InventoryRequest request = new InventoryRequest(UUID.fromString(required(p, "id")),
           Long.parseLong(required(p, "product")), Integer.parseInt(required(p, "qty")),
           readSerials(p, ""), required(p, "reference"), vendor.isBlank() ? null : Long.valueOf(vendor),
-          Money.of(required(p, "cost")), from.isBlank() ? null : from, required(p, "to"));
+          Money.of(required(p, "cost")), from.isBlank() ? null : from, required(p, "to"),
+          p.getProperty("identifierType", "SERIAL"), vn.dienmay.common.api.Json.convert(
+              vn.dienmay.common.api.Json.parse(p.getProperty("priceConfirmation", "null")),
+              vn.dienmay.common.model.PriceConfirmation.class));
       verifyFingerprint(p, request.fingerprint());
       return request;
     } catch (RuntimeException ex) {
@@ -235,6 +242,36 @@ public final class PendingStore implements AutoCloseable {
   private static void verifyFingerprint(Properties properties, String actual) {
     if (!required(properties, "fingerprint").equals(actual)) {
       throw new IllegalArgumentException("Noi dung yeu cau cho da thay doi hoac bi hong.");
+    }
+  }
+
+  public void save(vn.dienmay.common.model.GuardedRequest request) throws IOException {
+    boolean matches = kind.equals("delete") && request instanceof vn.dienmay.common.model.DeletionRequest
+        || kind.equals("reversal") && request instanceof vn.dienmay.common.model.ReversalRequest;
+    if (!matches) { throw new IllegalArgumentException("Wrong durable administrative request kind."); }
+    Properties p = new Properties();
+    set(p, "type", "guarded-" + kind);
+    set(p, "id", request.id());
+    set(p, "fingerprint", request.fingerprint());
+    set(p, "payload", vn.dienmay.common.api.Json.stringify(request));
+    write(p);
+  }
+
+  public <T extends vn.dienmay.common.model.GuardedRequest> T guarded(Class<T> type) throws IOException {
+    Properties p = read();
+    if (p.isEmpty()) { return null; }
+    try {
+      if (!required(p, "type").equals("guarded-" + kind)) {
+        throw new IllegalArgumentException("Wrong request kind.");
+      }
+      T result = vn.dienmay.common.api.Json.convert(vn.dienmay.common.api.Json.parse(required(p, "payload")), type);
+      if (!result.id().toString().equals(required(p, "id"))) {
+        throw new IllegalArgumentException("Request identifier was changed.");
+      }
+      verifyFingerprint(p, result.fingerprint());
+      return result;
+    } catch (RuntimeException ex) {
+      throw new IOException("Tep yeu cau quan tri bi loi; KHONG xoa tep: " + file, ex);
     }
   }
 

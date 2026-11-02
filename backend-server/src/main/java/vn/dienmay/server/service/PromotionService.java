@@ -57,6 +57,13 @@ public final class PromotionService {
             normalized, validName, from, to, percent, enabled);
       }
       RecordGuard.expect(c, "dm.Promotions", id, revision, enabled);
+      try (PreparedStatement q = statement(c, "SELECT p.Code FROM dm.Promotions p WHERE p.Id=? "
+          + "AND p.Code<>? AND EXISTS(SELECT 1 FROM dm.Invoices i WITH(HOLDLOCK) WHERE i.PromotionCode=p.Code)",
+          id, normalized); ResultSet used = q.executeQuery()) {
+        if (used.next()) {
+          throw new IllegalArgumentException("Khong doi ma khuyen mai da su dung tren hoa don.");
+        }
+      }
       if (update(c, "UPDATE dm.Promotions SET Code=?,Name=?,StartDate=?,EndDate=?,PercentOff=?,"
           + "Enabled=?,Revision=Revision+1 WHERE Id=?", normalized, validName, from, to, percent, enabled, id) != 1) {
         throw new IllegalArgumentException("Khong tim thay khuyen mai.");

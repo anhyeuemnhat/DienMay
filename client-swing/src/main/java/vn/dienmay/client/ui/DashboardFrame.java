@@ -18,12 +18,20 @@ public class DashboardFrame extends WorkFrame {
     JPanel shortcuts = new ShortcutGrid();
     shortcuts.setOpaque(false);
     for (Navigation.Destination destination : Navigation.destinations(app)) {
-      JPanel card = new SurfacePanel(new BorderLayout(4, 4), Ui.CARD, 14);
+      if (!destination.showOnDashboard()) { continue; }
+      JPanel card = new JPanel(new BorderLayout(4, 4));
+      card.setOpaque(false);
+      card.setName("dashboardFunctionCard");
       card.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
       JLabel group = new JLabel(destination.group());
-      group.setForeground(Ui.MUTED);
+      group.setForeground(java.awt.Color.WHITE);
+      // Small opaque label backing guarantees contrast even over the light mascot, not a card surface.
+      group.setOpaque(true);
+      group.setBackground(Ui.HEADER);
+      group.setBorder(BorderFactory.createEmptyBorder(2, 7, 2, 7));
       card.add(group, BorderLayout.NORTH);
-      card.add(Ui.button(destination.title(), () -> Navigation.open(app, destination)), BorderLayout.CENTER);
+      card.add(Ui.dashboardAction(destination.title(), () -> Navigation.open(app, destination)),
+          BorderLayout.CENTER);
       shortcuts.add(card);
     }
     JPanel content = new ScrollablePanel(new BorderLayout(12, 12));
@@ -36,15 +44,19 @@ public class DashboardFrame extends WorkFrame {
         + "Khi mất kết nối: không tạo yêu cầu mới. Giữ mã giao dịch và chọn Đối soát.\n"
         + "Các nút không thuộc vai trò hiện tại sẽ không xuất hiện.");
     guidance.setEditable(false);
+    guidance.setOpaque(false);
+    guidance.setForeground(Ui.TEXT);
     guidance.setLineWrap(true);
     guidance.setWrapStyleWord(true);
     guidance.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
     guidance.setRows(6);
-    content.add(guidance, BorderLayout.CENTER);
+    JPanel guidancePanel = new SurfacePanel(new BorderLayout(), Ui.GLASS_SURFACE, 12);
+    guidancePanel.setName("dashboardGuidanceGlass");
+    guidancePanel.add(guidance, BorderLayout.CENTER);
+    content.add(guidancePanel, BorderLayout.CENTER);
     javax.swing.JScrollPane scroll = Ui.backgroundScroll(content);
     body.add(scroll, BorderLayout.CENTER);
     javax.swing.SwingUtilities.invokeLater(() -> scroll.getVerticalScrollBar().setValue(0));
-    message("API: " + app.gateway().profile() + "  |  Phiên hết hạn: " + app.session().expiresAt());
   }
 
   @Override
@@ -61,14 +73,14 @@ public class DashboardFrame extends WorkFrame {
 
     private int columns() {
       int width = getParent() == null ? 980 : getParent().getWidth();
-      return width > 0 ? Math.max(1, Math.min(4, (width + 10) / 235)) : 4;
+      return width > 0 ? Math.max(1, Math.min(8, (width + 10) / 255)) : 4;
     }
 
     @Override
     public Dimension getPreferredSize() {
       int columns = columns();
       int rows = (getComponentCount() + columns - 1) / columns;
-      return new Dimension(220 * columns + 10 * (columns - 1), rows * 80 + 10 * Math.max(0, rows - 1));
+      return new Dimension(240 * columns + 10 * (columns - 1), rows * 92 + 10 * Math.max(0, rows - 1));
     }
 
     @Override

@@ -1,4 +1,26 @@
-# Bộ database SQL Server - schema v4
+# Cập nhật bắt buộc cho bản bàn giao schema v5
+
+**SQL trong đợt này chưa chạy trên SQL Server.** Các hướng dẫn bên dưới phải được DBA thử trên database riêng trước. Backend mới yêu cầu v5; không chỉ chạy các bước v4 của tài liệu cũ.
+
+| Tệp mới | Vai trò |
+|---|---|
+| `migration/014_controlled_operations.sql` | CostRevision; snapshot phiếu nhập; InventoryReversals; DeletionRequests; constraint movement/Serial/cancel; procedure ControlledDelete; marker v5 |
+| `security/015_controlled_operations.sql` | Chạy sau 008; EXECUTE procedure, DENY xóa danh mục trực tiếp/lịch sử, không cấp DELETE schema |
+| `checks/016_controlled_reconciliation.sql` | Chỉ đọc: gốc/bù trừ, tồn tại Serial đã đảo, liên kết/audit/cancel, không sửa dữ liệu |
+
+Thứ tự cấu trúc qua installer: **001 → 007 → 010 → 011 → 012 → 014**. Sau đó DBA chạy **008 → 015** để cấp quyền; chạy checks **009, 013, 016** khi nghiệm thu. Không sửa migration lịch sử. Các bước cấp quyền và checks không tự chạy khi backend khởi động.
+
+Snapshot của phiếu cũ giữ NULL: phiếu đó bị chặn đảo tự động, không tự backfill giá đoán. CostRevision theo dõi cập nhật giá vốn trong catalog/receive/reverse; một số cập nhật SQL trực tiếp ngoài ứng dụng không có cùng kiểm soát, nên không cấp cho client quyền truy cập DB.
+
+Procedure xóa dùng SQL ownership chaining cho DML tĩnh; giữ chung owner của procedure/tables, không cấp ALTER cho runtime. Phải xác nhận thực tế direct DELETE bị DENY trong khi procedure thực hiện đúng các điều kiện. Chưa có kết quả chạy permission test trong môi trường này.
+
+Có thể cần restore từ backup nếu migration lỗi; marker v5 chỉ ghi sau khi procedure và các đối tượng cần thiết đã tạo. Các batch không phải một transaction duy nhất bao toàn bộ bộ cài. Không đánh dấu version thủ công để bỏ qua lỗi.
+
+Xem `../README_RUN.md`, `../IMPLEMENTATION_STATUS.md`, `../docs/CONTROLLED_OPERATIONS.md` để biết phạm vi và hạn chế mới. Nội dung nền bên dưới được giữ để tham khảo quy trình demo/production; bước cấp quyền phải bao gồm 015 như trên.
+
+---
+
+# Bộ database SQL Server - schema v5
 
 **Có mã SQL và dataset, nhưng chưa chạy trên SQL Server trong môi trường bàn giao.**
 Không có file `.bak` giả lập. Cài đặt từ các script kèm theo; kiểm chứng theo checklist trước vận hành.
@@ -39,7 +61,7 @@ sh scripts/database-tool.sh check
 Windows thay `sh scripts/database-tool.sh` bằng `scripts\database-tool.bat`.
 `init-demo` yêu cầu DB trống hoặc bản khởi tạo DEMO do công cụ này tạo,
 không tự nhận database cũ là DEMO. `seed-demo` yêu cầu tên kết thúc `_Demo`,
-mode DEMO, schema v4, quản lý ban đầu và chưa có dữ liệu nghiệp vụ.
+mode DEMO, schema v5, quản lý ban đầu và chưa có dữ liệu nghiệp vụ.
 Chạy lại đúng dataset version sẽ không chèn trùng; dataset khác / mode thật bị chặn.
 
 4. DBA chạy `security/008_runtime_role.sql` trong DB này, tạo login và user riêng bằng quy trình bí mật nội bộ.
@@ -83,7 +105,7 @@ Các giao dịch mới bị chặn cho đến khi dữ liệu liên quan đượ
 Phải lập kế hoạch chuyển đổi và thời gian dừng nghiệp vụ, không bật chặn trên hệ thống đang bán hàng khi chưa nghiệm thu.
 
 Muốn tạo database production **mới, trống**, DBA tự tạo DB không mang hậu tố `_Demo` / `_Test`,
-chọn DB đó trong SSMS, lần lượt chạy 001, 007, 010, 011, 012; sau đó classify-production,
+chọn DB đó trong SSMS, lần lượt chạy 001, 007, 010, 011, 012, 014; sau đó classify-production,
 bootstrap và cấp quyền runtime. Không chạy 002. Cách này chưa được kiểm chứng tại đây.
 
 ## C. An toàn, lặp lại và khôi phục

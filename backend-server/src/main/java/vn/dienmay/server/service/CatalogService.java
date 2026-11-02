@@ -74,6 +74,12 @@ public final class CatalogService {
   }
 
   public long save(AuthService.Session session, Item value) throws SQLException {
+    return save(session, value, null);
+  }
+
+  public long save(AuthService.Session session, Item value,
+      vn.dienmay.common.model.PriceConfirmation confirmation) throws SQLException {
+    vn.dienmay.common.model.PricePolicy.validateProduct(value);
     String sku = Validation.required(value.sku(), 64, "SKU");
     String barcode = CatalogRules.barcode(value.barcode(), value.barcodeType());
     String name = Validation.required(value.name(), 180, "Ten san pham");
@@ -87,6 +93,8 @@ public final class CatalogService {
     Money.exact(value.sellingPrice());
     return db.transaction(c -> {
       auth.require(c, session, Role.MANAGER);
+      vn.dienmay.common.model.PricePolicy.require(value.id(), value.revision(), value.costPrice(),
+          value.sellingPrice(), confirmation);
       QualityService.requireLookup(c, "dm.Brands", value.brandId());
       QualityService.requireLookup(c, "dm.Categories", value.categoryId());
       String deployment = QualityService.mode(c);
@@ -130,10 +138,11 @@ public final class CatalogService {
               + "BarcodeVerifiedBy=NULL,BarcodeVerifiedAt=NULL WHERE Id=?", id);
         }
         update(c, "UPDATE dm.Products SET SKU=?,Barcode=?,Name=?,CategoryId=?,BrandId=?,Model=?,"
-            + "Description=?,CostPrice=?,SellingPrice=?,WarrantyMonths=?,TrackSerial=?,Enabled=?,"
+            + "Description=?,CostRevision=CostRevision+CASE WHEN CostPrice<>? THEN 1 ELSE 0 END,"
+            + "CostPrice=?,SellingPrice=?,WarrantyMonths=?,TrackSerial=?,Enabled=?,"
             + "ReorderLevel=?,BarcodeType=?,Revision=Revision+1 WHERE Id=?", sku,
             barcode.isBlank() ? null : barcode, name, value.categoryId(), value.brandId(), model,
-            description, value.costPrice(), value.sellingPrice(), value.warrantyMonths(),
+            description, value.costPrice(), value.costPrice(), value.sellingPrice(), value.warrantyMonths(),
             value.trackSerial(), value.enabled(), value.reorderLevel(), value.barcodeType(), id);
 
         // Search index entries only. No invoice, unit or movement history is removed.
@@ -146,6 +155,11 @@ public final class CatalogService {
       QualityService.audit(c, "product", id, value.id() == 0 ? "CREATE" : "UPDATE",
           Integer.toString(value.revision()), value.id() == 0 ? "1" : Integer.toString(value.revision() + 1),
           "Catalog form; identity changes require re-review", session.employeeId());
+      if (vn.dienmay.common.model.PricePolicy.belowCost(value.costPrice(), value.sellingPrice())) {
+        QualityService.audit(c, "product", id, "BELOW_COST_CONFIRMED", "revision=" + value.revision(),
+            "cost=" + value.costPrice() + ";selling=" + value.sellingPrice(),
+            "Explicit acknowledgement of the exact submitted price tuple", session.employeeId());
+      }
       return id;
     });
   }

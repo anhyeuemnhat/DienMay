@@ -15,7 +15,6 @@ import vn.dienmay.client.AppContext;
 public abstract class WorkFrame extends JPanel {
   protected final AppContext app;
   protected final JPanel body = new WorkArea();
-  protected final JLabel status = new JLabel("S\u1eb5n s\u00e0ng");
   private final Workspace workspace = new Workspace();
   private final String screenTitle;
   private JButton defaultAction;
@@ -37,11 +36,7 @@ public abstract class WorkFrame extends JPanel {
     }
     workspace.add(Ui.backgroundScroll(body), BorderLayout.CENTER);
     background.add(workspace, BorderLayout.CENTER);
-    SurfacePanel footer = new SurfacePanel(new BorderLayout(), new Color(65, 5, 15, 238), 0);
-    status.setForeground(Color.WHITE);
-    status.setBorder(BorderFactory.createEmptyBorder(8, 22, 8, 22));
-    footer.add(Ui.backgroundScroll(status), BorderLayout.CENTER);
-    background.add(footer, BorderLayout.SOUTH);
+
   }
 
   protected final void workspaceMode(String mode) {
@@ -71,8 +66,7 @@ public abstract class WorkFrame extends JPanel {
   }
 
   public final void message(String message) {
-    status.setText(message);
-    status.setToolTipText(message);
+    ToastNotifications.show(this, message);
   }
 
   /** Keep data/actions reachable on small windows without shrinking a table to zero height. */
@@ -136,8 +130,8 @@ public abstract class WorkFrame extends JPanel {
       int width = getWidth();
       int left = switch (mode) {
         case "login" -> 24;
-        case "home" -> width >= 1250 ? Math.min(400, Math.max(300, width - 1050)) : 20;
-        case "dense" -> width >= 1650 ? 180 : 20;
+        case "home" -> 24;
+        case "dense" -> 24;
         default -> width >= 1250 ? Math.min(320, (width - 1000) / 2) : 20;
       };
       return new Insets(14, left, 14, 24);

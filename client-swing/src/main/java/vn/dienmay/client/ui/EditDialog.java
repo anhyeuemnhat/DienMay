@@ -25,6 +25,8 @@ public final class EditDialog extends WorkFrame {
   private final List<Object> original;
   private boolean completed;
   private Runnable cancelled;
+  private boolean submitting;
+  private java.util.function.UnaryOperator<Map<String, Object>> beforeSubmit = value -> value;
 
   public EditDialog(AppContext app, Component owner, String title, JComponent fields,
       Operation operation, Supplier<Map<String, Object>> values, Consumer<Object> onSaved) {
@@ -32,16 +34,30 @@ public final class EditDialog extends WorkFrame {
     this.fields = fields;
     original = snapshot(fields);
     body.add(Ui.scroll(fields), BorderLayout.CENTER);
-    javax.swing.JButton save = Ui.button("Lưu", () -> app.request(this, operation, values.get(), result -> {
-      completed = true;
-      dispose();
-      onSaved.accept(result);
-    }));
+    javax.swing.JButton save = Ui.button("Lưu", () -> {
+      if (submitting || app.jobs() != 0 || completed) { return; }
+      Map<String, Object> payload = beforeSubmit.apply(values.get());
+      if (payload == null) { return; }
+      submitting = true;
+      String bearer = app.token();
+      app.run(this, () -> app.gateway().call(operation, bearer, payload), result -> {
+        submitting = false;
+        completed = true;
+        dispose();
+        onSaved.accept(result);
+      }, error -> { submitting = false; Ui.error(this, error); });
+    });
     save.setName("editorSave");
     javax.swing.JButton cancel = Ui.button("Hủy thao tác", this::cancel);
     cancel.setName("editorCancel");
     body.add(Ui.toolbar(save, cancel), BorderLayout.SOUTH);
     defaultAction(save);
+  }
+
+  /** Null means user returned to editing; no network request has been made. */
+  public EditDialog beforeSubmit(java.util.function.UnaryOperator<Map<String, Object>> hook) {
+    beforeSubmit = Objects.requireNonNull(hook);
+    return this;
   }
 
   public void onCancel(Runnable action) { cancelled = action; }

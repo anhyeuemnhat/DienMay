@@ -1,3 +1,5 @@
+> **Tài liệu nền trước đợt chỉnh sửa schema v5.** Giữ để truy vết dự án gốc; các con số kiểm thử/đánh giá giao diện hoặc câu “chưa có đảo phiếu” trong nội dung cũ không phải kết luận của bản bàn giao hiện tại. Trạng thái hiện tại ở `IMPLEMENTATION_STATUS.md`, `TEST_RESULTS.md`, `CHANGELOG.md` tại gốc dự án. Bảng cột v5 bổ sung trong `docs/CONTROLLED_OPERATIONS.md` và schema-inventory.json; script SQL là nguồn chính xác.
+
 # Giao diện một cửa sổ
 
 Tài nguyên giao diện đỏ trong tệp RAR được giữ lại.

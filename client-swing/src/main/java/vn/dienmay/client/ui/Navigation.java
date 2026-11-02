@@ -12,7 +12,11 @@ import vn.dienmay.common.api.Operation;
 /** Functional grouping follows ptud p.159; access is derived from the shared operation policy. */
 public final class Navigation {
   public record Destination(String group, String title, Operation permission,
-      Function<AppContext, WorkFrame> create) {}
+      Function<AppContext, WorkFrame> create, boolean showOnDashboard) {
+    public Destination(String group, String title, Operation permission, Function<AppContext, WorkFrame> create) {
+      this(group, title, permission, create, true);
+    }
+  }
 
   private static final String SYSTEM = "Hệ thống";
   private static final String CATALOG = "Danh mục";
@@ -21,7 +25,7 @@ public final class Navigation {
   private static final String SEARCH = "Tra cứu";
   private static final String REPORT = "Báo cáo";
   private static final List<Destination> DESTINATIONS = List.of(
-      new Destination(CATALOG, "Kiểm chứng dữ liệu", Operation.QUALITY_LIST, QualityUI::new),
+      new Destination(SYSTEM, "Kiểm chứng dữ liệu", Operation.QUALITY_LIST, QualityUI::new, false),
       new Destination(SYSTEM, "Nhân viên / tài khoản", Operation.EMPLOYEES,
           app -> new PeopleUI(app, PeopleUI.Kind.EMPLOYEES)),
       new Destination(CATALOG, "Sản phẩm / tồn kho", Operation.PRODUCT_SEARCH, ProductsUI::new),

@@ -79,6 +79,7 @@
     <offline-suite class="ApiTests" log="api-tests.log"/>
     <offline-suite class="SecurityTests" log="security-tests.log"/>
     <offline-suite class="QualityTests" log="quality-tests.log"/>
+    <offline-suite class="ControlledOperationsTests" log="controlled-operations-tests.log"/>
   </target>
   <target name="sql-it" depends="compile-tests">
     <java classname="vn.dienmay.tests.SqlServerIT" fork="true" failonerror="true" dir="${basedir}">
@@ -89,6 +90,12 @@
   <target name="ui" depends="compile-tests">
     <java classname="vn.dienmay.tests.UiSmoke" fork="true" failonerror="true" dir="${basedir}" timeout="120000">
       <classpath refid="all.classes"/><arg value="${evidence}/ui"/>
+      <jvmarg value="-Dstdout.encoding=UTF-8"/><jvmarg value="-Dstderr.encoding=UTF-8"/>
+    </java>
+  </target>
+  <target name="ui-modal" depends="compile-tests">
+    <java classname="vn.dienmay.tests.ControlledUiTests" fork="true" failonerror="true" dir="${basedir}" timeout="150000">
+      <classpath refid="all.classes"/>
       <jvmarg value="-Dstdout.encoding=UTF-8"/><jvmarg value="-Dstderr.encoding=UTF-8"/>
     </java>
   </target>

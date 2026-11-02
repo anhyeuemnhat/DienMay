@@ -152,6 +152,8 @@ public final class SqlServerIT {
     if (!"YES".equals(System.getenv("DIENMAY_IT_ALLOW_WRITES"))) {
       System.out.println("SKIP | SQL Server integration NOT RUN: set explicit opt-in, expected "
           + "*_Test database and backend JDBC settings.");
+      System.out.println("SKIP | Planned SQL scenarios=" + (38 + ControlledSqlCases.plannedCount())
+          + " | baseline=38, controlled=" + ControlledSqlCases.plannedCount());
       return;
     }
     String expected = System.getenv("DIENMAY_IT_DATABASE");
@@ -491,6 +493,7 @@ public final class SqlServerIT {
           "DEMO stale write", "", "", version));
       app.lifecycle().setActive(manager, "customer", customer, version + 1, true, "DEMO restore customer");
     });
+    new ControlledSqlCases(db, app, manager, cashier, warehouse, category, brand, vendor, reference).run(t);
     t.finish("sql-server-integration");
   }
 }

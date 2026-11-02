@@ -76,6 +76,14 @@ public final class ApplicationApi implements ApiHandler {
             Json.number(p.get("revision")).intValueExact(), flag(p, "enabled"), text(p, "reason"));
         yield null;
       }
+      case DELETE_PREVIEW -> system.deletion().preview(session, text(p, "type"), id(p, "id"),
+          Json.number(p.get("revision")).intValueExact());
+      case DELETE_RECORD -> system.deletion().delete(session,
+          Json.convert(p.get("request"), vn.dienmay.common.model.DeletionRequest.class));
+      case DELETE_RESOLVE -> system.deletion().resolve(session,
+          Json.convert(p.get("request"), vn.dienmay.common.model.DeletionRequest.class));
+      case DELETE_CANCEL -> system.deletion().cancel(session,
+          Json.convert(p.get("request"), vn.dienmay.common.model.DeletionRequest.class));
       case QUALITY_LIST -> system.quality().list(session, text(p, "type"));
       case REFERENCES -> system.quality().references(session);
       case AUDIT_LOG -> system.quality().auditLog(session);
@@ -88,7 +96,8 @@ public final class ApplicationApi implements ApiHandler {
       case PRODUCT_SEARCH -> system.catalog().search(session, text(p, "text"));
       case PRODUCT_FIND -> system.catalog().find(session, text(p, "code"));
       case PRODUCT_GET -> system.catalog().get(session, id(p, "id"));
-      case PRODUCT_SAVE -> system.catalog().save(session, Json.convert(p.get("item"), Item.class));
+      case PRODUCT_SAVE -> system.catalog().save(session, Json.convert(p.get("item"), Item.class),
+          Json.convert(p.get("priceConfirmation"), vn.dienmay.common.model.PriceConfirmation.class));
       case SERIALS -> system.catalog().serials(session, id(p, "id"), text(p, "location"));
       case LOOKUPS -> system.catalog().lookups(session, text(p, "type"));
       case LOOKUP_SAVE -> system.catalog().saveLookup(session, text(p, "type"), optionalId(p, "id"),
@@ -124,6 +133,14 @@ public final class ApplicationApi implements ApiHandler {
           Json.convert(p.get("request"), InventoryRequest.class));
       case STOCK_RESOLVE -> system.inventory().resolve(session,
           Json.convert(p.get("request"), InventoryRequest.class));
+      case RECEIPTS -> system.reversals().receipts(session, text(p, "text"));
+      case REVERSAL_PREVIEW -> system.reversals().preview(session, id(p, "id"));
+      case REVERSE_RECEIPT -> system.reversals().reverse(session,
+          Json.convert(p.get("request"), vn.dienmay.common.model.ReversalRequest.class));
+      case REVERSAL_RESOLVE -> system.reversals().resolve(session,
+          Json.convert(p.get("request"), vn.dienmay.common.model.ReversalRequest.class));
+      case REVERSAL_CANCEL -> system.reversals().cancel(session,
+          Json.convert(p.get("request"), vn.dienmay.common.model.ReversalRequest.class));
       case STOCK_HISTORY -> system.inventory().history(session, text(p, "sku"));
       case SERIAL_HISTORY -> system.inventory().unitHistory(session, text(p, "serial"));
       case WARRANTIES -> system.warranties().search(session, text(p, "text"));

@@ -1,5 +1,0 @@
-PASS | java -jar from an unrelated working directory: /mnt/data/DienMayDo/dist/client-swing.jar
-PASS | No startup exceptions; original application login shown; JAR resource loaded
-SCOPE | Cold startup only. Authentication requires a configured real backend.
-
-EXIT_CODE=0

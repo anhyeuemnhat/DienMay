@@ -117,6 +117,8 @@ public final class ApiServer implements AutoCloseable {
       respond(exchange, 200, Data.map("data", result), correlation);
     } catch (ApiException ex) {
       failure(exchange, ex.status(), ex.code(), ex.getMessage(), correlation);
+    } catch (vn.dienmay.common.api.BusinessException ex) {
+      failure(exchange, ex.status(), ex.code(), safe(ex.getMessage()), correlation);
     } catch (CharacterCodingException | IllegalArgumentException | DateTimeException ex) {
       failure(exchange, 400, "VALIDATION", "Du lieu khong hop le: " + safe(ex.getMessage()), correlation);
     } catch (SecurityException ex) {
